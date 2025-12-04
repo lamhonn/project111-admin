@@ -1,0 +1,34 @@
+Project 111 (Restaurant Admin Panel) - README
+How to run the first time
+
+Clone the project. In the project directory, run:
+npm i
+
+And then run:
+npm run dev
+
+Runs the app in the development mode using vite.
+Open http://localhost:5173/ to view it in the browser.
+
+The page will reload if you make edits.
+You will also see any lint errors in the console.
+Notes:
+
+    Make sure to push changes to dev branch first - main branch should be used as a latest stable release branch, which will later be used for pipelines too.
+        merging dev to main should happen only in controlled manner and after rigorous testing!
+
+Other scripts:
+npm run build
+
+Builds the app for production to the build folder.
+It correctly bundles React in production mode and optimizes the build for the best performance.
+
+The build is minified and the filenames include the hashes.
+Your app is ready to be deployed!
+
+See the section about deployment for more information.
+npm run lint
+
+Runs eslint
+npm run preview
+Runs vite preview
