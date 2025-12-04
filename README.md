@@ -1,34 +1,29 @@
-Project 111 (Restaurant Admin Panel) - README
-How to run the first time
+# Project 111 - Restaurant Admin Panel
 
-Clone the project. In the project directory, run:
+## Quick Start
+
+### First Time Setup
+```bash
 npm i
-
-And then run:
 npm run dev
+```
 
-Runs the app in the development mode using vite.
-Open http://localhost:5173/ to view it in the browser.
+The app will run in development mode using Vite. Open [http://localhost:5173/](http://localhost:5173/) to view it in the browser.
 
-The page will reload if you make edits.
-You will also see any lint errors in the console.
-Notes:
+The page will reload if you make edits, and lint errors will appear in the console.
 
-    Make sure to push changes to dev branch first - main branch should be used as a latest stable release branch, which will later be used for pipelines too.
-        merging dev to main should happen only in controlled manner and after rigorous testing!
+## Available Scripts
 
-Other scripts:
-npm run build
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server (Vite) |
+| `npm run build` | Build for production (optimized & minified) |
+| `npm run lint` | Run ESLint to check code quality |
+| `npm run preview` | Preview the production build locally |
 
-Builds the app for production to the build folder.
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Branch Management & Git Workflow
 
-The build is minified and the filenames include the hashes.
-Your app is ready to be deployed!
-
-See the section about deployment for more information.
-npm run lint
-
-Runs eslint
-npm run preview
-Runs vite preview
+> ⚠️ **Important:** Always push changes to the **dev branch** first
+- **main branch** = latest stable release (used for pipelines)
+- **dev branch** = active development
+- Merge dev → main only after rigorous testing in a controlled manner
