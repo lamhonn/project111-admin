@@ -1,4 +1,4 @@
-# Project 111 - Restaurant Admin Panel
+# Project 111 - Admin Panel
 
 ## Quick Start
 
