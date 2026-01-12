@@ -1,12 +1,40 @@
 import { CreateOrganizationButton } from './components/CreateOrganizationButton'
+import { graphqlClient } from './utils/graphqlClient'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
  
-  const handleCreateOrganization = () => {
-    alert('Create new organization')
+  async function handleCreateOrganization() {
+    const today = new Date();
+    //alert('Create new organization')
+    const testOrganization = {
+      email: "testorganization1@gmail.com",
+      expiresAt: new Date(today.getTime() + 86400000).toISOString() //TODO: this day + 24hrs
+      // create an setting config for this
+    }
+
+    const query = `
+      mutation CreateOrganizationCreationToken($input: CreateOrganizationCreationTokenInput!) {
+        createOrganizationCreationToken(input: $input) {
+          code
+          success
+          message
+          organizationCreationToken {
+            email,
+            expiresAt
+          }
+        }
+      }
+    `;
+
+    try {
+      const newOrganizationCreationToken = await graphqlClient.query(query, { input: testOrganization });
+      console.log("Created organization creation token: ", newOrganizationCreationToken);
+    } catch (error) {
+      console.error("Error creating organization creation token:", error);
+    }
     // TODO: Implement organization creation logic
   }
 
