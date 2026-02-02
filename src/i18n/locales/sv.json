@@ -1,0 +1,52 @@
+{
+  "common": {
+    "cancel": "Avbryt",
+    "confirm": "Bekräfta",
+    "bill": "Totalt",
+    "total": "Totalt",
+    "table": "Bord",
+    "campaigns": "Kampanjer"  },
+  "dashboard": {
+    "title": "Instrumentpanel",
+    "welcome": "Hej {{name}}, Välkommen till Spoon!",
+    "restaurantOpen": "Restaurangen Öppen",
+    "restaurantClosed": "Restaurangen Stängd",
+    "lastLogin": "Senaste inloggning: {{time}}",
+    "menu": {
+      "dashboard": "Instrumentpanel",
+      "allOrders": "Alla Beställningar",
+      "foodMenu": "Matmeny",
+      "liveKitchen": "Kök Live",
+      "deliveriesStaff": "Leveranser/Personal",
+      "tableBooking": "Bordsbokningar",
+      "analytics": "Analys",
+      "payments": "Betalningar",
+      "manageStaff": "Hantera Personal",
+      "customerReviews": "Kundrecensioner och Klagomål",
+      "settings": "Inställningar"
+    },
+    "orders": {
+      "newActive": "Nya Aktiva Beställningar",
+      "incoming": "Inkommande Beställningar",
+      "inProcess": "Beställningar Under Behandling",
+      "orderNo": "Beställning nr: {{number}}",
+      "status": {
+        "ready": "Klar",
+        "prep": "Förberedelse",
+        "cooking": "Tillagning"
+      }
+    },
+    "delivery": {
+      "title": "Leveransstatus",
+      "delivered": "Beställning Levererad",
+      "onTheWay": "Beställning På Väg",
+      "cancelled": "Beställning Avbruten",
+      "view": "Visa"
+    },
+    "stats": {
+      "title": "Dagens Beställningsstatistik",
+      "today": "Idag",
+      "yesterday": "Igår",
+      "lastMonth": "Förra Månaden"
+    }  }
+}

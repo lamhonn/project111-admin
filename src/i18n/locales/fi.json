@@ -1,0 +1,53 @@
+{
+  "common": {
+    "cancel": "Peruuta",
+    "confirm": "Vahvista",
+    "bill": "Lasku",
+    "total": "Loppusumma",
+    "table": "Pöytä",
+    "campaigns": "Kampanjat"  },
+  "dashboard": {
+    "title": "Hallintapaneeli",
+    "welcome": "Hei {{name}}, Tervetuloa Spooniin!",
+    "restaurantOpen": "Ravintola Auki",
+    "restaurantClosed": "Ravintola Suljettu",
+    "lastLogin": "Viimeisin kirjautuminen: {{time}}",
+    "menu": {
+      "dashboard": "Hallintapaneeli",
+      "allOrders": "Kaikki Tilaukset",
+      "foodMenu": "Ruokalista",
+      "liveKitchen": "Keittiö Reaaliaikana",
+      "deliveriesStaff": "Toimitukset/Henkilökunta",
+      "tableBooking": "Pöytävaraukset",
+      "analytics": "Analytiikka",
+      "payments": "Maksut",
+      "manageStaff": "Hallitse Henkilökuntaa",
+      "customerReviews": "Asiakasarvostelut ja Valitukset",
+      "settings": "Asetukset"
+    },
+    "orders": {
+      "newActive": "Uudet Aktiiviset Tilaukset",
+      "incoming": "Saapuvat Tilaukset",
+      "inProcess": "Käsittelyssä Olevat Tilaukset",
+      "orderNo": "Tilaus nro: {{number}}",
+      "status": {
+        "ready": "Valmis",
+        "prep": "Valmistelu",
+        "cooking": "Kypsennetään"
+      }
+    },
+    "delivery": {
+      "title": "Toimituksen Tila",
+      "delivered": "Tilaus Toimitettu",
+      "onTheWay": "Tilaus Matkalla",
+      "cancelled": "Tilaus Peruttu",
+      "view": "Näytä"
+    },
+    "stats": {
+      "title": "Tämän Päivän Tilaukset",
+      "today": "Tänään",
+      "yesterday": "Eilen",
+      "lastMonth": "Viime Kuussa"
+    }  }
+}
+
