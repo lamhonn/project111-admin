@@ -1,7 +1,7 @@
 import type {
   IncomingOrder,
   InProcessOrder,
-  OrderProcessStatus,
+  Bill,
   DeliveryStats,
   OrderStats,
 } from '../../context/dashboardStore';
@@ -27,6 +27,15 @@ export const MOCK_IN_PROCESS_ORDERS: InProcessOrder[] = [
   { id: '2', name: 'Maple Bacon Doughnut', orderNo: 220, status: 'prep' },
   { id: '3', name: 'Raspberry Lemon Meringue Pie', orderNo: 220, status: 'ready' },
   { id: '4', name: 'Raspberry Lemon Meringue Pie', orderNo: 220, status: 'ready' },
+];
+
+export const MOCK_BILLS: Bill[] = [
+  { id: '1', tableNumber: 5, guestName: 'Smith', amount: 45.50, items: 3 },
+  { id: '2', tableNumber: 12, guestName: 'Johnson', amount: 78.20, items: 5 },
+  { id: '3', tableNumber: 8, guestName: 'Williams', amount: 32.00, items: 2 },
+  { id: '4', tableNumber: 3, guestName: 'Brown', amount: 120.75, items: 7 },
+  { id: '5', tableNumber: 15, guestName: 'Davis', amount: 56.30, items: 4 },
+  { id: '6', tableNumber: 7, guestName: 'Miller', amount: 89.00, items: 6 },
 ];
 
 export const MOCK_DELIVERY_STATS: DeliveryStats = {

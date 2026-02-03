@@ -16,25 +16,20 @@ const IncomingOrdersCard: React.FC<IncomingOrdersCardProps> = ({
   const { t } = useTranslation();
 
   return (
-    <Card sx={{ bgcolor: theme.colors.brandWhite, color: 'black', height: '100%' }}>
+    <Card sx={{ 
+      bgcolor: 'background.paper',
+      height: '100%', 
+      borderRadius: theme.borderRadius.medium,
+      border: `1px solid ${theme.colors.border}`,
+      boxShadow: 1,
+    }}>
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-          <Box
-            sx={{
-              width: 50,
-              height: 50,
-              borderRadius: '50%',
-              bgcolor: '#E91E63',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          />
           <Box>
             <Typography variant="body2" sx={{ color: theme.colors.text }}>
               {t('dashboard.orders.newActive')}
             </Typography>
-            <Typography variant="h3" sx={{ color: '#8b5cf6', fontWeight: theme.typography.fontWeights.bold }}>
+            <Typography variant="h3" sx={{ color: theme.colors.primary, fontWeight: theme.typography.fontWeights.bold }}>
               {activeOrderCount}
             </Typography>
           </Box>
@@ -54,8 +49,9 @@ const IncomingOrdersCard: React.FC<IncomingOrdersCardProps> = ({
                 gap: 2,
                 mb: 2,
                 p: 1,
-                bgcolor: theme.colors.primary,
+                bgcolor: theme.colors.background,
                 borderRadius: theme.borderRadius.medium,
+                border: `1px solid ${theme.colors.border}`,
               }}
             >
               <Box
@@ -63,7 +59,8 @@ const IncomingOrdersCard: React.FC<IncomingOrdersCardProps> = ({
                   width: 50,
                   height: 50,
                   borderRadius: theme.borderRadius.medium,
-                  bgcolor: theme.colors.primary,
+                  bgcolor: 'background.paper',
+                  border: `1px solid ${theme.colors.border}`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',

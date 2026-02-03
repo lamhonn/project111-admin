@@ -1,12 +1,14 @@
 import type {
   IncomingOrder,
   InProcessOrder,
+  Bill,
   DeliveryStats,
   OrderStats,
 } from '../../context/dashboardStore';
 import {
   MOCK_INCOMING_ORDERS,
   MOCK_IN_PROCESS_ORDERS,
+  MOCK_BILLS,
   MOCK_DELIVERY_STATS,
   MOCK_ORDER_STATS,
 } from '../mockData/dashboard.mock';
@@ -22,6 +24,7 @@ import {
 interface DashboardData {
   incomingOrders: IncomingOrder[];
   inProcessOrders: InProcessOrder[];
+  bills: Bill[];
   deliveryStats: DeliveryStats;
   orderStats: OrderStats;
 }
@@ -37,6 +40,7 @@ export const useGetDashboardData = () => {
     data: {
       incomingOrders: MOCK_INCOMING_ORDERS,
       inProcessOrders: MOCK_IN_PROCESS_ORDERS,
+      bills: MOCK_BILLS,
       deliveryStats: MOCK_DELIVERY_STATS,
       orderStats: MOCK_ORDER_STATS,
     } as DashboardData,

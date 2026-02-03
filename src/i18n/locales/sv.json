@@ -14,6 +14,7 @@
     "lastLogin": "Senaste inloggning: {{time}}",
     "menu": {
       "dashboard": "Instrumentpanel",
+      "tableMonitor": "Bordövervakning",
       "allOrders": "Alla Beställningar",
       "foodMenu": "Matmeny",
       "liveKitchen": "Kök Live",
@@ -35,6 +36,11 @@
         "prep": "Förberedelse",
         "cooking": "Tillagning"
       }
+    },
+    "bills": {
+      "title": "Inkommande Räkningar",
+      "pending": "Väntande Räkningar",
+      "items": "artiklar"
     },
     "delivery": {
       "title": "Leveransstatus",

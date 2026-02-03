@@ -37,6 +37,15 @@ export interface InProcessOrder {
   status: OrderProcessStatus;
 }
 
+// Bill request types
+export interface Bill {
+  id: string;
+  tableNumber: number;
+  guestName: string;
+  amount: number;
+  items: number;
+}
+
 // Delivery status types
 export interface DeliveryStats {
   delivered: number;
@@ -57,6 +66,8 @@ export const selectedMenuAtom = atom<string>('Dashboard');
 export const incomingOrdersAtom = atom<IncomingOrder[]>([]);
 
 export const inProcessOrdersAtom = atom<InProcessOrder[]>([]);
+
+export const billsAtom = atom<Bill[]>([]);
 
 export const deliveryStatsAtom = atom<DeliveryStats>({
   delivered: 0,
@@ -80,4 +91,9 @@ export const activeOrderCountAtom = atom<number>(
 // Derived atom for in-process order count
 export const inProcessOrderCountAtom = atom<number>(
   (get) => get(inProcessOrdersAtom).length
+);
+
+// Derived atom for bill count
+export const billCountAtom = atom<number>(
+  (get) => get(billsAtom).length
 );

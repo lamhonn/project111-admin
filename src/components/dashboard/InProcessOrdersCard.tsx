@@ -23,20 +23,6 @@ const getStatusColor = (status: OrderProcessStatus): string => {
   }
 };
 
-// Helper function to get status background color
-const getStatusBgColor = (status: OrderProcessStatus): string => {
-  switch (status) {
-    case 'ready':
-      return '#1a3a36';
-    case 'prep':
-      return '#4a3520';
-    case 'cooking':
-      return '#3a1a26';
-    default:
-      return '#1a1f45';
-  }
-};
-
 const InProcessOrdersCard: React.FC<InProcessOrdersCardProps> = ({
   orders,
   inProcessOrderCount,
@@ -44,13 +30,19 @@ const InProcessOrdersCard: React.FC<InProcessOrdersCardProps> = ({
   const { t } = useTranslation();
 
   return (
-    <Card sx={{ bgcolor: theme.colors.brandWhite, color: 'black', height: '100%' }}>
+    <Card sx={{ 
+      bgcolor: 'background.paper',
+      height: '100%', 
+      borderRadius: theme.borderRadius.medium,
+      border: `1px solid ${theme.colors.border}`,
+      boxShadow: 1,
+    }}>
       <CardContent>
         <Box sx={{ mb: 3 }}>
           <Typography variant="body2" sx={{ color: theme.colors.text }}>
             {t('dashboard.orders.inProcess')}
           </Typography>
-          <Typography variant="h3" sx={{ color: '#8b5cf6', fontWeight: theme.typography.fontWeights.bold }}>
+          <Typography variant="h3" sx={{ color: theme.colors.primary, fontWeight: theme.typography.fontWeights.bold }}>
             {String(inProcessOrderCount).padStart(2, '0')}
           </Typography>
         </Box>
@@ -59,27 +51,28 @@ const InProcessOrdersCard: React.FC<InProcessOrdersCardProps> = ({
           <Card
             key={order.id}
             sx={{
-              bgcolor: getStatusBgColor(order.status),
-              color: 'white',
+              bgcolor: theme.colors.background,
               mb: 2,
-              border: `1px solid ${getStatusColor(order.status)}40`,
+              border: `1px solid ${theme.colors.border}`,
+              borderRadius: theme.borderRadius.medium,
             }}
           >
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box>
-                  <Typography variant="caption" sx={{ color: '#8e92bc' }}>
+                  <Typography variant="caption" color="text.secondary">
                     {t('dashboard.orders.orderNo', { number: order.orderNo })}
                   </Typography>
-                  <Typography variant="body2">{order.name}</Typography>
+                  <Typography variant="body2" color="text.primary">{order.name}</Typography>
                 </Box>
                 <Chip
                   label={t(`dashboard.orders.status.${order.status}`)}
                   size="small"
                   sx={{
-                    bgcolor: getStatusColor(order.status),
-                    color: 'white',
-                    fontWeight: theme.typography.fontWeights.bold,
+                    bgcolor: 'background.paper',
+                    border: `1px solid ${getStatusColor(order.status)}`,
+                    color: getStatusColor(order.status),
+                    fontWeight: theme.typography.fontWeights.medium,
                   }}
                 />
               </Box>

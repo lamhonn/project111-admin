@@ -14,6 +14,7 @@
     "lastLogin": "Viimeisin kirjautuminen: {{time}}",
     "menu": {
       "dashboard": "Hallintapaneeli",
+      "tableMonitor": "Pöytävalvonta",
       "allOrders": "Kaikki Tilaukset",
       "foodMenu": "Ruokalista",
       "liveKitchen": "Keittiö Reaaliaikana",
@@ -35,8 +36,11 @@
         "prep": "Valmistelu",
         "cooking": "Kypsennetään"
       }
-    },
-    "delivery": {
+    },    "bills": {
+      "title": "Saapuvat laskut",
+      "pending": "Odottavat laskut",
+      "items": "tuotetta"
+    },    "delivery": {
       "title": "Toimituksen Tila",
       "delivered": "Tilaus Toimitettu",
       "onTheWay": "Tilaus Matkalla",
