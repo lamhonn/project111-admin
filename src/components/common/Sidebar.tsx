@@ -23,17 +23,25 @@ export interface MenuItem {
   badgeColor?: 'error' | 'warning' | 'success' | 'info';
 }
 
+export interface MenuSection {
+  title?: string;
+  items: MenuItem[];
+}
+
 interface DashboardSidebarProps {
-  menuItems: MenuItem[];
+  menuSections: MenuSection[];
 }
 
 const COLLAPSED_WIDTH = 72; // Icon + padding
 const EXPANDED_WIDTH = 240;
 
-const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ menuItems }) => {
+const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ menuSections }) => {
   const selectedMenu = useAtomValue(selectedMenuAtom);
   const setSelectedMenu = useSetAtom(selectedMenuAtom);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Flatten all menu items for easy access
+  const allMenuItems = menuSections.flatMap(section => section.items);
 
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
@@ -85,7 +93,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ menuItems }) => {
           </IconButton>
         </Box>
         <List>
-          {menuItems.map((item) => (
+          {allMenuItems.map((item) => (
             <ListItemButton
               key={item.text}
               selected={selectedMenu === item.text}
@@ -159,40 +167,61 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ menuItems }) => {
           </Typography>
         </Box>
         <List>
-          {menuItems.map((item) => (
-            <ListItemButton
-              key={item.text}
-              selected={selectedMenu === item.text}
-              onClick={() => handleMenuItemClick(item.text)}
-              sx={{
-                mx: 1,
-                borderRadius: theme.borderRadius.medium,
-                mb: 0.5,
-                '&.Mui-selected': {
-                  bgcolor: '#1a1f45',
-                  color: theme.colors.primary,
-                },
-                '&:hover': {
-                  bgcolor: '#1a1f45',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText 
-                primary={item.text} 
-                primaryTypographyProps={{ fontSize: '0.9rem' }} 
-              />
-              {item.badge && (
-                <Chip
-                  label={item.badge}
-                  size="small"
-                  color={item.badgeColor || 'default'}
-                  sx={{ height: 20, fontSize: '0.65rem' }}
-                />
+          {menuSections.map((section, sectionIndex) => (
+            <Box key={sectionIndex}>
+              {section.title && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: theme.colors.brandGrey,
+                    px: 2,
+                    pt: sectionIndex === 0 ? 0 : 2,
+                    pb: 1,
+                    display: 'block',
+                    textTransform: 'uppercase',
+                    fontSize: '0.7rem',
+                    fontWeight: theme.typography.fontWeights.bold,
+                  }}
+                >
+                  {section.title}
+                </Typography>
               )}
-            </ListItemButton>
+              {section.items.map((item) => (
+                <ListItemButton
+                  key={item.text}
+                  selected={selectedMenu === item.text}
+                  onClick={() => handleMenuItemClick(item.text)}
+                  sx={{
+                    mx: 1,
+                    borderRadius: theme.borderRadius.medium,
+                    mb: 0.5,
+                    '&.Mui-selected': {
+                      bgcolor: '#1a1f45',
+                      color: theme.colors.primary,
+                    },
+                    '&:hover': {
+                      bgcolor: '#1a1f45',
+                    },
+                  }}
+                >
+                  <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary={item.text} 
+                    primaryTypographyProps={{ fontSize: '0.9rem' }} 
+                  />
+                  {item.badge && (
+                    <Chip
+                      label={item.badge}
+                      size="small"
+                      color={item.badgeColor || 'default'}
+                      sx={{ height: 20, fontSize: '0.65rem' }}
+                    />
+                  )}
+                </ListItemButton>
+              ))}
+            </Box>
           ))}
         </List>
       </Drawer>

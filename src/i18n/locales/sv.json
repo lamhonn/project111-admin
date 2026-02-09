@@ -54,5 +54,18 @@
       "today": "Idag",
       "yesterday": "Igår",
       "lastMonth": "Förra Månaden"
-    }  }
+    }  },
+  "admin": {
+    "title": "Administrationsverktyg",
+    "menu": {
+      "productEditor": "Produktredigerare"
+    },
+    "productEditor": {
+      "title": "Produktredigerare",
+      "search": "Sök produkter...",
+      "addProduct": "Lägg till produkt",
+      "edit": "Redigera",
+      "delete": "Radera"
+    }
+  }
 }

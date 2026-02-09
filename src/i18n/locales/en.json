@@ -56,5 +56,18 @@
       "yesterday": "Yesterday",
       "lastMonth": "Last Month"
     }
+  },
+  "admin": {
+    "title": "Admin Tools",
+    "menu": {
+      "productEditor": "Product Editor"
+    },
+    "productEditor": {
+      "title": "Product Editor",
+      "search": "Search products...",
+      "addProduct": "Add Product",
+      "edit": "Edit",
+      "delete": "Delete"
+    }
   }
 }

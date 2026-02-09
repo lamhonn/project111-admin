@@ -52,6 +52,19 @@
       "today": "Tänään",
       "yesterday": "Eilen",
       "lastMonth": "Viime Kuussa"
-    }  }
+    }  },
+  "admin": {
+    "title": "Ylläpitotyökalut",
+    "menu": {
+      "productEditor": "Tuoteeditori"
+    },
+    "productEditor": {
+      "title": "Tuoteeditori",
+      "search": "Etsi tuotteita...",
+      "addProduct": "Lisää tuote",
+      "edit": "Muokkaa",
+      "delete": "Poista"
+    }
+  }
 }
 
