@@ -24,7 +24,8 @@
       "payments": "Betalningar",
       "manageStaff": "Hantera Personal",
       "customerReviews": "Kundrecensioner och Klagomål",
-      "settings": "Inställningar"
+      "settings": "Inställningar",
+      "orderHistory": "Beställningshistorik"
     },
     "orders": {
       "newActive": "Nya Aktiva Beställningar",
@@ -54,11 +55,49 @@
       "today": "Idag",
       "yesterday": "Igår",
       "lastMonth": "Förra Månaden"
-    }  },
+    },
+    "orderList": {
+      "headers": {
+        "orderNo": "Beställning Nr.",
+        "table": "Bord",
+        "time": "Tid",
+        "amount": "Summa",
+        "action": "Åtgärd"
+      },
+      "sections": {
+        "newOrders": "Nya Beställningar",
+        "preparing": "Förbereder",
+        "billRequests": "Räkningsförfrågningar"
+      },
+      "actions": {
+        "view": "Visa",
+        "ready": "Klar",
+        "print": "Skriv ut"
+      },
+      "viewOrder": "Visa Beställning",
+      "tableLabel": "Bord {{number}}"
+    }
+  },
+  "orderOptionsDialog": {
+    "title": "Beställningsdetaljer",
+    "orderNumber": "Beställning #{{number}}",
+    "table": "Bord {{number}}",
+    "noProducts": "Inga produkter i denna beställning",
+    "quantity": "Antal",
+    "notes": "Anmärkningar",
+    "total": "Totalt",
+    "actions": {
+      "confirm": "Bekräfta Beställning",
+      "orderReady": "Beställning Klar"
+    }
+  },
   "admin": {
     "title": "Administrationsverktyg",
     "menu": {
-      "productEditor": "Produktredigerare"
+      "productEditor": "Produktredigerare",
+      "menuEditor": "Menyredigerare",
+      "campaignEditor": "Kampanjredigerare",
+      "deviceManagement": "Enhetshantering"
     },
     "productEditor": {
       "title": "Produktredigerare",
@@ -66,6 +105,41 @@
       "addProduct": "Lägg till produkt",
       "edit": "Redigera",
       "delete": "Radera"
+    },
+    "menuEditor": {
+      "title": "Menyredigerare",
+      "products": "produkter",
+      "search": "Sök menyer...",
+      "addMenu": "Lägg till meny"
+    },
+    "campaignEditor": {
+      "title": "Kampanjredigerare",
+      "products": "produkter",
+      "search": "Sök kampanjer...",
+      "addCampaign": "Lägg till kampanj",
+      "active": "Aktiv",
+      "inactive": "Inaktiv"
     }
+  },
+  "orderHistory": {
+    "title": "Beställningshistorik",
+    "orderNumber": "Beställningsnummer",
+    "date": "Datum & Tid",
+    "table": "Bord",
+    "items": "Artiklar",
+    "total": "Totalt",
+    "status": "Status",
+    "server": "Servitör"
+  },
+  "deviceManagement": {
+    "title": "Enhetshantering",
+    "pairDevice": "Para en enhet",
+    "deviceId": "Enhets-ID",
+    "deviceName": "Enhetsnamn",
+    "tableNumber": "Bordsnummer",
+    "status": "Status",
+    "lastSeen": "Senast sedd",
+    "batteryLevel": "Batterinivå",
+    "model": "Modell"
   }
 }

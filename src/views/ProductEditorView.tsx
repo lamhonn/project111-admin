@@ -12,7 +12,7 @@ export default function ProductEditorView() {
   const mockProducts = [1, 2, 3, 4, 5, 6].map((item) => ({
     id: item,
     name: `Product ${item}`,
-    description: 'Product description goes here',
+    description: 'A delicious menu item made with fresh ingredients and carefully prepared to delight your customers. This product is a popular choice and comes highly recommended.',
   }));
 
   const handleAddProduct = () => {

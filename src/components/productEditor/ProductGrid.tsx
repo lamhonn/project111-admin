@@ -39,6 +39,7 @@ export default function ProductGrid({
           id={product.id}
           name={product.name}
           description={product.description}
+          viewMode={viewMode}
           onEdit={onEdit}
           onDelete={onDelete}
         />

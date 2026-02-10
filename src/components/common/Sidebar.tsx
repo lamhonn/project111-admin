@@ -10,6 +10,7 @@ import {
   Chip,
   IconButton,
   Backdrop,
+  Divider,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useAtomValue, useSetAtom } from 'jotai';
@@ -35,13 +36,10 @@ interface DashboardSidebarProps {
 const COLLAPSED_WIDTH = 72; // Icon + padding
 const EXPANDED_WIDTH = 240;
 
-const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ menuSections }) => {
+const Sidebar: React.FC<DashboardSidebarProps> = ({ menuSections }) => {
   const selectedMenu = useAtomValue(selectedMenuAtom);
   const setSelectedMenu = useSetAtom(selectedMenuAtom);
   const [isExpanded, setIsExpanded] = useState(false);
-
-  // Flatten all menu items for easy access
-  const allMenuItems = menuSections.flatMap(section => section.items);
 
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
@@ -93,34 +91,47 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ menuSections }) => 
           </IconButton>
         </Box>
         <List>
-          {allMenuItems.map((item) => (
-            <ListItemButton
-              key={item.text}
-              selected={selectedMenu === item.text}
-              onClick={() => handleMenuItemClick(item.text)}
-              sx={{
-                mx: 1,
-                borderRadius: theme.borderRadius.medium,
-                mb: 0.5,
-                justifyContent: 'center',
-                minHeight: 48,
-                '&.Mui-selected': {
-                  bgcolor: '#1a1f45',
-                  color: theme.colors.primary,
-                },
-                '&:hover': {
-                  bgcolor: '#1a1f45',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ 
-                color: 'inherit', 
-                minWidth: 'unset',
-                justifyContent: 'center',
-              }}>
-                {item.icon}
-              </ListItemIcon>
-            </ListItemButton>
+          {menuSections.map((section, sectionIndex) => (
+            <React.Fragment key={sectionIndex}>
+              {sectionIndex > 0 && (
+                <Divider 
+                  sx={{ 
+                    my: 1, 
+                    mx: 1.5,
+                    borderColor: 'rgba(255, 255, 255, 0.12)',
+                  }} 
+                />
+              )}
+              {section.items.map((item) => (
+                <ListItemButton
+                  key={item.text}
+                  selected={selectedMenu === item.text}
+                  onClick={() => handleMenuItemClick(item.text)}
+                  sx={{
+                    mx: 1,
+                    borderRadius: theme.borderRadius.medium,
+                    mb: 0.5,
+                    justifyContent: 'center',
+                    minHeight: 48,
+                    '&.Mui-selected': {
+                      bgcolor: '#1a1f45',
+                      color: theme.colors.primary,
+                    },
+                    '&:hover': {
+                      bgcolor: '#1a1f45',
+                    },
+                  }}
+                >
+                  <ListItemIcon sx={{ 
+                    color: 'inherit', 
+                    minWidth: 'unset',
+                    justifyContent: 'center',
+                  }}>
+                    {item.icon}
+                  </ListItemIcon>
+                </ListItemButton>
+              ))}
+            </React.Fragment>
           ))}
         </List>
       </Drawer>
@@ -229,4 +240,4 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ menuSections }) => 
   );
 };
 
-export default DashboardSidebar;
+export default Sidebar;

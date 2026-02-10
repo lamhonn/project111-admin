@@ -60,6 +60,53 @@ export interface OrderStats {
   lastMonth: number;
 }
 
+// Order list types (unified order view)
+export const OrderItemStatus = {
+  New: 'new',
+  Preparing: 'preparing',
+  Ready: 'ready',
+} as const;
+
+export type OrderItemStatus = typeof OrderItemStatus[keyof typeof OrderItemStatus];
+
+export interface OrderListItem {
+  orderNo: string;
+  brand: string;
+  tableNumber: number;
+  time: string;
+  amount: string;
+  status: string;
+  statusColor: 'success' | 'warning' | 'primary' | 'secondary' | 'error';
+  // Internal status for logic
+  internalStatus?: OrderItemStatus;
+}
+
+export interface OrderListSection {
+  section: string;
+  count: number;
+  orders: OrderListItem[];
+}
+
+// Order product/item types for order details
+export interface OrderProduct {
+  id: string;
+  name: string;
+  image: string;
+  price: number;
+  quantity: number;
+  notes?: string;
+}
+
+// Full order details
+export interface OrderDetails {
+  orderNo: string;
+  tableNumber: number;
+  time: string;
+  status: OrderItemStatus;
+  products: OrderProduct[];
+  total: number;
+}
+
 // Dashboard state atoms
 export const selectedMenuAtom = atom<string>('Dashboard');
 
@@ -96,4 +143,37 @@ export const inProcessOrderCountAtom = atom<number>(
 // Derived atom for bill count
 export const billCountAtom = atom<number>(
   (get) => get(billsAtom).length
+);
+
+// Order list sections atom (data populated from hooks/API)
+export const orderListSectionsAtom = atom<OrderListSection[]>([]);
+
+// Order options dialog state
+export const selectedOrderAtom = atom<OrderDetails | null>(null);
+export const orderOptionsDialogOpenAtom = atom<boolean>(false);
+
+// Write-only atom to update order status
+export const updateOrderStatusAtom = atom(
+  null,
+  (get, set, { orderNo, newStatus }: { orderNo: string; newStatus: OrderItemStatus }) => {
+    const sections = get(orderListSectionsAtom);
+    
+    // Update the status in the order list sections
+    const updatedSections = sections.map(section => ({
+      ...section,
+      orders: section.orders.map(order => 
+        order.orderNo === orderNo 
+          ? { ...order, internalStatus: newStatus }
+          : order
+      ),
+    }));
+    
+    set(orderListSectionsAtom, updatedSections);
+    
+    // Update selected order if it matches
+    const selectedOrder = get(selectedOrderAtom);
+    if (selectedOrder && selectedOrder.orderNo === orderNo) {
+      set(selectedOrderAtom, { ...selectedOrder, status: newStatus });
+    }
+  }
 );

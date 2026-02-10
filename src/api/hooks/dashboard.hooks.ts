@@ -4,6 +4,7 @@ import type {
   Bill,
   DeliveryStats,
   OrderStats,
+  OrderListSection,
 } from '../../context/dashboardStore';
 import {
   MOCK_INCOMING_ORDERS,
@@ -11,6 +12,7 @@ import {
   MOCK_BILLS,
   MOCK_DELIVERY_STATS,
   MOCK_ORDER_STATS,
+  MOCK_ORDER_LIST_SECTIONS,
 } from '../mockData/dashboard.mock';
 
 /**
@@ -93,6 +95,17 @@ export const useGetDeliveryStats = () => {
 export const useGetOrderStats = () => {
   return {
     data: MOCK_ORDER_STATS,
+    loading: false,
+    error: undefined,
+  } as const;
+};
+
+/**
+ * Hook to fetch order list sections
+ */
+export const useGetOrderListSections = (): { data: OrderListSection[]; loading: boolean; error: undefined } => {
+  return {
+    data: MOCK_ORDER_LIST_SECTIONS,
     loading: false,
     error: undefined,
   } as const;

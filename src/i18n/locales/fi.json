@@ -14,7 +14,7 @@
     "lastLogin": "Viimeisin kirjautuminen: {{time}}",
     "menu": {
       "dashboard": "Hallintapaneeli",
-      "tableMonitor": "Pöytävalvonta",
+      "tableMonitor": "Tilaustenseuranta",
       "allOrders": "Kaikki Tilaukset",
       "foodMenu": "Ruokalista",
       "liveKitchen": "Keittiö Reaaliaikana",
@@ -24,7 +24,8 @@
       "payments": "Maksut",
       "manageStaff": "Hallitse Henkilökuntaa",
       "customerReviews": "Asiakasarvostelut ja Valitukset",
-      "settings": "Asetukset"
+      "settings": "Asetukset",
+      "orderHistory": "Tilaushistoria"
     },
     "orders": {
       "newActive": "Uudet Aktiiviset Tilaukset",
@@ -52,11 +53,49 @@
       "today": "Tänään",
       "yesterday": "Eilen",
       "lastMonth": "Viime Kuussa"
-    }  },
+    },
+    "orderList": {
+      "headers": {
+        "orderNo": "Tilauksen nro",
+        "table": "Pöytä",
+        "time": "Aika",
+        "amount": "Summa",
+        "action": "Toiminto"
+      },
+      "sections": {
+        "newOrders": "Uudet Tilaukset",
+        "preparing": "Valmistuksessa",
+        "billRequests": "Laskupyynnöt"
+      },
+      "actions": {
+        "view": "Näytä",
+        "ready": "Valmis",
+        "print": "Tulosta"
+      },
+      "viewOrder": "Näytä Tilaus",
+      "tableLabel": "Pöytä {{number}}"
+    }
+  },
+  "orderOptionsDialog": {
+    "title": "Tilauksen Tiedot",
+    "orderNumber": "Tilaus #{{number}}",
+    "table": "Pöytä {{number}}",
+    "noProducts": "Ei tuotteita tässä tilauksessa",
+    "quantity": "Määrä",
+    "notes": "Huomautukset",
+    "total": "Yhteensä",
+    "actions": {
+      "confirm": "Vahvista Tilaus",
+      "orderReady": "Tilaus Valmis"
+    }
+  },
   "admin": {
     "title": "Ylläpitotyökalut",
     "menu": {
-      "productEditor": "Tuoteeditori"
+      "productEditor": "Tuoteeditori",
+      "menuEditor": "Menueditori",
+      "campaignEditor": "Kampanjaeditori",
+      "deviceManagement": "Laitehallinta"
     },
     "productEditor": {
       "title": "Tuoteeditori",
@@ -64,7 +103,42 @@
       "addProduct": "Lisää tuote",
       "edit": "Muokkaa",
       "delete": "Poista"
+    },
+    "menuEditor": {
+      "title": "Menueditori",
+      "products": "tuotetta",
+      "search": "Etsi menuita...",
+      "addMenu": "Lisää menu"
+    },
+    "campaignEditor": {
+      "title": "Kampanjaeditori",
+      "products": "tuotetta",
+      "search": "Etsi kampanjoita...",
+      "addCampaign": "Lisää kampanja",
+      "active": "Aktiivinen",
+      "inactive": "Ei aktiivinen"
     }
+  },
+  "orderHistory": {
+    "title": "Tilaushistoria",
+    "orderNumber": "Tilausnumero",
+    "date": "Päivämäärä & Aika",
+    "table": "Pöytä",
+    "items": "Tuotteet",
+    "total": "Yhteensä",
+    "status": "Tila",
+    "server": "Tarjoilija"
+  },
+  "deviceManagement": {
+    "title": "Laitehallinta",
+    "pairDevice": "Liitä laite",
+    "deviceId": "Laitteen ID",
+    "deviceName": "Laitteen nimi",
+    "tableNumber": "Pöytänumero",
+    "status": "Tila",
+    "lastSeen": "Viimeksi nähty",
+    "batteryLevel": "Akun taso",
+    "model": "Malli"
   }
 }
 

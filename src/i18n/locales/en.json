@@ -25,7 +25,8 @@
       "payments": "Payments",
       "manageStaff": "Manage Staff",
       "customerReviews": "Customer Reviews and Complaints",
-      "settings": "Settings"
+      "settings": "Settings",
+      "orderHistory": "Order History"
     },
     "orders": {
       "newActive": "New Active Orders",
@@ -55,12 +56,49 @@
       "today": "Today",
       "yesterday": "Yesterday",
       "lastMonth": "Last Month"
+    },
+    "orderList": {
+      "headers": {
+        "orderNo": "Order no.",
+        "table": "Table",
+        "time": "Time",
+        "amount": "Amount",
+        "action": "Action"
+      },
+      "sections": {
+        "newOrders": "New Orders",
+        "preparing": "Preparing",
+        "billRequests": "Bill Requests"
+      },
+      "actions": {
+        "view": "View",
+        "ready": "Ready",
+        "print": "Print"
+      },
+      "viewOrder": "View Order",
+      "tableLabel": "Table {{number}}"
+    }
+  },
+  "orderOptionsDialog": {
+    "title": "Order Details",
+    "orderNumber": "Order #{{number}}",
+    "table": "Table {{number}}",
+    "noProducts": "No products in this order",
+    "quantity": "Qty",
+    "notes": "Notes",
+    "total": "Total",
+    "actions": {
+      "confirm": "Confirm Order",
+      "orderReady": "Order Ready"
     }
   },
   "admin": {
     "title": "Admin Tools",
     "menu": {
-      "productEditor": "Product Editor"
+      "productEditor": "Product Editor",
+      "menuEditor": "Menu Editor",
+      "campaignEditor": "Campaign Editor",
+      "deviceManagement": "Device Management"
     },
     "productEditor": {
       "title": "Product Editor",
@@ -68,6 +106,41 @@
       "addProduct": "Add Product",
       "edit": "Edit",
       "delete": "Delete"
+    },
+    "menuEditor": {
+      "title": "Menu Editor",
+      "products": "products",
+      "search": "Search menus...",
+      "addMenu": "Add Menu"
+    },
+    "campaignEditor": {
+      "title": "Campaign Editor",
+      "products": "products",
+      "search": "Search campaigns...",
+      "addCampaign": "Add Campaign",
+      "active": "Active",
+      "inactive": "Inactive"
     }
+  },
+  "orderHistory": {
+    "title": "Order History",
+    "orderNumber": "Order Number",
+    "date": "Date & Time",
+    "table": "Table",
+    "items": "Items",
+    "total": "Total",
+    "status": "Status",
+    "server": "Server"
+  },
+  "deviceManagement": {
+    "title": "Device Management",
+    "pairDevice": "Pair a Device",
+    "deviceId": "Device ID",
+    "deviceName": "Device Name",
+    "tableNumber": "Table Number",
+    "status": "Status",
+    "lastSeen": "Last Seen",
+    "batteryLevel": "Battery Level",
+    "model": "Model"
   }
 }
