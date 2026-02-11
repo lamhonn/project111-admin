@@ -3,10 +3,19 @@ import { theme } from '../theme';
 import { useState } from 'react';
 import ProductEditorHeader from '../components/productEditor/ProductEditorHeader';
 import ProductGrid from '../components/productEditor/ProductGrid';
+import EditProductDialog from '../components/productEditor/EditProductDialog';
+
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+}
 
 export default function ProductEditorView() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   // Placeholder data - replace with actual data fetching
   const mockProducts = [1, 2, 3, 4, 5, 6].map((item) => ({
@@ -16,18 +25,28 @@ export default function ProductEditorView() {
   }));
 
   const handleAddProduct = () => {
-    // TODO: Implement add product functionality
-    console.log('Add product clicked');
+    setSelectedProduct(null);
+    setDialogOpen(true);
   };
 
-  const handleEditProduct = (id: number) => {
-    // TODO: Implement edit product functionality
-    console.log('Edit product:', id);
+  const handleProductClick = (id: number) => {
+    const product = mockProducts.find(p => p.id === id);
+    if (product) {
+      setSelectedProduct(product);
+      setDialogOpen(true);
+    }
   };
 
-  const handleDeleteProduct = (id: number) => {
-    // TODO: Implement delete product functionality
-    console.log('Delete product:', id);
+  const handleSaveProduct = (data: any) => {
+    // TODO: Implement save product functionality
+    console.log('Save product:', data);
+  };
+
+  const handleDeleteProduct = () => {
+    if (selectedProduct) {
+      // TODO: Implement delete product functionality
+      console.log('Delete product:', selectedProduct.id);
+    }
   };
 
   return (
@@ -43,8 +62,18 @@ export default function ProductEditorView() {
       <ProductGrid
         products={mockProducts}
         viewMode={viewMode}
-        onEdit={handleEditProduct}
-        onDelete={handleDeleteProduct}
+        onProductClick={handleProductClick}
+      />
+
+      <EditProductDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        onSave={handleSaveProduct}
+        onDelete={selectedProduct ? handleDeleteProduct : undefined}
+        initialData={selectedProduct ? {
+          productName: selectedProduct.name,
+          description: selectedProduct.description,
+        } : undefined}
       />
     </Box>
   );

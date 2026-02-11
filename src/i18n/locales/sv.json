@@ -104,7 +104,25 @@
       "search": "Sök produkter...",
       "addProduct": "Lägg till produkt",
       "edit": "Redigera",
-      "delete": "Radera"
+      "delete": "Radera",
+      "dialog": {
+        "title": "Produktredigerare",
+        "productImage": "Produktbild",
+        "browseImage": "Bläddra bild",
+        "moreGallery": "Fler gallerialternativ",
+        "productName": "Produktnamn",
+        "productNamePlaceholder": "Ange produktnamn",
+        "description": "Beskrivning",
+        "descriptionPlaceholder": "Ange produktbeskrivning...",
+        "addToppings": "Lägg till/ta bort extra pålägg",
+        "addExcludables": "Lägg till/ta bort exkluderbara",
+        "ingredients": "Ingrediensinformation",
+        "ingredientsPlaceholder": "Lista ingredienser...",
+        "editAllergens": "Redigera allergener",
+        "noneSelected": "Inga valda",
+        "deleteProduct": "Radera produkt",
+        "saveProduct": "Spara produkt"
+      }
     },
     "menuEditor": {
       "title": "Menyredigerare",

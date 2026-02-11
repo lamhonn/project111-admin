@@ -105,7 +105,25 @@
       "search": "Search products...",
       "addProduct": "Add Product",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "dialog": {
+        "title": "Product Editor",
+        "productImage": "Product Image",
+        "browseImage": "Browse Image",
+        "moreGallery": "More Gallery Options",
+        "productName": "Product Name",
+        "productNamePlaceholder": "Enter product name",
+        "description": "Description",
+        "descriptionPlaceholder": "Enter product description...",
+        "addToppings": "Add/Remove Extra Toppings",
+        "addExcludables": "Add/Remove Excludables",
+        "ingredients": "Ingredient Information",
+        "ingredientsPlaceholder": "List ingredients...",
+        "editAllergens": "Edit Allergens",
+        "noneSelected": "None selected",
+        "deleteProduct": "Delete Product",
+        "saveProduct": "Save Product"
+      }
     },
     "menuEditor": {
       "title": "Menu Editor",

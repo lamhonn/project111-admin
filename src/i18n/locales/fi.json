@@ -102,7 +102,25 @@
       "search": "Etsi tuotteita...",
       "addProduct": "Lisää tuote",
       "edit": "Muokkaa",
-      "delete": "Poista"
+      "delete": "Poista",
+      "dialog": {
+        "title": "Tuoteeditori",
+        "productImage": "Tuotekuva",
+        "browseImage": "Selaa kuvaa",
+        "moreGallery": "Lisää galleriavaihtoehtoja",
+        "productName": "Tuotteen nimi",
+        "productNamePlaceholder": "Syötä tuotteen nimi",
+        "description": "Kuvaus",
+        "descriptionPlaceholder": "Syötä tuotteen kuvaus...",
+        "addToppings": "Lisää/poista lisätäytteet",
+        "addExcludables": "Lisää/poista poistettavat",
+        "ingredients": "Ainesosatiedot",
+        "ingredientsPlaceholder": "Luettele ainesosat...",
+        "editAllergens": "Muokkaa allergeeneja",
+        "noneSelected": "Ei valittuja",
+        "deleteProduct": "Poista tuote",
+        "saveProduct": "Tallenna tuote"
+      }
     },
     "menuEditor": {
       "title": "Menueditori",

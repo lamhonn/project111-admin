@@ -11,15 +11,13 @@ interface Product {
 interface ProductGridProps {
   products: Product[];
   viewMode: 'grid' | 'list';
-  onEdit: (id: number) => void;
-  onDelete: (id: number) => void;
+  onProductClick: (id: number) => void;
 }
 
 export default function ProductGrid({
   products,
   viewMode,
-  onEdit,
-  onDelete,
+  onProductClick,
 }: ProductGridProps) {
   return (
     <Box
@@ -40,8 +38,7 @@ export default function ProductGrid({
           name={product.name}
           description={product.description}
           viewMode={viewMode}
-          onEdit={onEdit}
-          onDelete={onDelete}
+          onClick={onProductClick}
         />
       ))}
     </Box>

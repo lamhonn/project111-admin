@@ -1,14 +1,12 @@
-import { Box, Typography, Paper, Button } from '@mui/material';
+import { Box, Typography, Paper } from '@mui/material';
 import { theme } from '../../theme';
-import { useTranslation } from 'react-i18next';
 
 interface ProductEditorCardProps {
   id: number;
   name: string;
   description: string;
   viewMode: 'grid' | 'list';
-  onEdit: (id: number) => void;
-  onDelete: (id: number) => void;
+  onClick: (id: number) => void;
 }
 
 export default function ProductEditorCard({
@@ -16,23 +14,24 @@ export default function ProductEditorCard({
   name,
   description,
   viewMode,
-  onEdit,
-  onDelete,
+  onClick,
 }: ProductEditorCardProps) {
-  const { t } = useTranslation();
   const isListMode = viewMode === 'list';
 
   return (
     <Paper
+      onClick={() => onClick(id)}
       sx={{
         p: theme.spacing.md,
         borderRadius: theme.borderRadius.small,
         border: `1px solid ${theme.colors.border}`,
         boxShadow: 1,
+        cursor: 'pointer',
         transition: theme.transitions.normal,
         '&:hover': {
           boxShadow: theme.shadows.primary,
           borderColor: theme.colors.primary,
+          transform: 'translateY(-2px)',
         },
       }}
     >
@@ -80,37 +79,6 @@ export default function ProductEditorCard({
           >
             {description}
           </Typography>
-          <Box sx={{ display: 'flex', gap: 1, mt: 'auto' }}>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => onEdit(id)}
-              sx={{
-                borderRadius: theme.borderRadius.large,
-                textTransform: 'none',
-                borderColor: theme.colors.border,
-                color: 'text.primary',
-                '&:hover': {
-                  borderColor: theme.colors.primary,
-                  backgroundColor: theme.colors.primaryLight,
-                },
-              }}
-            >
-              {t('admin.productEditor.edit')}
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              color="error"
-              onClick={() => onDelete(id)}
-              sx={{
-                borderRadius: theme.borderRadius.large,
-                textTransform: 'none',
-              }}
-            >
-              {t('admin.productEditor.delete')}
-            </Button>
-          </Box>
         </Box>
       </Box>
     </Paper>
