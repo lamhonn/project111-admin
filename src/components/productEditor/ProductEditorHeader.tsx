@@ -4,16 +4,12 @@ import { theme } from '../../theme';
 import { useTranslation } from 'react-i18next';
 
 interface ProductEditorHeaderProps {
-  viewMode: 'grid' | 'list';
-  onViewModeChange: (mode: 'grid' | 'list') => void;
   onAddProduct: () => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
 }
 
 export default function ProductEditorHeader({
-  viewMode,
-  onViewModeChange,
   onAddProduct,
   searchQuery,
   onSearchChange,
@@ -58,35 +54,6 @@ export default function ProductEditorHeader({
             },
           }}
         />
-
-        <Box sx={{ display: 'flex', border: `1px solid ${theme.colors.border}`, borderRadius: theme.borderRadius.small }}>
-          <Tooltip title="Grid View">
-            <IconButton
-              size="small"
-              onClick={() => onViewModeChange('grid')}
-              sx={{
-                borderRadius: 0,
-                color: viewMode === 'grid' ? theme.colors.primary : 'text.secondary',
-                bgcolor: viewMode === 'grid' ? theme.colors.primaryLight : 'transparent',
-              }}
-            >
-              <ViewModule />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="List View">
-            <IconButton
-              size="small"
-              onClick={() => onViewModeChange('list')}
-              sx={{
-                borderRadius: 0,
-                color: viewMode === 'list' ? theme.colors.primary : 'text.secondary',
-                bgcolor: viewMode === 'list' ? theme.colors.primaryLight : 'transparent',
-              }}
-            >
-              <ViewList />
-            </IconButton>
-          </Tooltip>
-        </Box>
 
         <Button
           variant="contained"

@@ -1,126 +1,321 @@
-import { Box, Typography, Paper } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
-import type { GridColDef } from '@mui/x-data-grid';
+import { useState, useMemo } from 'react';
+import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ToggleButton, ToggleButtonGroup, TextField } from '@mui/material';
 import { theme } from '../theme';
 import { useTranslation } from 'react-i18next';
+import { useGetOrderHistory } from '../api/hooks/orderHistory.hooks';
+import OrderHistoryDialog from '../components/dashboard/OrderHistoryDialog';
+import type { HistoryOrder } from '../api/mockData/orderHistory.mock';
+
+type FilterPreset = 'today' | '3days' | 'week' | 'month' | 'custom';
 
 export default function OrderHistoryView() {
   const { t } = useTranslation();
+  const { data: allOrders } = useGetOrderHistory();
+  
+  const [filterPreset, setFilterPreset] = useState<FilterPreset>('week');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [selectedOrder, setSelectedOrder] = useState<HistoryOrder | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-  // Define table columns
-  const columns: GridColDef[] = [
-    { 
-      field: 'orderNumber', 
-      headerName: t('orderHistory.orderNumber'), 
-      width: 150,
-      sortable: true,
-    },
-    { 
-      field: 'date', 
-      headerName: t('orderHistory.date'), 
-      width: 180,
-      sortable: true,
-    },
-    { 
-      field: 'table', 
-      headerName: t('orderHistory.table'), 
-      width: 100,
-      sortable: true,
-    },
-    { 
-      field: 'items', 
-      headerName: t('orderHistory.items'), 
-      width: 100,
-      align: 'center',
-      headerAlign: 'center',
-    },
-    { 
-      field: 'total', 
-      headerName: t('orderHistory.total'), 
-      width: 120,
-      sortable: true,
-      valueFormatter: (value: number) => `€${value.toFixed(2)}`,
-    },
-    { 
-      field: 'status', 
-      headerName: t('orderHistory.status'), 
-      width: 130,
-      sortable: true,
-    },
-    { 
-      field: 'server', 
-      headerName: t('orderHistory.server'), 
-      width: 150,
-      sortable: true,
-    },
-  ];
+  // Filter orders based on selected preset or custom date range
+  const filteredOrders = useMemo(() => {
+    const now = new Date('2026-02-12'); // Current date from context
+    let filterStartDate: Date;
 
-  // Mock data - replace with actual data fetching
-  const mockOrders = [
-    { id: 1, orderNumber: 'ORD-2026-001', date: '2026-02-10 14:23', table: 'A1', items: 4, total: 45.50, status: 'Completed', server: 'John Doe' },
-    { id: 2, orderNumber: 'ORD-2026-002', date: '2026-02-10 14:15', table: 'B3', items: 2, total: 28.00, status: 'Completed', server: 'Jane Smith' },
-    { id: 3, orderNumber: 'ORD-2026-003', date: '2026-02-10 13:45', table: 'C2', items: 6, total: 67.80, status: 'Completed', server: 'John Doe' },
-    { id: 4, orderNumber: 'ORD-2026-004', date: '2026-02-10 13:30', table: 'A5', items: 3, total: 32.50, status: 'Completed', server: 'Mike Johnson' },
-    { id: 5, orderNumber: 'ORD-2026-005', date: '2026-02-10 12:50', table: 'D1', items: 5, total: 54.20, status: 'Completed', server: 'Jane Smith' },
-    { id: 6, orderNumber: 'ORD-2026-006', date: '2026-02-10 12:30', table: 'B1', items: 2, total: 22.00, status: 'Completed', server: 'John Doe' },
-    { id: 7, orderNumber: 'ORD-2026-007', date: '2026-02-10 11:45', table: 'C4', items: 7, total: 89.90, status: 'Completed', server: 'Mike Johnson' },
-    { id: 8, orderNumber: 'ORD-2026-008', date: '2026-02-09 19:20', table: 'A3', items: 4, total: 48.50, status: 'Completed', server: 'Jane Smith' },
-    { id: 9, orderNumber: 'ORD-2026-009', date: '2026-02-09 18:55', table: 'B2', items: 3, total: 36.00, status: 'Completed', server: 'John Doe' },
-    { id: 10, orderNumber: 'ORD-2026-010', date: '2026-02-09 18:30', table: 'D3', items: 5, total: 62.40, status: 'Completed', server: 'Mike Johnson' },
-  ];
+    if (filterPreset === 'custom') {
+      if (!startDate || !endDate) return allOrders;
+      
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999); // Include the entire end date
+      
+      return allOrders.filter(order => {
+        const orderDate = new Date(order.date);
+        return orderDate >= start && orderDate <= end;
+      });
+    }
+
+    // Calculate start date based on preset
+    switch (filterPreset) {
+      case 'today':
+        filterStartDate = new Date(now);
+        filterStartDate.setHours(0, 0, 0, 0);
+        break;
+      case '3days':
+        filterStartDate = new Date(now);
+        filterStartDate.setDate(filterStartDate.getDate() - 3);
+        filterStartDate.setHours(0, 0, 0, 0);
+        break;
+      case 'week':
+        filterStartDate = new Date(now);
+        filterStartDate.setDate(filterStartDate.getDate() - 7);
+        filterStartDate.setHours(0, 0, 0, 0);
+        break;
+      case 'month':
+        filterStartDate = new Date(now);
+        filterStartDate.setDate(filterStartDate.getDate() - 30);
+        filterStartDate.setHours(0, 0, 0, 0);
+        break;
+      default:
+        return allOrders;
+    }
+
+    return allOrders.filter(order => {
+      const orderDate = new Date(order.date);
+      return orderDate >= filterStartDate;
+    });
+  }, [allOrders, filterPreset, startDate, endDate]);
+
+  const handlePresetChange = (_event: React.MouseEvent<HTMLElement>, newPreset: FilterPreset | null) => {
+    if (newPreset !== null) {
+      setFilterPreset(newPreset);
+      // Clear custom dates when switching to a preset
+      if (newPreset !== 'custom') {
+        setStartDate('');
+        setEndDate('');
+      }
+    }
+  };
+
+  const handleRowClick = (order: HistoryOrder) => {
+    setSelectedOrder(order);
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+  };
 
   return (
-    <Box sx={{ bgcolor: theme.colors.background, minHeight: '100vh' }}>
+    <Box sx={{ p: 3, width: '100%', bgcolor: theme.colors.background, minHeight: '100vh' }}>
       {/* Header */}
-      <Box sx={{ mb: theme.spacing.lg }}>
+      <Box sx={{ mb: 4 }}>
         <Typography 
           variant="h4" 
           sx={{ 
-            color: theme.colors.brandWhite,
             fontWeight: theme.typography.fontWeights.bold,
+            color: theme.colors.text,
+            mb: 3,
           }}
         >
           {t('orderHistory.title')}
         </Typography>
+
+        {/* Filter Section */}
+        <Box sx={{ display: 'flex', gap: 3, alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Preset Filters */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                color: theme.colors.text,
+                opacity: 0.7,
+                fontWeight: theme.typography.fontWeights.medium,
+              }}
+            >
+              {t('orderHistory.filters.showLast')}
+            </Typography>
+            <ToggleButtonGroup
+              value={filterPreset}
+              exclusive
+              onChange={handlePresetChange}
+              sx={{
+                '& .MuiToggleButton-root': {
+                  px: 2,
+                  py: 0.75,
+                  textTransform: 'none',
+                  fontSize: '0.875rem',
+                  border: `1px solid ${theme.colors.border}`,
+                  color: theme.colors.text,
+                  '&.Mui-selected': {
+                    bgcolor: theme.colors.primary,
+                    color: theme.colors.brandWhite,
+                    '&:hover': {
+                      bgcolor: theme.colors.primary,
+                    },
+                  },
+                  '&:hover': {
+                    bgcolor: theme.colors.primaryLight,
+                  },
+                },
+              }}
+            >
+              <ToggleButton value="today">{t('orderHistory.filters.today')}</ToggleButton>
+              <ToggleButton value="3days">{t('orderHistory.filters.threeDays')}</ToggleButton>
+              <ToggleButton value="week">{t('orderHistory.filters.week')}</ToggleButton>
+              <ToggleButton value="month">{t('orderHistory.filters.month')}</ToggleButton>
+              <ToggleButton value="custom">{t('orderHistory.filters.custom')}</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
+          {/* Custom Date Range */}
+          {filterPreset === 'custom' && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: theme.colors.text,
+                  opacity: 0.7,
+                  fontWeight: theme.typography.fontWeights.medium,
+                }}
+              >
+                {t('orderHistory.filters.showBetween')}
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                <TextField
+                  type="date"
+                  size="small"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  InputProps={{
+                    sx: {
+                      bgcolor: theme.colors.background,
+                      color: theme.colors.text,
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: theme.colors.border,
+                      },
+                    },
+                  }}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+                <Typography sx={{ color: theme.colors.text, opacity: 0.7 }}>{t('orderHistory.filters.to')}</Typography>
+                <TextField
+                  type="date"
+                  size="small"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  InputProps={{
+                    sx: {
+                      bgcolor: theme.colors.background,
+                      color: theme.colors.text,
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: theme.colors.border,
+                      },
+                    },
+                  }}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              </Box>
+            </Box>
+          )}
+
+          {/* Results count */}
+          <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'flex-end', height: '100%', pb: 1 }}>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                color: theme.colors.text,
+                opacity: 0.7,
+              }}
+            >
+              {t('orderHistory.filters.showing', { count: filteredOrders.length })}
+            </Typography>
+          </Box>
+        </Box>
       </Box>
 
-      {/* Data Grid */}
-      <Paper
-        sx={{
-          m: theme.spacing.md,
-          width: '90%',
-          borderRadius: theme.borderRadius.small,
-          border: `1px solid ${theme.colors.border}`,
-          boxShadow: 1,
-        //   overflow: 'hidden',
-        }}
-      >
-        <DataGrid
-          rows={mockOrders}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 10, page: 0 },
-            },
+      {/* Order History Table */}
+      <Box sx={{ width: '100%' }}>
+        <TableContainer 
+          component={Paper} 
+          elevation={0} 
+          sx={{ 
+            borderRadius: theme.borderRadius.medium,
+            border: `1px solid ${theme.colors.border}`,
+            boxShadow: theme.shadows.sm,
           }}
-          pageSizeOptions={[10, 25, 50, 100]}
-          checkboxSelection
-          disableRowSelectionOnClick
-          sx={{
-            border: 'none',
-            '& .MuiDataGrid-cell': {
-              borderColor: theme.colors.border,
-            },
-            '& .MuiDataGrid-columnHeaders': {
-              bgcolor: theme.colors.primaryLight,
-              borderColor: theme.colors.border,
-            },
-            '& .MuiDataGrid-footerContainer': {
-              borderColor: theme.colors.border,
-            },
-          }}
-        />
-      </Paper>
+        >
+          <Table>
+            <TableHead>
+              <TableRow sx={{ bgcolor: theme.colors.primaryLight }}>
+                <TableCell width="35%">
+                  <Typography 
+                    variant="subtitle2" 
+                    fontWeight={theme.typography.fontWeights.semibold}
+                    sx={{ color: theme.colors.text }}
+                  >
+                    {t('orderHistory.orderNumber')}
+                  </Typography>
+                </TableCell>
+                <TableCell width="40%">
+                  <Typography 
+                    variant="subtitle2" 
+                    fontWeight={theme.typography.fontWeights.semibold}
+                    sx={{ color: theme.colors.text }}
+                  >
+                    {t('orderHistory.date')}
+                  </Typography>
+                </TableCell>
+                <TableCell width="25%" align="right">
+                  <Typography 
+                    variant="subtitle2" 
+                    fontWeight={theme.typography.fontWeights.semibold}
+                    sx={{ color: theme.colors.text }}
+                  >
+                    {t('orderHistory.total')}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredOrders.map((order) => (
+                <TableRow
+                  key={order.id}
+                  hover
+                  onClick={() => handleRowClick(order)}
+                  sx={{ 
+                    '&:last-child td, &:last-child th': { border: 0 },
+                    transition: theme.transitions.fast,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      bgcolor: theme.colors.primaryLight,
+                    }
+                  }}
+                >
+                  <TableCell>
+                    <Typography 
+                      variant="body2" 
+                      fontWeight={theme.typography.fontWeights.semibold}
+                      sx={{ color: theme.colors.text }}
+                    >
+                      {order.orderNumber}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ color: theme.colors.text }}
+                    >
+                      {order.date}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Typography 
+                      variant="body2" 
+                      fontWeight={theme.typography.fontWeights.semibold}
+                      sx={{ color: theme.colors.text }}
+                    >
+                      €{order.total.toFixed(2)}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+      {/* Order History Dialog */}
+      <OrderHistoryDialog
+        open={dialogOpen}
+        order={selectedOrder}
+        onClose={handleCloseDialog}
+      />
+      </Box>
     </Box>
   );
 }

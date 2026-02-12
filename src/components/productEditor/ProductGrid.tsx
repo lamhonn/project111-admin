@@ -10,13 +10,11 @@ interface Product {
 
 interface ProductGridProps {
   products: Product[];
-  viewMode: 'grid' | 'list';
   onProductClick: (id: number) => void;
 }
 
 export default function ProductGrid({
   products,
-  viewMode,
   onProductClick,
 }: ProductGridProps) {
   return (
@@ -25,8 +23,8 @@ export default function ProductGrid({
         display: 'grid',
         gridTemplateColumns: {
           xs: '1fr',
-          sm: viewMode === 'grid' ? 'repeat(2, 1fr)' : '1fr',
-          md: viewMode === 'grid' ? 'repeat(3, 1fr)' : '1fr',
+          sm: '1fr',
+          md: '1fr',
         },
         gap: theme.spacing.lg,
       }}
@@ -37,7 +35,6 @@ export default function ProductGrid({
           id={product.id}
           name={product.name}
           description={product.description}
-          viewMode={viewMode}
           onClick={onProductClick}
         />
       ))}

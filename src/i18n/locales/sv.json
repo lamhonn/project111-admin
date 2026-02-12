@@ -147,7 +147,25 @@
     "items": "Artiklar",
     "total": "Totalt",
     "status": "Status",
-    "server": "Servitör"
+    "server": "Servitör",
+    "filters": {
+      "showLast": "Visa senaste",
+      "today": "Idag",
+      "threeDays": "3 dagar",
+      "week": "Vecka",
+      "month": "Månad",
+      "custom": "Anpassad",
+      "showBetween": "Visa beställningar mellan",
+      "to": "till",
+      "showing": "Visar {{count}} beställningar"
+    },
+    "dialog": {
+      "title": "Beställningskvitto",
+      "noProducts": "Inga produkter i denna beställning",
+      "quantity": "Antal",
+      "notes": "Anmärkningar",
+      "total": "Totalt"
+    }
   },
   "deviceManagement": {
     "title": "Enhetshantering",

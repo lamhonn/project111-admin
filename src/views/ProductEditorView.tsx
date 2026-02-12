@@ -12,7 +12,6 @@ interface Product {
 }
 
 export default function ProductEditorView() {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -52,8 +51,6 @@ export default function ProductEditorView() {
   return (
     <Box sx={{ p: theme.spacing.lg, width: '100%', bgcolor: theme.colors.background, minHeight: '100vh' }}>
       <ProductEditorHeader
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
         onAddProduct={handleAddProduct}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -61,7 +58,6 @@ export default function ProductEditorView() {
 
       <ProductGrid
         products={mockProducts}
-        viewMode={viewMode}
         onProductClick={handleProductClick}
       />
 

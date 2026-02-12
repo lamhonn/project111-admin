@@ -145,7 +145,25 @@
     "items": "Tuotteet",
     "total": "Yhteensä",
     "status": "Tila",
-    "server": "Tarjoilija"
+    "server": "Tarjoilija",
+    "filters": {
+      "showLast": "Näytä viimeiset",
+      "today": "Tänään",
+      "threeDays": "3 päivää",
+      "week": "Viikko",
+      "month": "Kuukausi",
+      "custom": "Mukautettu",
+      "showBetween": "Näytä tilaukset välillä",
+      "to": "–",
+      "showing": "Näytetään {{count}} tilausta"
+    },
+    "dialog": {
+      "title": "Tilauksen Kuitti",
+      "noProducts": "Ei tuotteita tässä tilauksessa",
+      "quantity": "Määrä",
+      "notes": "Huomautukset",
+      "total": "Yhteensä"
+    }
   },
   "deviceManagement": {
     "title": "Laitehallinta",

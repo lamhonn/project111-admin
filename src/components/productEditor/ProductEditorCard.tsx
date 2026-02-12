@@ -5,7 +5,6 @@ interface ProductEditorCardProps {
   id: number;
   name: string;
   description: string;
-  viewMode: 'grid' | 'list';
   onClick: (id: number) => void;
 }
 
@@ -13,10 +12,8 @@ export default function ProductEditorCard({
   id,
   name,
   description,
-  viewMode,
   onClick,
 }: ProductEditorCardProps) {
-  const isListMode = viewMode === 'list';
 
   return (
     <Paper
@@ -35,22 +32,22 @@ export default function ProductEditorCard({
         },
       }}
     >
-      <Box sx={{ display: 'flex', flexDirection: isListMode ? 'row' : 'column', gap: isListMode ? theme.spacing.md : 0 }}>
+      <Box sx={{ display: 'flex', flexDirection:'row', gap: theme.spacing.md }}>
         {/* Product Image */}
         <Box
           sx={{
-            width: isListMode ? 120 : '100%',
-            height: isListMode ? 120 : 200,
+            width: 120,
+            height: 120,
             flexShrink: 0,
             bgcolor: 'grey.200',
             borderRadius: theme.borderRadius.small,
-            mb: isListMode ? 0 : theme.spacing.md,
+            mb: 0,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          <Typography sx={{ color: 'grey.500', fontSize: isListMode ? '0.75rem' : '1rem' }}>
+          <Typography sx={{ color: 'grey.500', fontSize: '0.75rem' }}>
             Product Image
           </Typography>
         </Box>
@@ -73,7 +70,7 @@ export default function ProductEditorCard({
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               display: '-webkit-box',
-              WebkitLineClamp: isListMode ? 2 : 3,
+              WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
             }}
           >

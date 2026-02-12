@@ -148,7 +148,25 @@
     "items": "Items",
     "total": "Total",
     "status": "Status",
-    "server": "Server"
+    "server": "Server",
+    "filters": {
+      "showLast": "Show last",
+      "today": "Today",
+      "threeDays": "3 days",
+      "week": "Week",
+      "month": "Month",
+      "custom": "Custom",
+      "showBetween": "Show orders between",
+      "to": "to",
+      "showing": "Showing {{count}} orders"
+    },
+    "dialog": {
+      "title": "Order Receipt",
+      "noProducts": "No products in this order",
+      "quantity": "Qty",
+      "notes": "Notes",
+      "total": "Total"
+    }
   },
   "deviceManagement": {
     "title": "Device Management",
