@@ -2,6 +2,8 @@
   "common": {
     "cancel": "Peruuta",
     "confirm": "Vahvista",
+    "close": "Sulje",
+    "save": "Tallenna",
     "bill": "Lasku",
     "total": "Loppusumma",
     "table": "Pöytä",
@@ -168,13 +170,17 @@
   "deviceManagement": {
     "title": "Laitehallinta",
     "pairDevice": "Liitä laite",
+    "pairInstructions": "Syötä seuraava PIN-koodi laitteeseen laitteen liittämiseksi",
     "deviceId": "Laitteen ID",
     "deviceName": "Laitteen nimi",
     "tableNumber": "Pöytänumero",
     "status": "Tila",
     "lastSeen": "Viimeksi nähty",
     "batteryLevel": "Akun taso",
-    "model": "Malli"
+    "model": "Malli",
+    "deviceDetails": "Laitteen tiedot",
+    "edit": "Muokkaa",
+    "forgetDevice": "Unohda laite"
   }
 }
 

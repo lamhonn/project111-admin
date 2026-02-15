@@ -2,6 +2,8 @@
   "common": {
     "cancel": "Cancel",
     "confirm": "Confirm",
+    "close": "Close",
+    "save": "Save",
     "bill": "Bill",
     "total": "Total",
     "table": "Table",
@@ -171,12 +173,16 @@
   "deviceManagement": {
     "title": "Device Management",
     "pairDevice": "Pair a Device",
+    "pairInstructions": "Enter the following PIN to the device to pair the device",
     "deviceId": "Device ID",
     "deviceName": "Device Name",
     "tableNumber": "Table Number",
     "status": "Status",
     "lastSeen": "Last Seen",
     "batteryLevel": "Battery Level",
-    "model": "Model"
+    "model": "Model",
+    "deviceDetails": "Device Details",
+    "edit": "Edit",
+    "forgetDevice": "Forget Device"
   }
 }

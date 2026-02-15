@@ -2,6 +2,8 @@
   "common": {
     "cancel": "Avbryt",
     "confirm": "Bekräfta",
+    "close": "Stäng",
+    "save": "Spara",
     "bill": "Totalt",
     "total": "Totalt",
     "table": "Bord",
@@ -170,12 +172,16 @@
   "deviceManagement": {
     "title": "Enhetshantering",
     "pairDevice": "Para en enhet",
+    "pairInstructions": "Ange följande PIN-kod till enheten för att para enheten",
     "deviceId": "Enhets-ID",
     "deviceName": "Enhetsnamn",
     "tableNumber": "Bordsnummer",
     "status": "Status",
     "lastSeen": "Senast sedd",
     "batteryLevel": "Batterinivå",
-    "model": "Modell"
+    "model": "Modell",
+    "deviceDetails": "Enhetsinformation",
+    "edit": "Redigera",
+    "forgetDevice": "Glöm enhet"
   }
 }
