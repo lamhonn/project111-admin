@@ -1,54 +1,70 @@
-import { ListItem, ListItemText, Chip } from '@mui/material';
+import { Box, Typography, Paper, Chip } from '@mui/material';
 import { theme } from '../../theme';
 import { useTranslation } from 'react-i18next';
 
 interface MenuListItemProps {
   id: number;
   name: string;
-  productCount: number;
-  isLast: boolean;
+  description: string;
+  isActive: boolean;
   onClick: (id: number) => void;
 }
 
 export default function MenuListItem({
   id,
   name,
-  productCount,
-  isLast,
+  description,
+  isActive,
   onClick,
 }: MenuListItemProps) {
   const { t } = useTranslation();
 
   return (
-    <ListItem
+    <Paper
       onClick={() => onClick(id)}
       sx={{
-        borderBottom: !isLast ? `1px solid ${theme.colors.border}` : 'none',
-        py: theme.spacing.md,
-        px: theme.spacing.lg,
-        transition: theme.transitions.normal,
+        p: theme.spacing.lg,
+        borderRadius: theme.borderRadius.small,
+        border: `1px solid ${theme.colors.border}`,
+        boxShadow: 1,
         cursor: 'pointer',
+        transition: theme.transitions.normal,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: theme.spacing.md,
         '&:hover': {
-          bgcolor: theme.colors.primaryLight,
+          boxShadow: theme.shadows.primary,
+          borderColor: theme.colors.primary,
+          transform: 'translateY(-2px)',
         },
       }}
     >
-      <ListItemText
-        primary={name}
-        primaryTypographyProps={{
-          variant: 'h6',
-          fontWeight: theme.typography.fontWeights.semibold,
-        }}
-      />
+      <Box sx={{ flex: 1 }}>
+        <Typography
+          variant="h6"
+          component="div"
+          fontWeight={theme.typography.fontWeights.semibold}
+          sx={{ mb: theme.spacing.xs }}
+        >
+          {name}
+        </Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+        >
+          {description}
+        </Typography>
+      </Box>
       <Chip
-        label={`${productCount} ${t('admin.menuEditor.products')}`}
+        label={isActive ? t('admin.menuEditor.active') : t('admin.menuEditor.inactive')}
+        color={isActive ? 'success' : 'default'}
+        size="small"
         sx={{
-          bgcolor: theme.colors.primaryLight,
-          color: theme.colors.primary,
-          fontWeight: theme.typography.fontWeights.semibold,
           borderRadius: theme.borderRadius.large,
+          fontWeight: theme.typography.fontWeights.semibold,
         }}
       />
-    </ListItem>
+    </Paper>
   );
 }

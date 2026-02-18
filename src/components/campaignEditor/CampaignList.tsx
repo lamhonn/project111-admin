@@ -1,11 +1,11 @@
-import { Paper, List } from '@mui/material';
+import { Box } from '@mui/material';
 import { theme } from '../../theme';
 import CampaignListItem from './CampaignListItem';
 
 interface Campaign {
   id: number;
   name: string;
-  productCount: number;
+  description: string;
   isActive: boolean;
 }
 
@@ -16,28 +16,27 @@ interface CampaignListProps {
 
 export default function CampaignList({ campaigns, onCampaignClick }: CampaignListProps) {
   return (
-    <Paper
+    <Box
       sx={{
-        width: '100%',
-        borderRadius: theme.borderRadius.small,
-        border: `1px solid ${theme.colors.border}`,
-        boxShadow: 1,
-        overflow: 'hidden',
+        display: 'grid',
+        gridTemplateColumns: {
+          xs: '1fr',
+          sm: '1fr',
+          md: '1fr',
+        },
+        gap: theme.spacing.md,
       }}
     >
-      <List sx={{ p: 0 }}>
-        {campaigns.map((campaign, index) => (
-          <CampaignListItem
-            key={campaign.id}
-            id={campaign.id}
-            name={campaign.name}
-            productCount={campaign.productCount}
-            isActive={campaign.isActive}
-            isLast={index === campaigns.length - 1}
-            onClick={onCampaignClick}
-          />
-        ))}
-      </List>
-    </Paper>
+      {campaigns.map((campaign) => (
+        <CampaignListItem
+          key={campaign.id}
+          id={campaign.id}
+          name={campaign.name}
+          description={campaign.description}
+          isActive={campaign.isActive}
+          onClick={onCampaignClick}
+        />
+      ))}
+    </Box>
   );
 }

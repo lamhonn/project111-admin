@@ -170,7 +170,6 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({ menuSections }) => {
           <Typography 
             variant="h5" 
             sx={{ 
-              color: theme.colors.brandWhite, 
               fontWeight: theme.typography.fontWeights.bold,
             }}
           >

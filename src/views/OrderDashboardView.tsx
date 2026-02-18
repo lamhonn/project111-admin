@@ -11,7 +11,7 @@ export default function OrderDashboardView() {
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Typography 
-          variant="h4" 
+          variant="h5" 
           sx={{ 
             fontWeight: theme.typography.fontWeights.bold,
             color: theme.colors.text,

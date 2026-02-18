@@ -129,17 +129,45 @@
     },
     "menuEditor": {
       "title": "Menu Editor",
+      "pageTitle": "Menu Editor",
+      "pageSubtitle": "Edit menus",
       "products": "products",
       "search": "Search menus...",
-      "addMenu": "Add Menu"
+      "addMenu": "Add Menu",
+      "active": "Active",
+      "inactive": "Inactive",
+      "dialog": {
+        "title": "Edit Menu",
+        "menuName": "Menu Name",
+        "menuNamePlaceholder": "Enter menu name",
+        "description": "Description",
+        "descriptionPlaceholder": "Enter menu description",
+        "activeStatus": "Active",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete Menu"
+      }
     },
     "campaignEditor": {
       "title": "Campaign Editor",
+      "pageTitle": "Campaign Editor",
+      "pageSubtitle": "Edit campaigns",
       "products": "products",
       "search": "Search campaigns...",
       "addCampaign": "Add Campaign",
       "active": "Active",
-      "inactive": "Inactive"
+      "inactive": "Inactive",
+      "dialog": {
+        "title": "Edit Campaign",
+        "campaignName": "Campaign Name",
+        "campaignNamePlaceholder": "Enter campaign name",
+        "description": "Description",
+        "descriptionPlaceholder": "Enter campaign description",
+        "activeStatus": "Active",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete Campaign"
+      }
     }
   },
   "orderHistory": {
@@ -184,5 +212,28 @@
     "deviceDetails": "Device Details",
     "edit": "Edit",
     "forgetDevice": "Forget Device"
+  },
+  "tableDialog": {
+    "tableId": "Table ID",
+    "items": "Items",
+    "totalValue": "Total Value",
+    "editOrderButton": "Edit Order"
+  },
+  "settings": {
+    "organizationAndBrand": "Organization and Brand",
+    "organizationSettings": "Organization Settings",
+    "restaurantName": "Restaurant Name",
+    "colorSettings": "Color Settings",
+    "accentColor": "Accent Color",
+    "backgroundColor": "Background Color",
+    "dialogColor": "Dialog Color",
+    "textColor": "Text Color",
+    "actionBarColor": "Action Bar Color",
+    "credentials": "Credentials",
+    "username": "Username",
+    "email": "Email",
+    "oldPassword": "Old Password",
+    "newPassword": "New Password",
+    "saveChanges": "Save Changes"
   }
 }

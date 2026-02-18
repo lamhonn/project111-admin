@@ -1,11 +1,12 @@
-import { Paper, List } from '@mui/material';
+import { Box } from '@mui/material';
 import { theme } from '../../theme';
 import MenuListItem from './MenuListItem';
 
 interface Menu {
   id: number;
   name: string;
-  productCount: number;
+  description: string;
+  isActive: boolean;
 }
 
 interface MenuListProps {
@@ -15,27 +16,27 @@ interface MenuListProps {
 
 export default function MenuList({ menus, onMenuClick }: MenuListProps) {
   return (
-    <Paper
+    <Box
       sx={{
-        width: '100%',
-        borderRadius: theme.borderRadius.small,
-        border: `1px solid ${theme.colors.border}`,
-        boxShadow: 1,
-        overflow: 'hidden',
+        display: 'grid',
+        gridTemplateColumns: {
+          xs: '1fr',
+          sm: '1fr',
+          md: '1fr',
+        },
+        gap: theme.spacing.md,
       }}
     >
-      <List sx={{ p: 0 }}>
-        {menus.map((menu, index) => (
-          <MenuListItem
-            key={menu.id}
-            id={menu.id}
-            name={menu.name}
-            productCount={menu.productCount}
-            isLast={index === menus.length - 1}
-            onClick={onMenuClick}
-          />
-        ))}
-      </List>
-    </Paper>
+      {menus.map((menu) => (
+        <MenuListItem
+          key={menu.id}
+          id={menu.id}
+          name={menu.name}
+          description={menu.description}
+          isActive={menu.isActive}
+          onClick={onMenuClick}
+        />
+      ))}
+    </Box>
   );
 }

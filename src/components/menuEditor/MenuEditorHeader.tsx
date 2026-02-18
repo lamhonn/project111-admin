@@ -26,9 +26,8 @@ export default function MenuEditorHeader({
       flexWrap: 'wrap',
     }}>
       <Typography 
-        variant="h4" 
+        variant="h5" 
         sx={{ 
-          color: theme.colors.brandWhite,
           fontWeight: theme.typography.fontWeights.bold,
         }}
       >

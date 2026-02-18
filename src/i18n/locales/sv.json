@@ -128,17 +128,45 @@
     },
     "menuEditor": {
       "title": "Menyredigerare",
+      "pageTitle": "Menyredigerare",
+      "pageSubtitle": "Redigera menyer",
       "products": "produkter",
       "search": "Sök menyer...",
-      "addMenu": "Lägg till meny"
+      "addMenu": "Lägg till meny",
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "dialog": {
+        "title": "Redigera meny",
+        "menuName": "Menynamn",
+        "menuNamePlaceholder": "Ange menynamn",
+        "description": "Beskrivning",
+        "descriptionPlaceholder": "Ange menybeskrivning",
+        "activeStatus": "Aktiv",
+        "save": "Spara",
+        "cancel": "Avbryt",
+        "delete": "Radera meny"
+      }
     },
     "campaignEditor": {
       "title": "Kampanjredigerare",
+      "pageTitle": "Kampanjredigerare",
+      "pageSubtitle": "Redigera kampanjer",
       "products": "produkter",
       "search": "Sök kampanjer...",
       "addCampaign": "Lägg till kampanj",
       "active": "Aktiv",
-      "inactive": "Inaktiv"
+      "inactive": "Inaktiv",
+      "dialog": {
+        "title": "Redigera kampanj",
+        "campaignName": "Kampanjnamn",
+        "campaignNamePlaceholder": "Ange kampanjnamn",
+        "description": "Beskrivning",
+        "descriptionPlaceholder": "Ange kampanjbeskrivning",
+        "activeStatus": "Aktiv",
+        "save": "Spara",
+        "cancel": "Avbryt",
+        "delete": "Radera kampanj"
+      }
     }
   },
   "orderHistory": {
@@ -182,6 +210,27 @@
     "model": "Modell",
     "deviceDetails": "Enhetsinformation",
     "edit": "Redigera",
-    "forgetDevice": "Glöm enhet"
-  }
+    "forgetDevice": "Glöm enhet"  },
+  "tableDialog": {
+    "tableId": "Bords ID",
+    "items": "Artiklar",
+    "totalValue": "Totalt värde",
+    "editOrderButton": "Redigera Beställning"
+  },
+  "settings": {
+    "organizationAndBrand": "Organisation och Varumärke",
+    "organizationSettings": "Organisationsinställningar",
+    "restaurantName": "Restaurangnamn",
+    "colorSettings": "Färginställningar",
+    "accentColor": "Accentfärg",
+    "backgroundColor": "Bakgrundsfärg",
+    "dialogColor": "Dialogfärg",
+    "textColor": "Textfärg",
+    "actionBarColor": "Åtgärdsfältfärg",
+    "credentials": "Autentiseringsuppgifter",
+    "username": "Användarnamn",
+    "email": "E-post",
+    "oldPassword": "Gammalt Lösenord",
+    "newPassword": "Nytt Lösenord",
+    "saveChanges": "Spara Ändringar"  }
 }

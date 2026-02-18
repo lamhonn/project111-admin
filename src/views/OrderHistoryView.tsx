@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Box } from '@mui/material';
 import { theme } from '../theme';
-import { useTranslation } from 'react-i18next';
 import { useGetOrderHistory } from '../api/hooks/orderHistory.hooks';
 import OrderHistoryDialog from '../components/dashboard/OrderHistoryDialog';
 import OrderHistoryHeader from '../components/orderHistory/OrderHistoryHeader';
@@ -10,7 +9,6 @@ import OrderHistoryTable from '../components/orderHistory/OrderHistoryTable';
 import type { HistoryOrder } from '../api/mockData/orderHistory.mock';
 
 export default function OrderHistoryView() {
-  const { t } = useTranslation();
   const { data: allOrders } = useGetOrderHistory();
   
   const [filterPreset, setFilterPreset] = useState<FilterPreset>('week');

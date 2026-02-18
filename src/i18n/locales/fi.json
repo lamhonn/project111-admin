@@ -126,17 +126,45 @@
     },
     "menuEditor": {
       "title": "Menueditori",
+      "pageTitle": "Menueditori",
+      "pageSubtitle": "Muokkaa menuita",
       "products": "tuotetta",
       "search": "Etsi menuita...",
-      "addMenu": "Lisää menu"
+      "addMenu": "Lisää menu",
+      "active": "Aktiivinen",
+      "inactive": "Ei aktiivinen",
+      "dialog": {
+        "title": "Muokkaa menua",
+        "menuName": "Menun nimi",
+        "menuNamePlaceholder": "Syötä menun nimi",
+        "description": "Kuvaus",
+        "descriptionPlaceholder": "Syötä menun kuvaus",
+        "activeStatus": "Aktiivinen",
+        "save": "Tallenna",
+        "cancel": "Peruuta",
+        "delete": "Poista menu"
+      }
     },
     "campaignEditor": {
       "title": "Kampanjaeditori",
+      "pageTitle": "Kampanjaeditori",
+      "pageSubtitle": "Muokkaa kampanjoita",
       "products": "tuotetta",
       "search": "Etsi kampanjoita...",
       "addCampaign": "Lisää kampanja",
       "active": "Aktiivinen",
-      "inactive": "Ei aktiivinen"
+      "inactive": "Ei aktiivinen",
+      "dialog": {
+        "title": "Muokkaa kampanjaa",
+        "campaignName": "Kampanjan nimi",
+        "campaignNamePlaceholder": "Syötä kampanjan nimi",
+        "description": "Kuvaus",
+        "descriptionPlaceholder": "Syötä kampanjan kuvaus",
+        "activeStatus": "Aktiivinen",
+        "save": "Tallenna",
+        "cancel": "Peruuta",
+        "delete": "Poista kampanja"
+      }
     }
   },
   "orderHistory": {
@@ -180,7 +208,28 @@
     "model": "Malli",
     "deviceDetails": "Laitteen tiedot",
     "edit": "Muokkaa",
-    "forgetDevice": "Unohda laite"
-  }
+    "forgetDevice": "Unohda laite"  },
+  "tableDialog": {
+    "tableId": "Pöydän ID",
+    "items": "Tuotteet",
+    "totalValue": "Kokonaisarvo",
+    "editOrderButton": "Muokkaa Tilausta"
+  },
+  "settings": {
+    "organizationAndBrand": "Organisaatio ja Brändi",
+    "organizationSettings": "Organisaation Asetukset",
+    "restaurantName": "Ravintolan Nimi",
+    "colorSettings": "Värien Asetukset",
+    "accentColor": "Aksenttiväri",
+    "backgroundColor": "Taustaväri",
+    "dialogColor": "Dialogi Väri",
+    "textColor": "Teksti Väri",
+    "actionBarColor": "Toimintopalkki Väri",
+    "credentials": "Tunnistetiedot",
+    "username": "Käyttäjänimi",
+    "email": "Sähköposti",
+    "oldPassword": "Vanha Salasana",
+    "newPassword": "Uusi Salasana",
+    "saveChanges": "Tallenna Muutokset"  }
 }
 

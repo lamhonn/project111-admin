@@ -68,9 +68,8 @@ export default function DeviceManagementView() {
         flexWrap: 'wrap',
       }}>
         <Typography 
-          variant="h4" 
+          variant="h5" 
           sx={{ 
-            color: theme.colors.brandWhite,
             fontWeight: theme.typography.fontWeights.bold,
           }}
         >

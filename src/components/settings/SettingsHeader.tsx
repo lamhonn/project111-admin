@@ -1,21 +1,19 @@
 import { Box, Typography } from '@mui/material';
-import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme';
+import { useTranslation } from 'react-i18next';
 
-export default function OrderHistoryHeader() {
+export default function SettingsHeader() {
   const { t } = useTranslation();
 
   return (
-    <Box sx={{ mb: 4 }}>
+    <Box sx={{ mb: theme.spacing.lg }}>
       <Typography 
         variant="h5" 
         sx={{ 
           fontWeight: theme.typography.fontWeights.bold,
-          color: theme.colors.text,
-          mb: 3,
         }}
       >
-        {t('orderHistory.title')}
+        {t('dashboard.menu.settings')}
       </Typography>
     </Box>
   );
