@@ -211,11 +211,27 @@
     "deviceDetails": "Enhetsinformation",
     "edit": "Redigera",
     "forgetDevice": "Glöm enhet"  },
+  "tableManagement": {
+    "activeTables": "Aktiva Bord",
+    "availableTables": "Tillgängliga Bord",
+    "tableMonitor": "Bordövervakning"
+  },
   "tableDialog": {
-    "tableId": "Bords ID",
-    "items": "Artiklar",
-    "totalValue": "Totalt värde",
-    "editOrderButton": "Redigera Beställning"
+    "noOrders": "Inga beställningar än",
+    "bill": "Notering",
+    "requested": "Begärd",
+    "item": "artikel",
+    "items": "artiklar",
+    "primaryBill": "Primär not.",
+    "allItems": "Alla artiklar",
+    "paymentSummary": "Betalningssammanfattning",
+    "priceBeforeVat": "Pris före moms",
+    "vat": "Moms (14%)",
+    "actions": "Åtgärder",
+    "lockTable": "Lås bord",
+    "unlockTable": "Lås upp bord",
+    "discard": "Förkasta",
+    "finalize": "Slutför"
   },
   "settings": {
     "organizationAndBrand": "Organisation och Varumärke",

@@ -213,11 +213,27 @@
     "edit": "Edit",
     "forgetDevice": "Forget Device"
   },
+  "tableManagement": {
+    "activeTables": "Active Tables",
+    "availableTables": "Available Tables",
+    "tableMonitor": "Table Monitor"
+  },
   "tableDialog": {
-    "tableId": "Table ID",
-    "items": "Items",
-    "totalValue": "Total Value",
-    "editOrderButton": "Edit Order"
+    "noOrders": "No orders yet",
+    "bill": "Bill",
+    "requested": "Requested",
+    "item": "item",
+    "items": "items",
+    "primaryBill": "Primary Bill",
+    "allItems": "All Items",
+    "paymentSummary": "Payment Summary",
+    "priceBeforeVat": "Price before VAT",
+    "vat": "VAT (14%)",
+    "actions": "Actions",
+    "lockTable": "Lock Table",
+    "unlockTable": "Unlock Table",
+    "discard": "Discard",
+    "finalize": "Finalize"
   },
   "settings": {
     "organizationAndBrand": "Organization and Brand",
