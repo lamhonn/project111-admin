@@ -111,14 +111,39 @@
         "browseImage": "Selaa kuvaa",
         "moreGallery": "Lisää galleriavaihtoehtoja",
         "productName": "Tuotteen nimi",
+        "addTranslation": "Lisää käännös",
         "productNamePlaceholder": "Syötä tuotteen nimi",
         "description": "Kuvaus",
         "descriptionPlaceholder": "Syötä tuotteen kuvaus...",
         "addToppings": "Lisää/poista lisätäytteet",
+        "addToppingPlaceholder": "lisää täyte",
+        "addToppingButton": "Lisää täyte",
+        "removeTopping": "Poista täyte",
+        "priceIncrement": "Hintalisä",
+        "freeToppings": "Ilmaiset täytteet",
+        "maxToppings": "Täytteitä enintään",
+        "toppingNameHeader": "Nimi",
+        "toppingPriceHeader": "Hinta",
+        "toppingRemoveHeader": "Poista",
         "addExcludables": "Lisää/poista poistettavat",
+        "addExcludablePlaceholder": "lisää poistettava",
+        "addExcludableButton": "Lisää poistettava",
+        "removeExcludable": "Poista poistettava",
         "ingredients": "Ainesosatiedot",
         "ingredientsPlaceholder": "Luettele ainesosat...",
         "editAllergens": "Muokkaa allergeeneja",
+        "languages": {
+          "finnish": "Suomi",
+          "english": "Englanti",
+          "swedish": "Ruotsi"
+        },
+        "allergens": {
+          "glutenFree": "Gluteeniton",
+          "lactoseFree": "Laktoositon",
+          "lowLactose": "Vähälaktoosinen",
+          "vegetarian": "Kasvis",
+          "vegan": "Vegaaninen"
+        },
         "noneSelected": "Ei valittuja",
         "deleteProduct": "Poista tuote",
         "saveProduct": "Tallenna tuote"
@@ -244,8 +269,15 @@
     "credentials": "Tunnistetiedot",
     "username": "Käyttäjänimi",
     "email": "Sähköposti",
+    "changePasswordWip": "Vaihda salasana (WIP)",
     "oldPassword": "Vanha Salasana",
     "newPassword": "Uusi Salasana",
-    "saveChanges": "Tallenna Muutokset"  }
+    "saveChanges": "Tallenna Muutokset",
+    "systemSettings": "Järjestelmän Asetukset",
+    "systemLanguage": "Järjestelmän Kieli",
+    "languageEnglish": "Englanti",
+    "languageFinnish": "Suomi",
+    "languageSwedish": "Ruotsi"
+  }
 }
 

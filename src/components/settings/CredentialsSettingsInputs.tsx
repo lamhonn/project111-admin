@@ -1,4 +1,4 @@
-import { Box, TextField } from '@mui/material';
+import { Box, TextField, Button } from '@mui/material';
 import { theme } from '../../theme';
 import { useTranslation } from 'react-i18next';
 
@@ -7,10 +7,7 @@ interface CredentialsSettingsInputsProps {
   onUsernameChange: (value: string) => void;
   email: string;
   onEmailChange: (value: string) => void;
-  oldPassword: string;
-  onOldPasswordChange: (value: string) => void;
-  newPassword: string;
-  onNewPasswordChange: (value: string) => void;
+  onPasswordChangeWip: () => void;
 }
 
 export default function CredentialsSettingsInputs({
@@ -18,10 +15,7 @@ export default function CredentialsSettingsInputs({
   onUsernameChange,
   email,
   onEmailChange,
-  oldPassword,
-  onOldPasswordChange,
-  newPassword,
-  onNewPasswordChange,
+  onPasswordChangeWip,
 }: CredentialsSettingsInputsProps) {
   const { t } = useTranslation();
 
@@ -62,42 +56,22 @@ export default function CredentialsSettingsInputs({
           },
         }}
       />
-      <TextField
-        label={t('settings.oldPassword')}
-        type="password"
-        value={oldPassword}
-        onChange={(e) => onOldPasswordChange(e.target.value)}
-        fullWidth
+      <Button
         variant="outlined"
+        onClick={onPasswordChangeWip}
         sx={{
-          '& .MuiOutlinedInput-root': {
-            '& fieldset': {
-              borderColor: theme.colors.border,
-            },
-            '&:hover fieldset': {
-              borderColor: theme.colors.primary,
-            },
+          alignSelf: 'flex-start',
+          borderColor: theme.colors.border,
+          color: 'text.primary',
+          textTransform: 'none',
+          '&:hover': {
+            borderColor: theme.colors.primary,
+            backgroundColor: theme.colors.primaryLight,
           },
         }}
-      />
-      <TextField
-        label={t('settings.newPassword')}
-        type="password"
-        value={newPassword}
-        onChange={(e) => onNewPasswordChange(e.target.value)}
-        fullWidth
-        variant="outlined"
-        sx={{
-          '& .MuiOutlinedInput-root': {
-            '& fieldset': {
-              borderColor: theme.colors.border,
-            },
-            '&:hover fieldset': {
-              borderColor: theme.colors.primary,
-            },
-          },
-        }}
-      />
+      >
+        {t('settings.changePasswordWip')}
+      </Button>
     </Box>
   );
 }

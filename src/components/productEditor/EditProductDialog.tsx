@@ -17,15 +17,122 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
+import EditAllergensDialog, { AllergenCode } from './EditAllergensDialog';
+import EditToppingsDialog from './EditToppingsDialog';
+import EditExcludablesDialog from './EditExcludablesDialog';
+import type { ToppingRow } from './EditToppingsDialog';
+
+type SupportedLanguage = 'fi' | 'en' | 'sv';
+type TranslatableField = 'productName' | 'description' | 'ingredients';
+
+type FieldTranslations = Record<SupportedLanguage, string>;
+type ProductTranslations = Record<TranslatableField, FieldTranslations>;
+
+const TRANSLATABLE_FIELDS: TranslatableField[] = ['productName', 'description', 'ingredients'];
+
+const SUPPORTED_LANGUAGES: Array<{ code: SupportedLanguage; labelKey: string }> = [
+  { code: 'fi', labelKey: 'admin.productEditor.dialog.languages.finnish' },
+  { code: 'en', labelKey: 'admin.productEditor.dialog.languages.english' },
+  { code: 'sv', labelKey: 'admin.productEditor.dialog.languages.swedish' },
+];
 
 interface ProductData {
   productName?: string;
   description?: string;
   ingredients?: string;
+  productTranslations?: ProductTranslations;
   productImage?: File | null;
   additionalImages?: File[];
+  toppings?: ToppingRow[];
+  excludables?: string[];
+  freeToppings?: number;
+  maxToppings?: number;
+  allergens?: AllergenCode[];
   [key: string]: any;
 }
+
+const createDefaultToppingRow = (): ToppingRow => ({
+  name: '',
+  priceIncrement: 0,
+});
+
+const normalizeToppings = (toppings: unknown): ToppingRow[] => {
+  if (!Array.isArray(toppings) || toppings.length === 0) {
+    return [createDefaultToppingRow()];
+  }
+
+  if (typeof toppings[0] === 'string') {
+    return (toppings as string[]).map((name) => ({
+      name,
+      priceIncrement: 0,
+    }));
+  }
+
+  return (toppings as Array<Partial<ToppingRow>>).map((row) => ({
+    name: row.name ?? '',
+    priceIncrement: row.priceIncrement ?? 0,
+  }));
+};
+
+const normalizeExcludables = (excludables: unknown): string[] => {
+  if (!Array.isArray(excludables) || excludables.length === 0) {
+    return [''];
+  }
+
+  return excludables.map((value) => String(value ?? ''));
+};
+
+const getSupportedLanguage = (language: string): SupportedLanguage => {
+  const normalized = language.toLowerCase();
+
+  if (normalized.startsWith('fi')) {
+    return 'fi';
+  }
+
+  if (normalized.startsWith('sv')) {
+    return 'sv';
+  }
+
+  return 'en';
+};
+
+const createEmptyProductTranslations = (): ProductTranslations => ({
+  productName: { fi: '', en: '', sv: '' },
+  description: { fi: '', en: '', sv: '' },
+  ingredients: { fi: '', en: '', sv: '' },
+});
+
+const normalizeProductTranslations = (
+  productTranslations: unknown,
+  fallbackValues: Record<TranslatableField, string>,
+  defaultLanguage: SupportedLanguage,
+): ProductTranslations => {
+  const normalized = createEmptyProductTranslations();
+
+  if (productTranslations && typeof productTranslations === 'object') {
+    TRANSLATABLE_FIELDS.forEach((field) => {
+      const fieldTranslations = (productTranslations as Partial<Record<TranslatableField, Partial<FieldTranslations>>>)[field];
+
+      if (!fieldTranslations || typeof fieldTranslations !== 'object') {
+        return;
+      }
+
+      SUPPORTED_LANGUAGES.forEach(({ code }) => {
+        const value = fieldTranslations[code];
+        normalized[field][code] = typeof value === 'string' ? value : '';
+      });
+    });
+  }
+
+  TRANSLATABLE_FIELDS.forEach((field) => {
+    const fallbackValue = fallbackValues[field];
+    if (fallbackValue && !normalized[field][defaultLanguage]) {
+      normalized[field][defaultLanguage] = fallbackValue;
+    }
+  });
+
+  return normalized;
+};
 
 interface EditProductDialogProps {
   open: boolean;
@@ -35,6 +142,8 @@ interface EditProductDialogProps {
   initialData?: ProductData;
 }
 
+type TranslationTargetField = 'productName' | 'description' | 'ingredients' | null;
+
 const EditProductDialog: React.FC<EditProductDialogProps> = ({ 
   open, 
   onClose, 
@@ -42,22 +151,69 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
   onDelete,
   initialData = {} 
 }) => {
-  const { t } = useTranslation();
-  const [formData, setFormData] = useState<ProductData>({
+  const { t, i18n } = useTranslation();
+  const systemLanguage = getSupportedLanguage(i18n.resolvedLanguage || i18n.language || 'en');
+  const initialToppings = normalizeToppings(initialData.toppings);
+  const initialExcludables = normalizeExcludables(initialData.excludables);
+  const initialFieldValues: Record<TranslatableField, string> = {
     productName: initialData.productName || '',
     description: initialData.description || '',
     ingredients: initialData.ingredients || '',
+  };
+  const initialProductTranslations = normalizeProductTranslations(
+    initialData.productTranslations,
+    initialFieldValues,
+    systemLanguage,
+  );
+  const initialProductName = initialData.productName || initialProductTranslations.productName[systemLanguage] || '';
+  const initialDescription = initialData.description || initialProductTranslations.description[systemLanguage] || '';
+  const initialIngredients = initialData.ingredients || initialProductTranslations.ingredients[systemLanguage] || '';
+
+  const [formData, setFormData] = useState<ProductData>({
+    productName: initialProductName,
+    description: initialDescription,
+    ingredients: initialIngredients,
+    productTranslations: initialProductTranslations,
     productImage: initialData.productImage || null,
     additionalImages: initialData.additionalImages || [],
+    toppings: initialToppings,
+    excludables: initialExcludables,
+    freeToppings: initialData.freeToppings ?? 0,
+    maxToppings: initialData.maxToppings ?? 0,
+    allergens: initialData.allergens || [],
     ...initialData
   });
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isAllergensDialogOpen, setIsAllergensDialogOpen] = useState(false);
+  const [isToppingsDialogOpen, setIsToppingsDialogOpen] = useState(false);
+  const [isExcludablesDialogOpen, setIsExcludablesDialogOpen] = useState(false);
+  const [translationTargetField, setTranslationTargetField] = useState<TranslationTargetField>(null);
+
+  const isTranslatableField = (field: keyof ProductData): field is TranslatableField =>
+    field === 'productName' || field === 'description' || field === 'ingredients';
 
   const handleInputChange = (field: keyof ProductData) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [field]: event.target.value
+    const value = event.target.value;
+
+    setFormData((previous) => {
+      const next: ProductData = {
+        ...previous,
+        [field]: value,
+      };
+
+      if (isTranslatableField(field)) {
+        const currentTranslations = previous.productTranslations || createEmptyProductTranslations();
+        next.productTranslations = {
+          ...currentTranslations,
+          [field]: {
+            ...currentTranslations[field],
+            [systemLanguage]: value,
+          },
+        };
+      }
+
+      return next;
     });
   };
 
@@ -78,18 +234,115 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
   };
 
   const handleAddToppings = () => {
-    // TODO: Implement toppings management
-    console.log('Add/Remove Toppings clicked');
+    setIsToppingsDialogOpen(true);
   };
 
   const handleAddExcludables = () => {
-    // TODO: Implement excludables management
-    console.log('Add/Remove Excludables clicked');
+    setIsExcludablesDialogOpen(true);
   };
 
   const handleEditAllergens = () => {
-    // TODO: Implement allergen editor
-    console.log('Edit Allergens clicked');
+    setIsAllergensDialogOpen(true);
+  };
+
+  const handleCloseAllergensDialog = () => {
+    setIsAllergensDialogOpen(false);
+  };
+
+  const handleCloseToppingsDialog = () => {
+    setIsToppingsDialogOpen(false);
+  };
+
+  const handleCloseExcludablesDialog = () => {
+    setIsExcludablesDialogOpen(false);
+  };
+
+  const handleOpenTranslationDialog = (field: Exclude<TranslationTargetField, null>) => {
+    setTranslationTargetField(field);
+  };
+
+  const handleCloseTranslationDialog = () => {
+    setTranslationTargetField(null);
+  };
+
+  const getTranslationTargetLabel = () => {
+    if (translationTargetField === 'productName') {
+      return t('admin.productEditor.dialog.productName');
+    }
+
+    if (translationTargetField === 'description') {
+      return t('admin.productEditor.dialog.description');
+    }
+
+    if (translationTargetField === 'ingredients') {
+      return t('admin.productEditor.dialog.ingredients');
+    }
+
+    return '';
+  };
+
+  const handleTranslationValueChange = (language: SupportedLanguage, value: string) => {
+    if (!translationTargetField) {
+      return;
+    }
+
+    setFormData((previous) => {
+      const currentTranslations = previous.productTranslations || createEmptyProductTranslations();
+      const next: ProductData = {
+        ...previous,
+        productTranslations: {
+          ...currentTranslations,
+          [translationTargetField]: {
+            ...currentTranslations[translationTargetField],
+            [language]: value,
+          },
+        },
+      };
+
+      if (language === systemLanguage) {
+        next[translationTargetField] = value;
+      }
+
+      return next;
+    });
+  };
+
+  const getTranslationValue = (language: SupportedLanguage) => {
+    if (!translationTargetField) {
+      return '';
+    }
+
+    const translations = formData.productTranslations || createEmptyProductTranslations();
+    return translations[translationTargetField][language] || '';
+  };
+
+  const handleToppingsChange = (toppings: ToppingRow[]) => {
+    setFormData({
+      ...formData,
+      toppings,
+    });
+  };
+
+  const handleToppingsSettingsChange = (settings: { freeToppings: number; maxToppings: number }) => {
+    setFormData({
+      ...formData,
+      freeToppings: settings.freeToppings,
+      maxToppings: settings.maxToppings,
+    });
+  };
+
+  const handleExcludablesChange = (excludables: string[]) => {
+    setFormData({
+      ...formData,
+      excludables,
+    });
+  };
+
+  const handleSaveAllergens = (allergens: AllergenCode[]) => {
+    setFormData({
+      ...formData,
+      allergens,
+    });
   };
 
   const handleSave = () => {
@@ -116,9 +369,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
       PaperProps={{
         sx: {
           width: '95vw',
-          height: '95vh',
           maxWidth: '95vw',
-          maxHeight: '95vh',
           borderRadius: theme.borderRadius.medium,
           boxShadow: theme.shadows.lg,
           m: 0,
@@ -154,7 +405,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
         </IconButton>
       </Box>
 
-      <DialogContent sx={{ p: theme.spacing.lg, flex: 1, overflow: 'auto' }}>
+      <DialogContent sx={{ p: theme.spacing.lg }}>  
         <Box 
           sx={{ 
             display: 'flex', 
@@ -236,9 +487,26 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
           <Box sx={{ flex: 1 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
               {/* Product Name */}
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  {t('admin.productEditor.dialog.productName')}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={() => handleOpenTranslationDialog('productName')}
+                  sx={{
+                    textTransform: 'none',
+                    borderRadius: 999,
+                    px: theme.spacing.md,
+                    borderColor: theme.colors.border,
+                    fontWeight: theme.typography.fontWeights.medium,
+                  }}
+                >
+                  {t('admin.productEditor.dialog.addTranslation')}
+                </Button>
+              </Box>
               <TextField
                 fullWidth
-                label={t('admin.productEditor.dialog.productName')}
                 placeholder={t('admin.productEditor.dialog.productNamePlaceholder')}
                 value={formData.productName}
                 onChange={handleInputChange('productName')}
@@ -246,9 +514,26 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
               />
 
               {/* Description */}
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  {t('admin.productEditor.dialog.description')}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={() => handleOpenTranslationDialog('description')}
+                  sx={{
+                    textTransform: 'none',
+                    borderRadius: 999,
+                    px: theme.spacing.md,
+                    borderColor: theme.colors.border,
+                    fontWeight: theme.typography.fontWeights.medium,
+                  }}
+                >
+                  {t('admin.productEditor.dialog.addTranslation')}
+                </Button>
+              </Box>
               <TextField
                 fullWidth
-                label={t('admin.productEditor.dialog.description')}
                 multiline
                 rows={6}
                 placeholder={t('admin.productEditor.dialog.descriptionPlaceholder')}
@@ -300,9 +585,26 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
               </Box>
 
               {/* Ingredient Info */}
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  {t('admin.productEditor.dialog.ingredients')}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={() => handleOpenTranslationDialog('ingredients')}
+                  sx={{
+                    textTransform: 'none',
+                    borderRadius: 999,
+                    px: theme.spacing.md,
+                    borderColor: theme.colors.border,
+                    fontWeight: theme.typography.fontWeights.medium,
+                  }}
+                >
+                  {t('admin.productEditor.dialog.addTranslation')}
+                </Button>
+              </Box>
               <TextField
                 fullWidth
-                label={t('admin.productEditor.dialog.ingredients')}
                 multiline
                 rows={3}
                 placeholder={t('admin.productEditor.dialog.ingredientsPlaceholder')}
@@ -332,7 +634,15 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
                     {t('admin.productEditor.dialog.editAllergens')}
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                    <Chip label={t('admin.productEditor.dialog.noneSelected')} size="small" variant="outlined" />
+                    {formData.allergens && formData.allergens.length > 0 ? (
+                      <Chip
+                        label={formData.allergens.join(', ')}
+                        size="small"
+                        variant="outlined"
+                      />
+                    ) : (
+                      <Chip label={t('admin.productEditor.dialog.noneSelected')} size="small" variant="outlined" />
+                    )}
                   </Box>
                 </Box>
               </Paper>
@@ -401,6 +711,81 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
           </Button>
         </Box>
       </DialogActions>
+
+      <EditAllergensDialog
+        open={isAllergensDialogOpen}
+        onClose={handleCloseAllergensDialog}
+        selectedAllergens={formData.allergens || []}
+        onSave={handleSaveAllergens}
+      />
+
+      <EditToppingsDialog
+        open={isToppingsDialogOpen}
+        onClose={handleCloseToppingsDialog}
+        toppings={formData.toppings || [createDefaultToppingRow()]}
+        onChange={handleToppingsChange}
+        freeToppings={formData.freeToppings ?? 0}
+        maxToppings={formData.maxToppings ?? 0}
+        onSettingsChange={handleToppingsSettingsChange}
+      />
+
+      <EditExcludablesDialog
+        open={isExcludablesDialogOpen}
+        onClose={handleCloseExcludablesDialog}
+        excludables={formData.excludables || ['']}
+        onChange={handleExcludablesChange}
+      />
+
+      <Dialog
+        open={translationTargetField !== null}
+        onClose={handleCloseTranslationDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderBottom: '1px solid',
+            borderColor: theme.colors.border,
+            p: theme.spacing.lg,
+          }}
+        >
+          <Typography
+            variant="h6"
+            component="div"
+            fontWeight={theme.typography.fontWeights.semibold}
+          >
+            {`${t('admin.productEditor.dialog.addTranslation')} - ${getTranslationTargetLabel()}`}
+          </Typography>
+          <IconButton
+            aria-label="close translation dialog"
+            onClick={handleCloseTranslationDialog}
+            sx={{ color: 'text.secondary' }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <DialogContent sx={{ p: theme.spacing.lg }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+            {SUPPORTED_LANGUAGES.map((language) => (
+              <Box key={language.code} sx={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  {t(language.labelKey)}
+                </Typography>
+                <TextField
+                  fullWidth
+                  value={getTranslationValue(language.code)}
+                  onChange={(event) => handleTranslationValueChange(language.code, event.target.value)}
+                  multiline={translationTargetField === 'description' || translationTargetField === 'ingredients'}
+                  rows={translationTargetField === 'description' ? 4 : translationTargetField === 'ingredients' ? 3 : 1}
+                />
+              </Box>
+            ))}
+          </Box>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };

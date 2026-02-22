@@ -1,53 +1,36 @@
 import { Box, Typography, Paper, Button, Divider } from '@mui/material';
 import { Save as SaveIcon } from '@mui/icons-material';
 import { theme } from '../../theme';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAtom, useSetAtom } from 'jotai';
+import {
+  settingsAtom,
+  resetSettingsAtom,
+  applySettingsAtom,
+} from '../../context/settingsStore';
 import OrganizationSettingsInputs from './OrganizationSettingsInputs';
 import ColorSettingsInputs from './ColorSettingsInputs';
 import CredentialsSettingsInputs from './CredentialsSettingsInputs';
+import SystemSettingsInputs from './SystemSettingsInputs';
 
 export default function SettingsForm() {
   const { t } = useTranslation();
-  const [restaurantName, setRestaurantName] = useState('');
-  const [accentColor, setAccentColor] = useState('#1976d2');
-  const [backgroundColor, setBackgroundColor] = useState('#ffffff');
-  const [dialogColor, setDialogColor] = useState('#ffffff');
-  const [textColor, setTextColor] = useState('#000000');
-  const [actionBarColor, setActionBarColor] = useState('#f5f5f5');
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
+  const [settings, setSettings] = useAtom(settingsAtom);
+  const resetSettings = useSetAtom(resetSettingsAtom);
+  const applySettings = useSetAtom(applySettingsAtom);
+
+  const handlePasswordChangeWip = () => {
+    console.log('WIP: password change flow not implemented yet');
+  };
 
   const handleSave = () => {
-    // TODO: Implement save functionality
-    console.log('Save settings:', {
-      restaurantName,
-      accentColor,
-      backgroundColor,
-      dialogColor,
-      textColor,
-      actionBarColor,
-      username,
-      email,
-      oldPassword,
-      newPassword,
-    });
+    // Apply settings at atom level (including language change)
+    applySettings();
   };
 
   const handleCancel = () => {
-    // TODO: Implement cancel/reset functionality
-    setRestaurantName('');
-    setAccentColor('#1976d2');
-    setBackgroundColor('#ffffff');
-    setDialogColor('#ffffff');
-    setTextColor('#000000');
-    setActionBarColor('#f5f5f5');
-    setUsername('');
-    setEmail('');
-    setOldPassword('');
-    setNewPassword('');
+    // Reset all settings to defaults
+    resetSettings();
   };
 
   return (
@@ -81,8 +64,10 @@ export default function SettingsForm() {
       </Typography>
       <Box sx={{ mb: theme.spacing.lg }}>
         <OrganizationSettingsInputs
-          restaurantName={restaurantName}
-          onRestaurantNameChange={setRestaurantName}
+          restaurantName={settings.restaurantName}
+          onRestaurantNameChange={(value) =>
+            setSettings((prev) => ({ ...prev, restaurantName: value }))
+          }
         />
       </Box>
 
@@ -97,16 +82,26 @@ export default function SettingsForm() {
       </Typography>
       <Box sx={{ mb: theme.spacing.xl }}>
         <ColorSettingsInputs
-          accentColor={accentColor}
-          onAccentColorChange={setAccentColor}
-          backgroundColor={backgroundColor}
-          onBackgroundColorChange={setBackgroundColor}
-          dialogColor={dialogColor}
-          onDialogColorChange={setDialogColor}
-          textColor={textColor}
-          onTextColorChange={setTextColor}
-          actionBarColor={actionBarColor}
-          onActionBarColorChange={setActionBarColor}
+          accentColor={settings.accentColor}
+          onAccentColorChange={(value) =>
+            setSettings((prev) => ({ ...prev, accentColor: value }))
+          }
+          backgroundColor={settings.backgroundColor}
+          onBackgroundColorChange={(value) =>
+            setSettings((prev) => ({ ...prev, backgroundColor: value }))
+          }
+          dialogColor={settings.dialogColor}
+          onDialogColorChange={(value) =>
+            setSettings((prev) => ({ ...prev, dialogColor: value }))
+          }
+          textColor={settings.textColor}
+          onTextColorChange={(value) =>
+            setSettings((prev) => ({ ...prev, textColor: value }))
+          }
+          actionBarColor={settings.actionBarColor}
+          onActionBarColorChange={(value) =>
+            setSettings((prev) => ({ ...prev, actionBarColor: value }))
+          }
         />
       </Box>
 
@@ -124,14 +119,36 @@ export default function SettingsForm() {
 
       <Box sx={{ mb: theme.spacing.xl }}>
         <CredentialsSettingsInputs
-          username={username}
-          onUsernameChange={setUsername}
-          email={email}
-          onEmailChange={setEmail}
-          oldPassword={oldPassword}
-          onOldPasswordChange={setOldPassword}
-          newPassword={newPassword}
-          onNewPasswordChange={setNewPassword}
+          username={settings.username}
+          onUsernameChange={(value) =>
+            setSettings((prev) => ({ ...prev, username: value }))
+          }
+          email={settings.email}
+          onEmailChange={(value) =>
+            setSettings((prev) => ({ ...prev, email: value }))
+          }
+          onPasswordChangeWip={handlePasswordChangeWip}
+        />
+      </Box>
+
+      <Divider sx={{ mb: theme.spacing.xl }} />
+
+      {/* System Settings Section */}
+      <Typography
+        variant="h6"
+        component="div"
+        fontWeight={theme.typography.fontWeights.semibold}
+        sx={{ mb: theme.spacing.md }}
+      >
+        {t('settings.systemSettings')}
+      </Typography>
+
+      <Box sx={{ mb: theme.spacing.xl }}>
+        <SystemSettingsInputs
+          selectedLanguage={settings.systemLanguage}
+          onLanguageChange={(value) =>
+            setSettings((prev) => ({ ...prev, systemLanguage: value }))
+          }
         />
       </Box>
 

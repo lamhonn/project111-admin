@@ -114,14 +114,39 @@
         "browseImage": "Browse Image",
         "moreGallery": "More Gallery Options",
         "productName": "Product Name",
+        "addTranslation": "Add translation",
         "productNamePlaceholder": "Enter product name",
         "description": "Description",
         "descriptionPlaceholder": "Enter product description...",
         "addToppings": "Add/Remove Extra Toppings",
+        "addToppingPlaceholder": "add a topping",
+        "addToppingButton": "Add a topping",
+        "removeTopping": "Remove topping",
+        "priceIncrement": "Price increment",
+        "freeToppings": "Free toppings",
+        "maxToppings": "Max toppings",
+        "toppingNameHeader": "Name",
+        "toppingPriceHeader": "Price",
+        "toppingRemoveHeader": "Remove",
         "addExcludables": "Add/Remove Excludables",
+        "addExcludablePlaceholder": "add an excludable",
+        "addExcludableButton": "Add an excludable",
+        "removeExcludable": "Remove excludable",
         "ingredients": "Ingredient Information",
         "ingredientsPlaceholder": "List ingredients...",
         "editAllergens": "Edit Allergens",
+        "languages": {
+          "finnish": "Finnish",
+          "english": "English",
+          "swedish": "Swedish"
+        },
+        "allergens": {
+          "glutenFree": "Gluten free",
+          "lactoseFree": "Lactose free",
+          "lowLactose": "Low lactose",
+          "vegetarian": "Vegetarian",
+          "vegan": "Vegan"
+        },
         "noneSelected": "None selected",
         "deleteProduct": "Delete Product",
         "saveProduct": "Save Product"
@@ -248,8 +273,14 @@
     "credentials": "Credentials",
     "username": "Username",
     "email": "Email",
+    "changePasswordWip": "Change Password (WIP)",
     "oldPassword": "Old Password",
     "newPassword": "New Password",
-    "saveChanges": "Save Changes"
+    "saveChanges": "Save Changes",
+    "systemSettings": "System Settings",
+    "systemLanguage": "System Language",
+    "languageEnglish": "English",
+    "languageFinnish": "Finnish",
+    "languageSwedish": "Swedish"
   }
 }

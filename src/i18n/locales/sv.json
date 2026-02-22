@@ -113,14 +113,39 @@
         "browseImage": "Bläddra bild",
         "moreGallery": "Fler gallerialternativ",
         "productName": "Produktnamn",
+        "addTranslation": "Lägg till översättning",
         "productNamePlaceholder": "Ange produktnamn",
         "description": "Beskrivning",
         "descriptionPlaceholder": "Ange produktbeskrivning...",
         "addToppings": "Lägg till/ta bort extra pålägg",
+        "addToppingPlaceholder": "lägg till ett pålägg",
+        "addToppingButton": "Lägg till ett pålägg",
+        "removeTopping": "Ta bort pålägg",
+        "priceIncrement": "Pristillägg",
+        "freeToppings": "Gratis pålägg",
+        "maxToppings": "Max pålägg",
+        "toppingNameHeader": "Namn",
+        "toppingPriceHeader": "Pris",
+        "toppingRemoveHeader": "Ta bort",
         "addExcludables": "Lägg till/ta bort exkluderbara",
+        "addExcludablePlaceholder": "lägg till ett exkluderbart",
+        "addExcludableButton": "Lägg till ett exkluderbart",
+        "removeExcludable": "Ta bort exkluderbart",
         "ingredients": "Ingrediensinformation",
         "ingredientsPlaceholder": "Lista ingredienser...",
         "editAllergens": "Redigera allergener",
+        "languages": {
+          "finnish": "Finska",
+          "english": "Engelska",
+          "swedish": "Svenska"
+        },
+        "allergens": {
+          "glutenFree": "Glutenfri",
+          "lactoseFree": "Laktosfri",
+          "lowLactose": "Låglaktos",
+          "vegetarian": "Vegetarisk",
+          "vegan": "Vegansk"
+        },
         "noneSelected": "Inga valda",
         "deleteProduct": "Radera produkt",
         "saveProduct": "Spara produkt"
@@ -246,7 +271,14 @@
     "credentials": "Autentiseringsuppgifter",
     "username": "Användarnamn",
     "email": "E-post",
+    "changePasswordWip": "Byt lösenord (WIP)",
     "oldPassword": "Gammalt Lösenord",
     "newPassword": "Nytt Lösenord",
-    "saveChanges": "Spara Ändringar"  }
+    "saveChanges": "Spara Ändringar",
+    "systemSettings": "Systeminställningar",
+    "systemLanguage": "Systemspråk",
+    "languageEnglish": "Engelska",
+    "languageFinnish": "Finska",
+    "languageSwedish": "Svenska"
+  }
 }
