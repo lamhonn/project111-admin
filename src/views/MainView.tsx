@@ -41,7 +41,7 @@ const MainView = () => {
       items: [
         { text: t('admin.menu.productEditor'), icon: <Edit />, badge: undefined },
         { text: t('admin.menu.menuEditor'), icon: <MenuBook />, badge: undefined },
-        { text: t('admin.menu.campaignEditor'), icon: <Campaign />, badge: undefined },
+        // { text: t('admin.menu.campaignEditor'), icon: <Campaign />, badge: undefined },
         { text: t('admin.menu.deviceManagement'), icon: <Devices />, badge: undefined },
         { text: t('dashboard.menu.settings'), icon: <Settings />, badge: undefined },
       ],

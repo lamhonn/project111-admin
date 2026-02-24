@@ -6,7 +6,7 @@ import OrderHistoryDialog from '../components/dashboard/OrderHistoryDialog';
 import OrderHistoryHeader from '../components/orderHistory/OrderHistoryHeader';
 import OrderHistoryFilters, { type FilterPreset } from '../components/orderHistory/OrderHistoryFilters';
 import OrderHistoryTable from '../components/orderHistory/OrderHistoryTable';
-import type { HistoryOrder } from '../api/mockData/orderHistory.mock';
+import type { HistoryOrderViewModel } from '../viewModels';
 
 export default function OrderHistoryView() {
   const { data: allOrders } = useGetOrderHistory();
@@ -14,7 +14,7 @@ export default function OrderHistoryView() {
   const [filterPreset, setFilterPreset] = useState<FilterPreset>('week');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
-  const [selectedOrder, setSelectedOrder] = useState<HistoryOrder | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<HistoryOrderViewModel | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // Filter orders based on selected preset or custom date range
@@ -75,7 +75,7 @@ export default function OrderHistoryView() {
     }
   };
 
-  const handleRowClick = (order: HistoryOrder) => {
+  const handleRowClick = (order: HistoryOrderViewModel) => {
     setSelectedOrder(order);
     setDialogOpen(true);
   };

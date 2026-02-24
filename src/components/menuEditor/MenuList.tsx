@@ -1,17 +1,11 @@
 import { Box } from '@mui/material';
 import { theme } from '../../theme';
 import MenuListItem from './MenuListItem';
-
-interface Menu {
-  id: number;
-  name: string;
-  description: string;
-  isActive: boolean;
-}
+import type { MenuListItemViewModel } from '../../viewModels';
 
 interface MenuListProps {
-  menus: Menu[];
-  onMenuClick: (id: number) => void;
+  menus: MenuListItemViewModel[];
+  onMenuClick: (id: string) => void;
 }
 
 export default function MenuList({ menus, onMenuClick }: MenuListProps) {

@@ -4,66 +4,26 @@ import { useState } from 'react';
 import MenuEditorHeader from '../components/menuEditor/MenuEditorHeader';
 import MenuList from '../components/menuEditor/MenuList';
 import EditMenuDialog from '../components/menuEditor/EditMenuDialog';
-
-interface Menu {
-  id: number;
-  name: string;
-  description: string;
-  isActive: boolean;
-}
+import type { MenuListItemViewModel } from '../viewModels';
+import { useGetMenus } from '../api/hooks/menu.hooks';
 
 export default function MenuEditorView() {
+  const { data: menus } = useGetMenus();
   const [searchQuery, setSearchQuery] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null);
+  const [selectedMenu, setSelectedMenu] = useState<MenuListItemViewModel | null>(null);
 
-  // Placeholder data - replace with actual data fetching
-  const mockMenus = [
-    { 
-      id: 1, 
-      name: 'Breakfast Menu', 
-      description: 'Morning menu with fresh pastries, eggs, and coffee',
-      isActive: true 
-    },
-    { 
-      id: 2, 
-      name: 'Lunch Menu', 
-      description: 'Midday selections including salads, sandwiches, and main dishes',
-      isActive: true 
-    },
-    { 
-      id: 3, 
-      name: 'Dinner Menu', 
-      description: 'Evening menu featuring premium entrees and specialties',
-      isActive: true 
-    },
-    { 
-      id: 4, 
-      name: 'Drinks Menu', 
-      description: 'Beverages, cocktails, wines, and specialty drinks',
-      isActive: true 
-    },
-    { 
-      id: 5, 
-      name: 'Desserts Menu', 
-      description: 'Sweet treats and after-dinner delights',
-      isActive: false 
-    },
-    { 
-      id: 6, 
-      name: 'Specials Menu', 
-      description: 'Limited time seasonal offerings and chef specials',
-      isActive: true 
-    },
-  ];
+  const filteredMenus = menus.filter((menu) =>
+    menu.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleAddMenu = () => {
     setSelectedMenu(null);
     setDialogOpen(true);
   };
 
-  const handleMenuClick = (id: number) => {
-    const menu = mockMenus.find(m => m.id === id);
+  const handleMenuClick = (id: string) => {
+    const menu = filteredMenus.find((item) => item.id === id);
     if (menu) {
       setSelectedMenu(menu);
       setDialogOpen(true);
@@ -90,7 +50,7 @@ export default function MenuEditorView() {
         onSearchChange={setSearchQuery}
       />
 
-      <MenuList menus={mockMenus} onMenuClick={handleMenuClick} />
+      <MenuList menus={filteredMenus} onMenuClick={handleMenuClick} />
 
       <EditMenuDialog
         open={dialogOpen}

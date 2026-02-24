@@ -1,26 +1,11 @@
-export interface CampaignCategoryItem {
-  id: number;
-  name: string;
-}
+import type {
+  CampaignCategoryItemViewModel,
+  CampaignCategoryViewModel,
+  CampaignDataViewModel,
+  CampaignProductOptionViewModel,
+} from '../../viewModels';
 
-export interface CampaignCategory {
-  id: number;
-  name: string;
-  items: CampaignCategoryItem[];
-}
-
-export interface ProductOption {
-  id: number;
-  name: string;
-}
-
-export interface CampaignData {
-  campaignName?: string;
-  description?: string;
-  isActive?: boolean;
-  activeDays?: string[];
-  activeFrom?: string;
-  activeTo?: string;
-  categories?: CampaignCategory[];
-  [key: string]: any;
-}
+export type CampaignCategoryItem = CampaignCategoryItemViewModel;
+export type CampaignCategory = CampaignCategoryViewModel;
+export type ProductOption = CampaignProductOptionViewModel;
+export type CampaignData = CampaignDataViewModel;

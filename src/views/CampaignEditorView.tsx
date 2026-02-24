@@ -4,60 +4,26 @@ import { useState } from 'react';
 import CampaignEditorHeader from '../components/campaignEditor/CampaignEditorHeader';
 import CampaignList from '../components/campaignEditor/CampaignList';
 import EditCampaignDialog from '../components/campaignEditor/EditCampaignDialog';
-
-interface Campaign {
-  id: number;
-  name: string;
-  description: string;
-  isActive: boolean;
-}
+import type { CampaignListItemViewModel } from '../viewModels';
+import { useGetCampaigns } from '../api/hooks/campaign.hooks';
 
 export default function CampaignEditorView() {
+  const { data: campaigns } = useGetCampaigns();
   const [searchQuery, setSearchQuery] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [selectedCampaign, setSelectedCampaign] = useState<CampaignListItemViewModel | null>(null);
 
-  // Placeholder data - replace with actual data fetching
-  const mockCampaigns = [
-    { 
-      id: 1, 
-      name: 'Summer Sale 2026', 
-      description: 'Special summer discounts on selected items and refreshing beverages',
-      isActive: true 
-    },
-    { 
-      id: 2, 
-      name: 'Happy Hour Special', 
-      description: 'Discounted drinks and appetizers during happy hour times',
-      isActive: true 
-    },
-    { 
-      id: 3, 
-      name: 'Weekend Brunch Deal', 
-      description: 'Special brunch menu with exclusive pricing every Saturday and Sunday',
-      isActive: false 
-    },
-    { 
-      id: 4, 
-      name: 'Valentine\'s Day Menu', 
-      description: 'Romantic dinner packages and special desserts for couples',
-      isActive: false 
-    },
-    { 
-      id: 5, 
-      name: 'Student Discount', 
-      description: '15% off for students with valid student ID on weekdays',
-      isActive: true 
-    },
-  ];
+  const filteredCampaigns = campaigns.filter((campaign) =>
+    campaign.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleAddCampaign = () => {
     setSelectedCampaign(null);
     setDialogOpen(true);
   };
 
-  const handleCampaignClick = (id: number) => {
-    const campaign = mockCampaigns.find(c => c.id === id);
+  const handleCampaignClick = (id: string) => {
+    const campaign = filteredCampaigns.find((item) => item.id === id);
     if (campaign) {
       setSelectedCampaign(campaign);
       setDialogOpen(true);
@@ -84,7 +50,7 @@ export default function CampaignEditorView() {
         onSearchChange={setSearchQuery}
       />
 
-      <CampaignList campaigns={mockCampaigns} onCampaignClick={handleCampaignClick} />
+      <CampaignList campaigns={filteredCampaigns} onCampaignClick={handleCampaignClick} />
 
       <EditCampaignDialog
         open={dialogOpen}

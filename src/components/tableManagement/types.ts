@@ -1,41 +1,13 @@
-export interface Topping {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-}
+import type {
+  BillSplitConfigurationViewModel,
+  BillViewModel,
+  OrderItemViewModel,
+  TableMonitorViewModel,
+  ToppingViewModel,
+} from '../../viewModels';
 
-export interface OrderItem {
-  id: string;
-  productId: string;
-  name: string;
-  image?: string;
-  price: number;
-  quantity: number;
-  toppings?: Topping[];
-  excludables?: string[];
-}
-
-export interface Bill {
-  id: string;
-  items: OrderItem[];
-  status: 'active' | 'requested';
-}
-
-export interface BillSplitConfiguration {
-  bills: Bill[];
-  unsplitItems: OrderItem[];
-}
-
-export interface Table {
-  id: string;
-  number: number;
-  status: 'active' | 'inactive';
-  progress: number;
-  items: number;
-  value: number;
-  guestName?: string;
-  locked?: boolean;
-  orderItems?: OrderItem[];
-  billSplitConfig?: BillSplitConfiguration;
-}
+export type Topping = ToppingViewModel;
+export type OrderItem = OrderItemViewModel;
+export type Bill = BillViewModel;
+export type BillSplitConfiguration = BillSplitConfigurationViewModel;
+export type Table = TableMonitorViewModel;

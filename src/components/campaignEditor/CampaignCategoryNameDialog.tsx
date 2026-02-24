@@ -5,7 +5,7 @@ import { theme } from '../../theme/theme';
 
 interface CampaignCategoryNameDialogProps {
   open: boolean;
-  editingCategoryId: number | null;
+  editingCategoryId: string | null;
   categoryNameInput: string;
   onCategoryNameChange: (value: string) => void;
   onClose: () => void;

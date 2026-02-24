@@ -1,11 +1,11 @@
 import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme';
-import type { HistoryOrder } from '../../api/mockData/orderHistory.mock';
+import type { HistoryOrderViewModel } from '../../viewModels';
 
 interface OrderHistoryTableProps {
-  orders: HistoryOrder[];
-  onRowClick: (order: HistoryOrder) => void;
+  orders: HistoryOrderViewModel[];
+  onRowClick: (order: HistoryOrderViewModel) => void;
 }
 
 export default function OrderHistoryTable({ orders, onRowClick }: OrderHistoryTableProps) {

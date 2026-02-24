@@ -20,9 +20,9 @@ interface CategoryItemsDialogProps {
   open: boolean;
   productOptions: ProductOption[];
   itemSearchQuery: string;
-  selectedProductIds: number[];
+  selectedProductIds: string[];
   onSearchChange: (value: string) => void;
-  onToggleProductSelection: (productId: number) => void;
+  onToggleProductSelection: (productId: string) => void;
   onClose: () => void;
   onSave: () => void;
 }

@@ -2,10 +2,10 @@ import { Box, Typography, Paper } from '@mui/material';
 import { theme } from '../../theme';
 
 interface ProductEditorCardProps {
-  id: number;
+  id: string;
   name: string;
   description: string;
-  onClick: (id: number) => void;
+  onClick: (id: string) => void;
 }
 
 export default function ProductEditorCard({

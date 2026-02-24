@@ -42,25 +42,25 @@ const EditCampaignDialog: React.FC<EditCampaignDialogProps> = ({
   const { t } = useTranslation();
   const defaultCategories: CampaignCategory[] = [
     {
-      id: 1,
+      id: '1',
       name: 'New Orders',
       items: [
-        { id: 1, name: 'Classic Burger' },
-        { id: 2, name: 'Chicken Caesar Salad' },
+        { id: '1', name: 'Classic Burger' },
+        { id: '2', name: 'Chicken Caesar Salad' },
       ],
     },
     {
-      id: 2,
+      id: '2',
       name: 'Preparing',
       items: [
-        { id: 3, name: 'Margherita Pizza' },
-        { id: 4, name: 'Pasta Carbonara' },
+        { id: '3', name: 'Margherita Pizza' },
+        { id: '4', name: 'Pasta Carbonara' },
       ],
     },
     {
-      id: 3,
+      id: '3',
       name: 'Bill Requests',
-      items: [{ id: 5, name: 'Tiramisu' }],
+      items: [{ id: '5', name: 'Tiramisu' }],
     },
   ];
 
@@ -72,21 +72,21 @@ const EditCampaignDialog: React.FC<EditCampaignDialogProps> = ({
     ...initialData
   });
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
-  const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [categoryNameInput, setCategoryNameInput] = useState('');
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [itemsDialogOpen, setItemsDialogOpen] = useState(false);
   const [itemSearchQuery, setItemSearchQuery] = useState('');
-  const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
   const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const productOptions: ProductOption[] = [
-    { id: 1, name: 'Product 1' },
-    { id: 2, name: 'Product 2' },
-    { id: 3, name: 'Product 3' },
-    { id: 4, name: 'Product 4' },
-    { id: 5, name: 'Product 5' },
-    { id: 6, name: 'Product 6' },
+    { id: '1', name: 'Product 1' },
+    { id: '2', name: 'Product 2' },
+    { id: '3', name: 'Product 3' },
+    { id: '4', name: 'Product 4' },
+    { id: '5', name: 'Product 5' },
+    { id: '6', name: 'Product 6' },
   ];
 
   useEffect(() => {
@@ -140,14 +140,14 @@ const EditCampaignDialog: React.FC<EditCampaignDialogProps> = ({
         const product = productOptions.find((option) => option.name === item.name);
         return product?.id;
       })
-      .filter((id): id is number => id !== undefined);
+      .filter((id): id is string => id !== undefined);
 
     setSelectedProductIds(selectedIds);
     setItemSearchQuery('');
     setItemsDialogOpen(true);
   };
 
-  const handleToggleProductSelection = (productId: number) => {
+  const handleToggleProductSelection = (productId: string) => {
     setSelectedProductIds((currentSelectedIds) =>
       currentSelectedIds.includes(productId)
         ? currentSelectedIds.filter((id) => id !== productId)
@@ -196,9 +196,12 @@ const EditCampaignDialog: React.FC<EditCampaignDialogProps> = ({
     const categories = (formData.categories || []).slice();
 
     if (editingCategoryId === null) {
-      const nextId = categories.length > 0 ? Math.max(...categories.map(c => c.id)) + 1 : 1;
+      const nextId =
+        categories.length > 0
+          ? Math.max(...categories.map((category) => Number(category.id))) + 1
+          : 1;
       categories.push({
-        id: nextId,
+        id: String(nextId),
         name: trimmedName,
         items: [],
       });

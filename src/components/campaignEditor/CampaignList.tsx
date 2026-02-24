@@ -1,17 +1,11 @@
 import { Box } from '@mui/material';
 import { theme } from '../../theme';
 import CampaignListItem from './CampaignListItem';
-
-interface Campaign {
-  id: number;
-  name: string;
-  description: string;
-  isActive: boolean;
-}
+import type { CampaignListItemViewModel } from '../../viewModels';
 
 interface CampaignListProps {
-  campaigns: Campaign[];
-  onCampaignClick: (id: number) => void;
+  campaigns: CampaignListItemViewModel[];
+  onCampaignClick: (id: string) => void;
 }
 
 export default function CampaignList({ campaigns, onCampaignClick }: CampaignListProps) {

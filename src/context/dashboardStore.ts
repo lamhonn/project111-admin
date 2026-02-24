@@ -1,4 +1,11 @@
 import { atom } from 'jotai';
+import type {
+  OrderDetailsViewModel,
+  OrderItemStatus as OrderItemStatusType,
+  OrderListItemViewModel,
+  OrderListSectionViewModel,
+} from '../viewModels';
+import { OrderItemStatus as OrderItemStatusValues } from '../viewModels';
 
 /**
  * Dashboard Store - State management for Order Dashboard
@@ -60,52 +67,11 @@ export interface OrderStats {
   lastMonth: number;
 }
 
-// Order list types (unified order view)
-export const OrderItemStatus = {
-  New: 'new',
-  Preparing: 'preparing',
-  Ready: 'ready',
-} as const;
-
-export type OrderItemStatus = typeof OrderItemStatus[keyof typeof OrderItemStatus];
-
-export interface OrderListItem {
-  orderNo: string;
-  brand: string;
-  tableNumber: number;
-  time: string;
-  amount: string;
-  status: string;
-  statusColor: 'success' | 'warning' | 'primary' | 'secondary' | 'error';
-  // Internal status for logic
-  internalStatus?: OrderItemStatus;
-}
-
-export interface OrderListSection {
-  section: string;
-  count: number;
-  orders: OrderListItem[];
-}
-
-// Order product/item types for order details
-export interface OrderProduct {
-  id: string;
-  name: string;
-  image: string;
-  price: number;
-  quantity: number;
-  notes?: string;
-}
-
-// Full order details
-export interface OrderDetails {
-  orderNo: string;
-  tableNumber: number;
-  time: string;
-  status: OrderItemStatus;
-  products: OrderProduct[];
-  total: number;
-}
+export type OrderListItem = OrderListItemViewModel;
+export type OrderListSection = OrderListSectionViewModel;
+export type OrderDetails = OrderDetailsViewModel;
+export const OrderItemStatus = OrderItemStatusValues;
+export type OrderItemStatus = OrderItemStatusType;
 
 // Dashboard state atoms
 export const selectedMenuAtom = atom<string>('Dashboard');

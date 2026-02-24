@@ -4,32 +4,26 @@ import { useState } from 'react';
 import ProductEditorHeader from '../components/productEditor/ProductEditorHeader';
 import ProductGrid from '../components/productEditor/ProductGrid';
 import EditProductDialog from '../components/productEditor/EditProductDialog';
-
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-}
+import type { ProductListItemViewModel } from '../viewModels';
+import { useGetProducts } from '../api/hooks/product.hooks';
 
 export default function ProductEditorView() {
+  const { data: products } = useGetProducts();
   const [searchQuery, setSearchQuery] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductListItemViewModel | null>(null);
 
-  // Placeholder data - replace with actual data fetching
-  const mockProducts = [1, 2, 3, 4, 5, 6].map((item) => ({
-    id: item,
-    name: `Product ${item}`,
-    description: 'A delicious menu item made with fresh ingredients and carefully prepared to delight your customers. This product is a popular choice and comes highly recommended.',
-  }));
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleAddProduct = () => {
     setSelectedProduct(null);
     setDialogOpen(true);
   };
 
-  const handleProductClick = (id: number) => {
-    const product = mockProducts.find(p => p.id === id);
+  const handleProductClick = (id: string) => {
+    const product = filteredProducts.find((item) => item.id === id);
     if (product) {
       setSelectedProduct(product);
       setDialogOpen(true);
@@ -57,7 +51,7 @@ export default function ProductEditorView() {
       />
 
       <ProductGrid
-        products={mockProducts}
+        products={filteredProducts}
         onProductClick={handleProductClick}
       />
 

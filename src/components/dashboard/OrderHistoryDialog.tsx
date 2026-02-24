@@ -12,11 +12,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
-import type { HistoryOrder } from '../../api/mockData/orderHistory.mock';
+import type { HistoryOrderViewModel } from '../../viewModels';
 
 interface OrderHistoryDialogProps {
   open: boolean;
-  order: HistoryOrder | null;
+  order: HistoryOrderViewModel | null;
   onClose: () => void;
 }
 

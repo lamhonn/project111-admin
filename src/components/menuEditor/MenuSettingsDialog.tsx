@@ -78,6 +78,30 @@ const MenuSettingsDialog: React.FC<MenuSettingsDialogProps> = ({
 
           <Box>
             <Typography variant="subtitle2" sx={{ color: theme.colors.text, mb: theme.spacing.xs }}>
+              {t('admin.menuEditor.dialog.activePeriod')}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: theme.spacing.md }}>
+              <TextField
+                fullWidth
+                type="date"
+                label={t('admin.menuEditor.dialog.activePeriodStart')}
+                value={formData.activePeriodStart || ''}
+                onChange={onInputChange('activePeriodStart')}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                fullWidth
+                type="date"
+                label={t('admin.menuEditor.dialog.activePeriodEnd')}
+                value={formData.activePeriodEnd || ''}
+                onChange={onInputChange('activePeriodEnd')}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Box>
+          </Box>
+
+          <Box>
+            <Typography variant="subtitle2" sx={{ color: theme.colors.text, mb: theme.spacing.xs }}>
               {t('admin.menuEditor.dialog.automaticActiveDays')}
             </Typography>
             <Box sx={{ display: 'flex', gap: theme.spacing.xs, flexWrap: 'wrap' }}>

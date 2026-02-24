@@ -1,26 +1,11 @@
-export interface MenuCategoryItem {
-  id: number;
-  name: string;
-}
+import type {
+  MenuCategoryItemViewModel,
+  MenuCategoryViewModel,
+  MenuDataViewModel,
+  ProductOptionViewModel,
+} from '../../viewModels';
 
-export interface MenuCategory {
-  id: number;
-  name: string;
-  items: MenuCategoryItem[];
-}
-
-export interface ProductOption {
-  id: number;
-  name: string;
-}
-
-export interface MenuData {
-  menuName?: string;
-  description?: string;
-  isActive?: boolean;
-  activeDays?: string[];
-  activeFrom?: string;
-  activeTo?: string;
-  categories?: MenuCategory[];
-  [key: string]: any;
-}
+export type MenuCategoryItem = MenuCategoryItemViewModel;
+export type MenuCategory = MenuCategoryViewModel;
+export type ProductOption = ProductOptionViewModel;
+export type MenuData = MenuDataViewModel;

@@ -3,11 +3,11 @@ import { theme } from '../../theme';
 import { useTranslation } from 'react-i18next';
 
 interface CampaignListItemProps {
-  id: number;
+  id: string;
   name: string;
   description: string;
   isActive: boolean;
-  onClick: (id: number) => void;
+  onClick: (id: string) => void;
 }
 
 export default function CampaignListItem({
