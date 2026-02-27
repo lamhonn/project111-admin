@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -32,48 +32,55 @@ interface EditMenuDialogProps {
   initialData?: MenuData;
 }
 
+const defaultCategories: MenuCategory[] = [
+  {
+    id: '1',
+    name: 'New Orders',
+    showTopmost: false,
+    items: [
+      { id: '1', name: 'Classic Burger' },
+      { id: '2', name: 'Chicken Caesar Salad' },
+    ],
+  },
+  {
+    id: '2',
+    name: 'Preparing',
+    showTopmost: false,
+    items: [
+      { id: '3', name: 'Margherita Pizza' },
+      { id: '4', name: 'Pasta Carbonara' },
+    ],
+  },
+  {
+    id: '3',
+    name: 'Bill Requests',
+    showTopmost: false,
+    items: [{ id: '5', name: 'Tiramisu' }],
+  },
+];
+
+const buildInitialFormData = (initialData?: MenuData): MenuData => ({
+  menuName: initialData?.menuName || '',
+  description: initialData?.description || '',
+  isActive: initialData?.isActive || false,
+  activePeriodStart: initialData?.activePeriodStart || '',
+  activePeriodEnd: initialData?.activePeriodEnd || '',
+  activeDays: initialData?.activeDays || [],
+  activeFrom: initialData?.activeFrom || '09:00',
+  activeTo: initialData?.activeTo || '17:00',
+  categories: initialData?.categories || defaultCategories,
+  ...(initialData || {}),
+});
+
 const EditMenuDialog: React.FC<EditMenuDialogProps> = ({ 
   open, 
   onClose, 
   onSave, 
   onDelete,
-  initialData = {} 
+  initialData
 }) => {
   const { t } = useTranslation();
-  const defaultCategories: MenuCategory[] = [
-    {
-      id: '1',
-      name: 'New Orders',
-      showTopmost: false,
-      items: [
-        { id: '1', name: 'Classic Burger' },
-        { id: '2', name: 'Chicken Caesar Salad' },
-      ],
-    },
-    {
-      id: '2',
-      name: 'Preparing',
-      showTopmost: false,
-      items: [
-        { id: '3', name: 'Margherita Pizza' },
-        { id: '4', name: 'Pasta Carbonara' },
-      ],
-    },
-    {
-      id: '3',
-      name: 'Bill Requests',
-      showTopmost: false,
-      items: [{ id: '5', name: 'Tiramisu' }],
-    },
-  ];
-
-  const [formData, setFormData] = useState<MenuData>({
-    menuName: initialData.menuName || '',
-    description: initialData.description || '',
-    isActive: initialData.isActive || false,
-    categories: initialData.categories || defaultCategories,
-    ...initialData
-  });
+  const [formData, setFormData] = useState<MenuData>(() => buildInitialFormData(initialData));
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [categoryNameInput, setCategoryNameInput] = useState('');
@@ -92,21 +99,6 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
     { id: '5', name: 'Product 5' },
     { id: '6', name: 'Product 6' },
   ];
-
-  useEffect(() => {
-    setFormData({
-      menuName: initialData.menuName || '',
-      description: initialData.description || '',
-      isActive: initialData.isActive || false,
-      activePeriodStart: initialData.activePeriodStart || '',
-      activePeriodEnd: initialData.activePeriodEnd || '',
-      activeDays: initialData.activeDays || [],
-      activeFrom: initialData.activeFrom || '09:00',
-      activeTo: initialData.activeTo || '17:00',
-      categories: initialData.categories || defaultCategories,
-      ...initialData,
-    });
-  }, [initialData]);
 
   const handleSettingsInputChange = (field: keyof MenuData) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({

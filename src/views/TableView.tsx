@@ -59,16 +59,24 @@ export default function TableView() {
         {t('tableManagement.tableMonitor')}
       </Typography>
 
-      {/* Active Tables Section */}
-      <ActiveTablesGrid 
-        tables={activeTables} 
-        onTableClick={handleTableClick}
-      />
+      {tableMonitor.length === 0 ? (
+        <Typography variant="body1" sx={{ color: theme.colors.text }}>
+          No tables configured
+        </Typography>
+      ) : (
+        <>
+          {/* Active Tables Section */}
+          <ActiveTablesGrid 
+            tables={activeTables} 
+            onTableClick={handleTableClick}
+          />
 
-      {/* Available Tables Section */}
-      <AvailableTablesGrid 
-        tables={inactiveTables}
-      />
+          {/* Available Tables Section */}
+          <AvailableTablesGrid 
+            tables={inactiveTables}
+          />
+        </>
+      )}
 
       {/* Table Dialog */}
       <TableDialog 

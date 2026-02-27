@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import { theme } from '../theme';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import CampaignEditorHeader from '../components/campaignEditor/CampaignEditorHeader';
 import CampaignList from '../components/campaignEditor/CampaignList';
 import EditCampaignDialog from '../components/campaignEditor/EditCampaignDialog';
@@ -15,6 +15,18 @@ export default function CampaignEditorView() {
 
   const filteredCampaigns = campaigns.filter((campaign) =>
     campaign.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const initialCampaignData = useMemo(
+    () =>
+      selectedCampaign
+        ? {
+            campaignName: selectedCampaign.name,
+            description: selectedCampaign.description,
+            isActive: selectedCampaign.isActive,
+          }
+        : undefined,
+    [selectedCampaign]
   );
 
   const handleAddCampaign = () => {
@@ -57,11 +69,7 @@ export default function CampaignEditorView() {
         onClose={() => setDialogOpen(false)}
         onSave={handleSaveCampaign}
         onDelete={selectedCampaign ? handleDeleteCampaign : undefined}
-        initialData={selectedCampaign ? {
-          campaignName: selectedCampaign.name,
-          description: selectedCampaign.description,
-          isActive: selectedCampaign.isActive,
-        } : undefined}
+        initialData={initialCampaignData}
       />
     </Box>
   );

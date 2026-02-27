@@ -1,9 +1,10 @@
-import { MOCK_PRODUCTS } from '../mockData/product.mock';
-import { toProductListItemViewModel } from '../../viewModels';
+import type { ProductListItemViewModel } from '../../viewModels';
+
+const EMPTY_PRODUCTS: ProductListItemViewModel[] = [];
 
 export const useGetProducts = () => {
   return {
-    data: MOCK_PRODUCTS.map(toProductListItemViewModel),
+    data: EMPTY_PRODUCTS,
     loading: false,
     error: undefined,
   } as const;

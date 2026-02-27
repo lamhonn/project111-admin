@@ -20,8 +20,7 @@ import {
   orderOptionsDialogOpenAtom,
   type OrderListSection 
 } from '../../context/dashboardStore';
-import { useGetOrderListSections } from '../../api/hooks/dashboard.hooks';
-import { getOrderDetails } from '../../api/mockData/dashboard.mock';
+import { useGetOrderListSections, getOrderDetails } from '../../api/hooks/dashboard.hooks';
 import OrderOptionsDialog from './OrderOptionsDialog';
 
 interface OrderListProps {
@@ -45,7 +44,7 @@ const OrderList: React.FC<OrderListProps> = () => {
 
   // Handle row click to open dialog
   const handleRowClick = (orderNo: string) => {
-    const orderDetails = getOrderDetails(orderNo);
+    const orderDetails = getOrderDetails(orderNo, orderSections);
     if (orderDetails) {
       setSelectedOrder(orderDetails);
       setDialogOpen(true);

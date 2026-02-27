@@ -6,7 +6,6 @@ import {
   Settings,
   Edit,
   MenuBook,
-  Campaign,
   History,
   Devices,
 } from '@mui/icons-material';

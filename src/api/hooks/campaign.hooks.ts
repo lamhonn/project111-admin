@@ -1,9 +1,10 @@
-import { MOCK_CAMPAIGNS } from '../mockData/campaign.mock';
-import { toCampaignListItemViewModel } from '../../viewModels';
+import type { CampaignListItemViewModel } from '../../viewModels';
+
+const EMPTY_CAMPAIGNS: CampaignListItemViewModel[] = [];
 
 export const useGetCampaigns = () => {
   return {
-    data: MOCK_CAMPAIGNS.map(toCampaignListItemViewModel),
+    data: EMPTY_CAMPAIGNS,
     loading: false,
     error: undefined,
   } as const;

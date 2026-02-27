@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { theme } from '../theme';
 import { useState } from 'react';
 import ProductEditorHeader from '../components/productEditor/ProductEditorHeader';
@@ -50,10 +50,16 @@ export default function ProductEditorView() {
         onSearchChange={setSearchQuery}
       />
 
-      <ProductGrid
-        products={filteredProducts}
-        onProductClick={handleProductClick}
-      />
+      {products.length === 0 ? (
+        <Typography variant="body1" sx={{ color: theme.colors.text }}>
+          No products configured
+        </Typography>
+      ) : (
+        <ProductGrid
+          products={filteredProducts}
+          onProductClick={handleProductClick}
+        />
+      )}
 
       <EditProductDialog
         open={dialogOpen}

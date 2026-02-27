@@ -94,10 +94,16 @@ export default function DeviceManagementView() {
       </Box>
 
       {/* Device List */}
-      <DeviceList
-        devices={devices}
-        onRowClick={handleRowClick}
-      />
+      {devices.length === 0 ? (
+        <Typography variant="body1" sx={{ color: theme.colors.text }}>
+          No devices configured
+        </Typography>
+      ) : (
+        <DeviceList
+          devices={devices}
+          onRowClick={handleRowClick}
+        />
+      )}
 
       {/* Device Dialog */}
       <DeviceDialog

@@ -5,23 +5,9 @@ import type {
   DeliveryStats,
   OrderStats,
   OrderListSection,
+  OrderDetails,
 } from '../../context/dashboardStore';
-import {
-  MOCK_INCOMING_ORDERS,
-  MOCK_IN_PROCESS_ORDERS,
-  MOCK_BILLS,
-  MOCK_DELIVERY_STATS,
-  MOCK_ORDER_STATS,
-  MOCK_ORDER_LIST_SECTIONS,
-} from '../mockData/dashboard.mock';
-
-/**
- * Dashboard data hooks
- * Following the pattern from product.hooks.ts
- * 
- * TODO: Currently returns mock data. When ready to connect to real API,
- * replace with actual GraphQL queries or API calls.
- */
+import { OrderItemStatus } from '../../context/dashboardStore';
 
 interface DashboardData {
   incomingOrders: IncomingOrder[];
@@ -31,29 +17,38 @@ interface DashboardData {
   orderStats: OrderStats;
 }
 
+const EMPTY_INCOMING_ORDERS: IncomingOrder[] = [];
+const EMPTY_IN_PROCESS_ORDERS: InProcessOrder[] = [];
+const EMPTY_BILLS: Bill[] = [];
+const EMPTY_DELIVERY_STATS: DeliveryStats = {
+  delivered: 0,
+  onTheWay: 0,
+  cancelled: 0,
+};
+const EMPTY_ORDER_STATS: OrderStats = {
+  today: 0,
+  yesterday: 0,
+  lastMonth: 0,
+};
+const EMPTY_ORDER_LIST_SECTIONS: OrderListSection[] = [];
+const EMPTY_DASHBOARD_DATA: DashboardData = {
+  incomingOrders: EMPTY_INCOMING_ORDERS,
+  inProcessOrders: EMPTY_IN_PROCESS_ORDERS,
+  bills: EMPTY_BILLS,
+  deliveryStats: EMPTY_DELIVERY_STATS,
+  orderStats: EMPTY_ORDER_STATS,
+};
+
 /**
  * Hook to fetch dashboard data
  * Used for: Dashboard overview, order management
  */
 export const useGetDashboardData = () => {
-  // Temporarily return mock data instead of making API query
-  // This allows components to use the hook pattern while we develop
   return {
-    data: {
-      incomingOrders: MOCK_INCOMING_ORDERS,
-      inProcessOrders: MOCK_IN_PROCESS_ORDERS,
-      bills: MOCK_BILLS,
-      deliveryStats: MOCK_DELIVERY_STATS,
-      orderStats: MOCK_ORDER_STATS,
-    } as DashboardData,
+    data: EMPTY_DASHBOARD_DATA,
     loading: false,
     error: undefined,
   } as const;
-
-  // When ready for real API, replace above with:
-  // return useQuery<DashboardData>(GET_DASHBOARD_DATA, {
-  //   pollInterval: 5000, // Refresh every 5 seconds for real-time updates
-  // });
 };
 
 /**
@@ -61,7 +56,7 @@ export const useGetDashboardData = () => {
  */
 export const useGetIncomingOrders = () => {
   return {
-    data: MOCK_INCOMING_ORDERS,
+    data: EMPTY_INCOMING_ORDERS,
     loading: false,
     error: undefined,
   } as const;
@@ -72,7 +67,7 @@ export const useGetIncomingOrders = () => {
  */
 export const useGetInProcessOrders = () => {
   return {
-    data: MOCK_IN_PROCESS_ORDERS,
+    data: EMPTY_IN_PROCESS_ORDERS,
     loading: false,
     error: undefined,
   } as const;
@@ -83,7 +78,7 @@ export const useGetInProcessOrders = () => {
  */
 export const useGetDeliveryStats = () => {
   return {
-    data: MOCK_DELIVERY_STATS,
+    data: EMPTY_DELIVERY_STATS,
     loading: false,
     error: undefined,
   } as const;
@@ -94,7 +89,7 @@ export const useGetDeliveryStats = () => {
  */
 export const useGetOrderStats = () => {
   return {
-    data: MOCK_ORDER_STATS,
+    data: EMPTY_ORDER_STATS,
     loading: false,
     error: undefined,
   } as const;
@@ -105,8 +100,31 @@ export const useGetOrderStats = () => {
  */
 export const useGetOrderListSections = (): { data: OrderListSection[]; loading: boolean; error: undefined } => {
   return {
-    data: MOCK_ORDER_LIST_SECTIONS,
+    data: EMPTY_ORDER_LIST_SECTIONS,
     loading: false,
     error: undefined,
   } as const;
+};
+
+const parseOrderAmount = (amount: string): number => {
+  const normalized = amount.replace(/[^\d.,-]/g, '').replace(',', '.');
+  const parsed = Number.parseFloat(normalized);
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
+
+export const getOrderDetails = (orderNo: string, sections: OrderListSection[]): OrderDetails | null => {
+  const order = sections.flatMap((section) => section.orders).find((item) => item.orderNo === orderNo);
+
+  if (!order) {
+    return null;
+  }
+
+  return {
+    orderNo: order.orderNo,
+    tableNumber: order.tableNumber,
+    time: order.time,
+    status: order.internalStatus ?? OrderItemStatus.New,
+    products: [],
+    total: parseOrderAmount(order.amount),
+  };
 };

@@ -1,9 +1,10 @@
-import { MOCK_MENUS } from '../mockData/menu.mock';
-import { toMenuListItemViewModel } from '../../viewModels';
+import type { MenuListItemViewModel } from '../../viewModels';
+
+const EMPTY_MENUS: MenuListItemViewModel[] = [];
 
 export const useGetMenus = () => {
   return {
-    data: MOCK_MENUS.map(toMenuListItemViewModel),
+    data: EMPTY_MENUS,
     loading: false,
     error: undefined,
   } as const;

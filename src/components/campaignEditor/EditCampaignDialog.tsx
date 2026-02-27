@@ -32,45 +32,50 @@ interface EditCampaignDialogProps {
   initialData?: CampaignData;
 }
 
+const defaultCategories: CampaignCategory[] = [
+  {
+    id: '1',
+    name: 'New Orders',
+    items: [
+      { id: '1', name: 'Classic Burger' },
+      { id: '2', name: 'Chicken Caesar Salad' },
+    ],
+  },
+  {
+    id: '2',
+    name: 'Preparing',
+    items: [
+      { id: '3', name: 'Margherita Pizza' },
+      { id: '4', name: 'Pasta Carbonara' },
+    ],
+  },
+  {
+    id: '3',
+    name: 'Bill Requests',
+    items: [{ id: '5', name: 'Tiramisu' }],
+  },
+];
+
+const buildInitialFormData = (initialData?: CampaignData): CampaignData => ({
+  campaignName: initialData?.campaignName || '',
+  description: initialData?.description || '',
+  isActive: initialData?.isActive || false,
+  activeDays: initialData?.activeDays || [],
+  activeFrom: initialData?.activeFrom || '09:00',
+  activeTo: initialData?.activeTo || '17:00',
+  categories: initialData?.categories || defaultCategories,
+  ...(initialData || {}),
+});
+
 const EditCampaignDialog: React.FC<EditCampaignDialogProps> = ({ 
   open, 
   onClose, 
   onSave, 
   onDelete,
-  initialData = {} 
+  initialData
 }) => {
   const { t } = useTranslation();
-  const defaultCategories: CampaignCategory[] = [
-    {
-      id: '1',
-      name: 'New Orders',
-      items: [
-        { id: '1', name: 'Classic Burger' },
-        { id: '2', name: 'Chicken Caesar Salad' },
-      ],
-    },
-    {
-      id: '2',
-      name: 'Preparing',
-      items: [
-        { id: '3', name: 'Margherita Pizza' },
-        { id: '4', name: 'Pasta Carbonara' },
-      ],
-    },
-    {
-      id: '3',
-      name: 'Bill Requests',
-      items: [{ id: '5', name: 'Tiramisu' }],
-    },
-  ];
-
-  const [formData, setFormData] = useState<CampaignData>({
-    campaignName: initialData.campaignName || '',
-    description: initialData.description || '',
-    isActive: initialData.isActive || false,
-    categories: initialData.categories || defaultCategories,
-    ...initialData
-  });
+  const [formData, setFormData] = useState<CampaignData>(() => buildInitialFormData(initialData));
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [categoryNameInput, setCategoryNameInput] = useState('');
@@ -90,17 +95,12 @@ const EditCampaignDialog: React.FC<EditCampaignDialogProps> = ({
   ];
 
   useEffect(() => {
-    setFormData({
-      campaignName: initialData.campaignName || '',
-      description: initialData.description || '',
-      isActive: initialData.isActive || false,
-      activeDays: initialData.activeDays || [],
-      activeFrom: initialData.activeFrom || '09:00',
-      activeTo: initialData.activeTo || '17:00',
-      categories: initialData.categories || defaultCategories,
-      ...initialData,
-    });
-  }, [initialData]);
+    if (!open) {
+      return;
+    }
+
+    setFormData(buildInitialFormData(initialData));
+  }, [open, initialData]);
 
   const handleSettingsInputChange = (field: keyof CampaignData) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({

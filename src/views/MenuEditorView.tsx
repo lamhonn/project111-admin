@@ -1,6 +1,6 @@
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { theme } from '../theme';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import MenuEditorHeader from '../components/menuEditor/MenuEditorHeader';
 import MenuList from '../components/menuEditor/MenuList';
 import EditMenuDialog from '../components/menuEditor/EditMenuDialog';
@@ -15,6 +15,18 @@ export default function MenuEditorView() {
 
   const filteredMenus = menus.filter((menu) =>
     menu.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const initialMenuData = useMemo(
+    () =>
+      selectedMenu
+        ? {
+            menuName: selectedMenu.name,
+            description: selectedMenu.description,
+            isActive: selectedMenu.isActive,
+          }
+        : undefined,
+    [selectedMenu]
   );
 
   const handleAddMenu = () => {
@@ -50,19 +62,24 @@ export default function MenuEditorView() {
         onSearchChange={setSearchQuery}
       />
 
-      <MenuList menus={filteredMenus} onMenuClick={handleMenuClick} />
+      {menus.length === 0 ? (
+        <Typography variant="body1" sx={{ color: theme.colors.text }}>
+          No menus configured
+        </Typography>
+      ) : (
+        <MenuList menus={filteredMenus} onMenuClick={handleMenuClick} />
+      )}
 
-      <EditMenuDialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        onSave={handleSaveMenu}
-        onDelete={selectedMenu ? handleDeleteMenu : undefined}
-        initialData={selectedMenu ? {
-          menuName: selectedMenu.name,
-          description: selectedMenu.description,
-          isActive: selectedMenu.isActive,
-        } : undefined}
-      />
+      {dialogOpen && (
+        <EditMenuDialog
+          key={selectedMenu?.id ?? 'new-menu'}
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          onSave={handleSaveMenu}
+          onDelete={selectedMenu ? handleDeleteMenu : undefined}
+          initialData={initialMenuData}
+        />
+      )}
     </Box>
   );
 }
