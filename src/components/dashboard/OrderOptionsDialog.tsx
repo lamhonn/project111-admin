@@ -14,6 +14,7 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
+import { formatPriceWithEuro } from '../../utils/numberFormat';
 import {
   selectedOrderAtom,
   orderOptionsDialogOpenAtom,
@@ -220,14 +221,14 @@ const OrderOptionsDialog: React.FC<OrderOptionsDialogProps> = () => {
                         fontWeight={theme.typography.fontWeights.bold}
                         sx={{ color: theme.colors.primary }}
                       >
-                        ${itemTotalPrice.toFixed(2)}
+                        {formatPriceWithEuro(itemTotalPrice)}
                       </Typography>
                     </Box>
                     <Typography
                       variant="body2"
                       sx={{ color: theme.colors.text, opacity: 0.6, mt: 0.5 }}
                     >
-                      {t('orderOptionsDialog.quantity')}: {product.quantity} × ${product.price.toFixed(2)}
+                      {t('orderOptionsDialog.quantity')}: {product.quantity} × {formatPriceWithEuro(product.price)}
                     </Typography>
                     {product.notes && (
                       <Typography
@@ -274,7 +275,7 @@ const OrderOptionsDialog: React.FC<OrderOptionsDialogProps> = () => {
               fontWeight={theme.typography.fontWeights.bold}
               sx={{ color: theme.colors.primary }}
             >
-              ${selectedOrder.total.toFixed(2)}
+              {formatPriceWithEuro(selectedOrder.total)}
             </Typography>
           </Box>
         )}

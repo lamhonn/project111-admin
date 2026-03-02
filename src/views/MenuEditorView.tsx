@@ -1,33 +1,43 @@
 import { Box, Typography } from '@mui/material';
 import { theme } from '../theme';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import MenuEditorHeader from '../components/menuEditor/MenuEditorHeader';
 import MenuList from '../components/menuEditor/MenuList';
 import EditMenuDialog from '../components/menuEditor/EditMenuDialog';
-import type { MenuListItemViewModel } from '../viewModels';
+import type { MenuDataViewModel, MenuListItemViewModel } from '../viewModels';
 import { useGetMenus } from '../api/hooks/menu.hooks';
 
 export default function MenuEditorView() {
-  const { data: menus } = useGetMenus();
+  const { data: menuListItems } = useGetMenus();
   const [searchQuery, setSearchQuery] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedMenu, setSelectedMenu] = useState<MenuListItemViewModel | null>(null);
+  const [selectedMenu, setSelectedMenu] = useState<MenuDataViewModel | null>(null);
+  const [menus, setMenus] = useState<MenuDataViewModel[]>([]);
+
+  useEffect(() => {
+    setMenus(
+      menuListItems.map<MenuDataViewModel>((menu) => ({
+        menuId: menu.id,
+        menuName: menu.name,
+        description: menu.description,
+        isActive: menu.isActive,
+        categories: [],
+      }))
+    );
+  }, [menuListItems]);
 
   const filteredMenus = menus.filter((menu) =>
-    menu.name.toLowerCase().includes(searchQuery.toLowerCase())
+    (menu.menuName || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const initialMenuData = useMemo(
-    () =>
-      selectedMenu
-        ? {
-            menuName: selectedMenu.name,
-            description: selectedMenu.description,
-            isActive: selectedMenu.isActive,
-          }
-        : undefined,
-    [selectedMenu]
-  );
+  const filteredMenuListItems = filteredMenus.map<MenuListItemViewModel>((menu, index) => ({
+    id: menu.menuId || `menu-${index}`,
+    name: menu.menuName || '',
+    description: menu.description || '',
+    isActive: Boolean(menu.isActive),
+  }));
+
+  const initialMenuData = useMemo(() => selectedMenu ?? undefined, [selectedMenu]);
 
   const handleAddMenu = () => {
     setSelectedMenu(null);
@@ -35,22 +45,33 @@ export default function MenuEditorView() {
   };
 
   const handleMenuClick = (id: string) => {
-    const menu = filteredMenus.find((item) => item.id === id);
+    const menu = menus.find((item) => item.menuId === id);
     if (menu) {
       setSelectedMenu(menu);
       setDialogOpen(true);
     }
   };
 
-  const handleSaveMenu = (data: any) => {
-    // TODO: Implement save menu functionality
-    console.log('Save menu:', data);
+  const handleSaveMenu = (data: MenuDataViewModel) => {
+    setMenus((currentMenus) => {
+      if (selectedMenu?.menuId) {
+        return currentMenus.map((menu) =>
+          menu.menuId === selectedMenu.menuId
+            ? { ...menu, ...data, menuId: selectedMenu.menuId }
+            : menu
+        );
+      }
+
+      const nextId = `menu-${Date.now()}`;
+      return [...currentMenus, { ...data, menuId: nextId }];
+    });
   };
 
   const handleDeleteMenu = () => {
     if (selectedMenu) {
-      // TODO: Implement delete menu functionality
-      console.log('Delete menu:', selectedMenu.id);
+      setMenus((currentMenus) =>
+        currentMenus.filter((menu) => menu.menuId !== selectedMenu.menuId)
+      );
     }
   };
 
@@ -67,12 +88,12 @@ export default function MenuEditorView() {
           No menus configured
         </Typography>
       ) : (
-        <MenuList menus={filteredMenus} onMenuClick={handleMenuClick} />
+        <MenuList menus={filteredMenuListItems} onMenuClick={handleMenuClick} />
       )}
 
       {dialogOpen && (
         <EditMenuDialog
-          key={selectedMenu?.id ?? 'new-menu'}
+          key={selectedMenu?.menuId ?? 'new-menu'}
           open={dialogOpen}
           onClose={() => setDialogOpen(false)}
           onSave={handleSaveMenu}

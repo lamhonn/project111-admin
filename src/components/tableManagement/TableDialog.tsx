@@ -15,6 +15,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
+import ConfirmationDialog from '../common/ConfirmationDialog';
 import type { Table, OrderItem } from './types';
 
 interface TableDialogProps {
@@ -36,6 +37,7 @@ export default function TableDialog({
 }: TableDialogProps) {
   const { t } = useTranslation();
   const [actionsOpen, setActionsOpen] = useState(false);
+  const [discardConfirmOpen, setDiscardConfirmOpen] = useState(false);
 
   if (!table) return null;
 
@@ -134,6 +136,11 @@ export default function TableDialog({
 
   const handleDiscardAction = () => {
     setActionsOpen(false);
+    setDiscardConfirmOpen(true);
+  };
+
+  const handleConfirmDiscard = () => {
+    setDiscardConfirmOpen(false);
     handleDiscard();
   };
 
@@ -790,6 +797,17 @@ export default function TableDialog({
           </Box>
         </DialogContent>
       </Dialog>
+
+      <ConfirmationDialog
+        open={discardConfirmOpen}
+        title={t('tableDialog.discardTableTitle')}
+        message={t('tableDialog.discardTableMessage')}
+        confirmLabel={t('common.confirm')}
+        cancelLabel={t('common.cancel')}
+        confirmButtonColor="error"
+        onClose={() => setDiscardConfirmOpen(false)}
+        onConfirm={handleConfirmDiscard}
+      />
     </Dialog>
   );
 }
