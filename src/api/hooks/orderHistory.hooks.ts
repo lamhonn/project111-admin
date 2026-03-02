@@ -1,6 +1,7 @@
 import type { HistoryOrderViewModel } from '../../viewModels';
+import { MOCK_ORDER_HISTORY } from '../mockData/orders.mock';
 
-const EMPTY_ORDER_HISTORY: HistoryOrderViewModel[] = [];
+const EMPTY_ORDER_HISTORY: HistoryOrderViewModel[] = MOCK_ORDER_HISTORY;
 
 /**
  * Hook to fetch order history

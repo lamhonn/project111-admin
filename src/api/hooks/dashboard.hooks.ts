@@ -8,6 +8,15 @@ import type {
   OrderDetails,
 } from '../../context/dashboardStore';
 import { OrderItemStatus } from '../../context/dashboardStore';
+import {
+  MOCK_BILLS,
+  MOCK_DELIVERY_STATS,
+  MOCK_IN_PROCESS_ORDERS,
+  MOCK_INCOMING_ORDERS,
+  MOCK_ORDER_DETAILS,
+  MOCK_ORDER_LIST_SECTIONS,
+  MOCK_ORDER_STATS,
+} from '../mockData/orders.mock';
 
 interface DashboardData {
   incomingOrders: IncomingOrder[];
@@ -17,20 +26,12 @@ interface DashboardData {
   orderStats: OrderStats;
 }
 
-const EMPTY_INCOMING_ORDERS: IncomingOrder[] = [];
-const EMPTY_IN_PROCESS_ORDERS: InProcessOrder[] = [];
-const EMPTY_BILLS: Bill[] = [];
-const EMPTY_DELIVERY_STATS: DeliveryStats = {
-  delivered: 0,
-  onTheWay: 0,
-  cancelled: 0,
-};
-const EMPTY_ORDER_STATS: OrderStats = {
-  today: 0,
-  yesterday: 0,
-  lastMonth: 0,
-};
-const EMPTY_ORDER_LIST_SECTIONS: OrderListSection[] = [];
+const EMPTY_INCOMING_ORDERS: IncomingOrder[] = MOCK_INCOMING_ORDERS;
+const EMPTY_IN_PROCESS_ORDERS: InProcessOrder[] = MOCK_IN_PROCESS_ORDERS;
+const EMPTY_BILLS: Bill[] = MOCK_BILLS;
+const EMPTY_DELIVERY_STATS: DeliveryStats = MOCK_DELIVERY_STATS;
+const EMPTY_ORDER_STATS: OrderStats = MOCK_ORDER_STATS;
+const EMPTY_ORDER_LIST_SECTIONS: OrderListSection[] = MOCK_ORDER_LIST_SECTIONS;
 const EMPTY_DASHBOARD_DATA: DashboardData = {
   incomingOrders: EMPTY_INCOMING_ORDERS,
   inProcessOrders: EMPTY_IN_PROCESS_ORDERS,
@@ -113,6 +114,11 @@ const parseOrderAmount = (amount: string): number => {
 };
 
 export const getOrderDetails = (orderNo: string, sections: OrderListSection[]): OrderDetails | null => {
+  const mockOrder = MOCK_ORDER_DETAILS[orderNo];
+  if (mockOrder) {
+    return mockOrder;
+  }
+
   const order = sections.flatMap((section) => section.orders).find((item) => item.orderNo === orderNo);
 
   if (!order) {

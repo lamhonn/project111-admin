@@ -39,29 +39,52 @@ const parseJson = <T>(value: string | undefined, fallback: T): T => {
   }
 };
 
+const resolveLocalizedText = (value: string | undefined): string => {
+  if (!value) {
+    return '';
+  }
+
+  const parsed = parseJson<Record<string, string> | string>(value, value);
+  if (typeof parsed === 'string') {
+    return parsed;
+  }
+
+  return parsed.en ?? parsed.fi ?? parsed.sv ?? Object.values(parsed)[0] ?? '';
+};
+
 export const toProductListItemViewModel = (product: Product): ProductListItemViewModel => ({
   id: product.Id,
-  name: product.Name,
-  description: product.Description ?? '',
+  name: resolveLocalizedText(product.Name),
+  description: resolveLocalizedText(product.Description),
   enabled: product.Enabled,
 });
 
 export const toProductEditorViewModel = (product: Product): ProductEditorViewModel => {
-  const toppings = parseJson<Array<{ name?: string; priceIncrement?: number }>>(product.Toppings, []);
+  const toppings = parseJson<Array<{
+    name?: string;
+    Name?: string | Record<string, string>;
+    priceIncrement?: number;
+    PriceIncrement?: number;
+  }>>(product.Toppings, []);
   const excludables = parseJson<Array<string | { fi?: string; en?: string; sv?: string }>>(product.Excludables, []);
   const ingredientTranslations = parseJson<Record<string, string>>(product.Ingredients, {});
 
   return {
     id: product.Id,
-    name: product.Name,
-    description: product.Description ?? '',
+    name: resolveLocalizedText(product.Name),
+    description: resolveLocalizedText(product.Description),
     ingredients: ingredientTranslations.fi ?? ingredientTranslations.en ?? ingredientTranslations.sv ?? '',
     imgUrl: product.ImgUrl,
     enabled: product.Enabled,
     dietaries: product.Dietaries ?? [],
     toppings: toppings.map((topping) => ({
-      name: topping.name ?? '',
-      priceIncrement: topping.priceIncrement ?? 0,
+      name:
+        topping.name ??
+        (typeof topping.Name === 'string'
+          ? topping.Name
+          : topping.Name?.en ?? topping.Name?.fi ?? topping.Name?.sv ?? '') ??
+        '',
+      priceIncrement: topping.priceIncrement ?? topping.PriceIncrement ?? 0,
     })),
     excludables: excludables.map((item) =>
       typeof item === 'string' ? item : item.fi ?? item.en ?? item.sv ?? ''
