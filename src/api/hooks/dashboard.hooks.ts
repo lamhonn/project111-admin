@@ -18,6 +18,18 @@ import {
   MOCK_ORDER_STATS,
 } from '../mockData/orders.mock';
 
+/**
+ * Dashboard API hooks - Currently using mock data
+ * 
+ * Migration path:
+ * 1. Currently: Returns static mock data
+ * 2. With WebSocket: Use useDashboardWebSocket for real-time updates
+ * 3. Future: Replace with REST API calls + WebSocket for updates
+ * 
+ * Note: These hooks maintain the same interface regardless of data source,
+ * making it easy to swap between mock data, WebSocket, and REST API.
+ */
+
 interface DashboardData {
   incomingOrders: IncomingOrder[];
   inProcessOrders: InProcessOrder[];
@@ -132,5 +144,102 @@ export const getOrderDetails = (orderNo: string, sections: OrderListSection[]): 
     status: order.internalStatus ?? OrderItemStatus.New,
     products: [],
     total: parseOrderAmount(order.amount),
+  };
+};
+
+/**
+ * Mutation hooks for order actions
+ * These will send updates via WebSocket when connected
+ */
+
+export interface OrderActionResult {
+  success: boolean;
+  error?: string;
+}
+
+interface OrderActionsHook {
+  acceptOrder: (orderNo: string) => Promise<OrderActionResult>;
+  rejectOrder: (orderNo: string, reason?: string) => Promise<OrderActionResult>;
+  markOrderReady: (orderNo: string) => Promise<OrderActionResult>;
+  markOrderDelivered: (orderNo: string) => Promise<OrderActionResult>;
+}
+
+/**
+ * Hook for order actions (accept, reject, etc.)
+ * When WebSocket is connected, these actions will send real-time updates
+ * When WebSocket is not connected, they work with local state only
+ * 
+ * Usage:
+ * ```tsx
+ * const { acceptOrder, rejectOrder } = useOrderActions();
+ * 
+ * const handleAccept = async () => {
+ *   const result = await acceptOrder(orderNo);
+ *   if (result.success) {
+ *     // Handle success
+ *   }
+ * };
+ * ```
+ */
+export const useOrderActions = (): OrderActionsHook => {
+  // This is a placeholder that works with local state
+  // In practice, you'd use the useDashboardWebSocket hook to get real actions
+  // See example in OrderOptionsDialog for integration
+  
+  const acceptOrder = async (orderNo: string): Promise<OrderActionResult> => {
+    try {
+      // When WebSocket is integrated, this will call ws.acceptOrder(orderNo)
+      // For now, it's a local-only operation handled by updateOrderStatusAtom
+      console.log(`[API] Accept order ${orderNo}`);
+      return { success: true };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      };
+    }
+  };
+
+  const rejectOrder = async (orderNo: string, reason?: string): Promise<OrderActionResult> => {
+    try {
+      console.log(`[API] Reject order ${orderNo}`, reason);
+      return { success: true };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      };
+    }
+  };
+
+  const markOrderReady = async (orderNo: string): Promise<OrderActionResult> => {
+    try {
+      console.log(`[API] Mark order ready ${orderNo}`);
+      return { success: true };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      };
+    }
+  };
+
+  const markOrderDelivered = async (orderNo: string): Promise<OrderActionResult> => {
+    try {
+      console.log(`[API] Mark order delivered ${orderNo}`);
+      return { success: true };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      };
+    }
+  };
+
+  return {
+    acceptOrder,
+    rejectOrder,
+    markOrderReady,
+    markOrderDelivered,
   };
 };

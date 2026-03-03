@@ -9,5 +9,6 @@ export * from './organization.types';
 export * from './product.types';
 export * from './table.types';
 export * from './user.types';
+export * from './websocket.types';
 
 export * from './enums';
