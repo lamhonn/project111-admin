@@ -19,6 +19,8 @@ import {
   deliveryStatsAtom,
   orderStatsAtom,
 } from '../../context/dashboardStore';
+import { apiConfig } from '../config';
+import type { OrderItemStatus } from '../../viewModels';
 
 /**
  * Hook to manage dashboard real-time updates via WebSocket
@@ -232,8 +234,8 @@ export const useDashboardWebSocket = (config: WebSocketConfig) => {
    */
   const changeOrderStatus = (
     orderNo: string,
-    oldStatus: string,
-    newStatus: string,
+    oldStatus: OrderItemStatus,
+    newStatus: OrderItemStatus,
     changedBy?: string
   ) => {
     console.log('[Dashboard WS] Changing order status:', orderNo, oldStatus, '->', newStatus);
@@ -242,8 +244,8 @@ export const useDashboardWebSocket = (config: WebSocketConfig) => {
       WebSocketEventType.ORDER_STATUS_CHANGED,
       {
         orderNo,
-        oldStatus: oldStatus as any,
-        newStatus: newStatus as any,
+        oldStatus,
+        newStatus,
         changedAt: new Date().toISOString(),
         changedBy,
       }
@@ -263,10 +265,8 @@ export const useDashboardWebSocket = (config: WebSocketConfig) => {
  * This provides sensible defaults for the admin dashboard
  */
 export const useAdminWebSocket = () => {
-  // In production, this URL would come from environment variables
-  // For now, we provide a configurable default
   const config: WebSocketConfig = {
-    url: import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:8080',
+    url: apiConfig.websocketUrl,
     reconnectInterval: 3000,
     reconnectAttempts: 5,
     heartbeatInterval: 30000,

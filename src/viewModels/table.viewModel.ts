@@ -1,4 +1,4 @@
-import type { Table } from '../api/types';
+import type { Tablet } from '../api/types';
 
 export interface ToppingViewModel {
   id: string;
@@ -42,7 +42,7 @@ export interface TableMonitorViewModel {
   billSplitConfig?: BillSplitConfigurationViewModel;
 }
 
-export const toTableMonitorViewModel = (table: Table): TableMonitorViewModel => ({
+export const toTableMonitorViewModel = (table: Tablet): TableMonitorViewModel => ({
   id: table.Id,
   number: table.TableNumber,
   status: 'inactive',
