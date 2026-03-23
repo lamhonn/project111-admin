@@ -5,7 +5,7 @@ export * from './orderProduct.types';
 export * from './orderProductTopping.types';
 export * from './organization.types';
 export * from './product.types';
-export * from './table.types';
+export * from './tablet.types';
 export * from './user.types';
 export * from './websocket.types';
 

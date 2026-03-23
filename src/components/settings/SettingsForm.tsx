@@ -1,8 +1,9 @@
 import { Box, Typography, Paper, Button, Divider } from '@mui/material';
-import { Save as SaveIcon } from '@mui/icons-material';
+import { Save as SaveIcon, Logout as LogoutIcon } from '@mui/icons-material';
 import { theme } from '../../theme';
 import { useTranslation } from 'react-i18next';
 import { useAtom, useSetAtom } from 'jotai';
+import { useAuthorization } from '../../api/hooks/auth.hooks';
 import {
   settingsAtom,
   resetSettingsAtom,
@@ -15,6 +16,7 @@ import SystemSettingsInputs from './SystemSettingsInputs';
 
 export default function SettingsForm() {
   const { t } = useTranslation();
+  const { logout } = useAuthorization();
   const [settings, setSettings] = useAtom(settingsAtom);
   const resetSettings = useSetAtom(resetSettingsAtom);
   const applySettings = useSetAtom(applySettingsAtom);
@@ -31,6 +33,10 @@ export default function SettingsForm() {
   const handleCancel = () => {
     // Reset all settings to defaults
     resetSettings();
+  };
+
+  const handleLogout = () => {
+    logout();
   };
 
   return (
@@ -155,38 +161,53 @@ export default function SettingsForm() {
       <Divider sx={{ mb: theme.spacing.xl }} />
 
       {/* Action Buttons */}
-      <Box sx={{ display: 'flex', gap: theme.spacing.md, justifyContent: 'flex-end' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
         <Button
           variant="outlined"
-          onClick={handleCancel}
+          color="error"
+          startIcon={<LogoutIcon />}
+          onClick={handleLogout}
           sx={{
             borderRadius: theme.borderRadius.large,
             textTransform: 'none',
-            borderColor: theme.colors.border,
-            color: 'text.primary',
-            '&:hover': {
-              borderColor: theme.colors.primary,
-              backgroundColor: theme.colors.primaryLight,
-            },
           }}
         >
-          {t('common.cancel')}
+          {t('settings.logout')}
         </Button>
-        <Button
-          variant="contained"
-          startIcon={<SaveIcon />}
-          onClick={handleSave}
-          sx={{
-            borderRadius: theme.borderRadius.large,
-            textTransform: 'none',
-            bgcolor: theme.colors.primary,
-            '&:hover': {
-              bgcolor: theme.colors.primaryHover,
-            },
-          }}
-        >
-          {t('settings.saveChanges')}
-        </Button>
+
+        <Box sx={{ display: 'flex', gap: theme.spacing.md }}>
+          <Button
+            variant="outlined"
+            onClick={handleCancel}
+            sx={{
+              borderRadius: theme.borderRadius.large,
+              textTransform: 'none',
+              borderColor: theme.colors.border,
+              color: 'text.primary',
+              '&:hover': {
+                borderColor: theme.colors.primary,
+                backgroundColor: theme.colors.primaryLight,
+              },
+            }}
+          >
+            {t('common.cancel')}
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<SaveIcon />}
+            onClick={handleSave}
+            sx={{
+              borderRadius: theme.borderRadius.large,
+              textTransform: 'none',
+              bgcolor: theme.colors.primary,
+              '&:hover': {
+                bgcolor: theme.colors.primaryHover,
+              },
+            }}
+          >
+            {t('settings.saveChanges')}
+          </Button>
+        </Box>
       </Box>
     </Paper>
   );

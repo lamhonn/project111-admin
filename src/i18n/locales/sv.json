@@ -313,11 +313,22 @@
     "changePasswordWip": "Byt lösenord (WIP)",
     "oldPassword": "Gammalt Lösenord",
     "newPassword": "Nytt Lösenord",
+    "logout": "Logga ut",
     "saveChanges": "Spara Ändringar",
     "systemSettings": "Systeminställningar",
     "systemLanguage": "Systemspråk",
     "languageEnglish": "Engelska",
     "languageFinnish": "Finska",
     "languageSwedish": "Svenska"
+  },
+  "auth": {
+    "login": "Anvandarnamn",
+    "password": "Losenord",
+    "forgotPassword": "Glomt ditt losenord?",
+    "loginButton": "Logga in",
+    "loginSubtitle": "Logga in for att fortsatta till din instrumentpanel.",
+    "fillAllFields": "Fyll i bade anvandarnamn och losenord.",
+    "loginFailed": "Inloggning misslyckades",
+    "authorizationRequired": "Auktorisering kravs"
   }
 }

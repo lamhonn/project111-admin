@@ -18,7 +18,6 @@ import TableView from './TableView';
 import ProductEditorView from './ProductEditorView';
 import SettingsView from './SettingsView';
 import MenuEditorView from './MenuEditorView';
-import CampaignEditorView from './CampaignEditorView';
 import OrderHistoryView from './OrderHistoryView';
 import DeviceManagementView from './DeviceManagementView';
 
@@ -40,7 +39,6 @@ const MainView = () => {
       items: [
         { text: t('admin.menu.productEditor'), icon: <Edit />, badge: undefined },
         { text: t('admin.menu.menuEditor'), icon: <MenuBook />, badge: undefined },
-        // { text: t('admin.menu.campaignEditor'), icon: <Campaign />, badge: undefined },
         { text: t('admin.menu.deviceManagement'), icon: <Devices />, badge: undefined },
         { text: t('dashboard.menu.settings'), icon: <Settings />, badge: undefined },
       ],
@@ -62,8 +60,6 @@ const MainView = () => {
         return <ProductEditorView />;
       case t('admin.menu.menuEditor'):
         return <MenuEditorView />;
-      case t('admin.menu.campaignEditor'):
-        return <CampaignEditorView />;
       case t('admin.menu.deviceManagement'):
         return <DeviceManagementView />;
       default:

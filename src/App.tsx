@@ -1,6 +1,8 @@
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import MainView from './views/MainView';
+import UnauthorizedView from './views/UnauthorizedView';
+import { useAuthorization } from './api/hooks/auth.hooks';
 import './i18n'; // Initialize i18n
 // import './App.css';
 
@@ -37,10 +39,12 @@ const muiTheme = createTheme({
 });
 
 function App() {
+  const { isAuthorized } = useAuthorization();
+
   return (
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
-      <MainView />
+      {isAuthorized ? <MainView /> : <UnauthorizedView />}
     </ThemeProvider>
   );
 }

@@ -317,11 +317,22 @@
     "changePasswordWip": "Change Password (WIP)",
     "oldPassword": "Old Password",
     "newPassword": "New Password",
+    "logout": "Log out",
     "saveChanges": "Save Changes",
     "systemSettings": "System Settings",
     "systemLanguage": "System Language",
     "languageEnglish": "English",
     "languageFinnish": "Finnish",
     "languageSwedish": "Swedish"
+  },
+  "auth": {
+    "login": "Login",
+    "password": "Password",
+    "forgotPassword": "Forgot your password?",
+    "loginButton": "Login",
+    "loginSubtitle": "Sign in to continue to your dashboard.",
+    "fillAllFields": "Please fill in both login and password.",
+    "loginFailed": "Login failed",
+    "authorizationRequired": "Authorization required"
   }
 }

@@ -313,12 +313,23 @@
     "changePasswordWip": "Vaihda salasana (WIP)",
     "oldPassword": "Vanha Salasana",
     "newPassword": "Uusi Salasana",
+    "logout": "Kirjaudu ulos",
     "saveChanges": "Tallenna Muutokset",
     "systemSettings": "Järjestelmän Asetukset",
     "systemLanguage": "Järjestelmän Kieli",
     "languageEnglish": "Englanti",
     "languageFinnish": "Suomi",
     "languageSwedish": "Ruotsi"
+  },
+  "auth": {
+    "login": "Kayttajatunnus",
+    "password": "Salasana",
+    "forgotPassword": "Unohditko salasanasi?",
+    "loginButton": "Kirjaudu",
+    "loginSubtitle": "Kirjaudu sisään jatkaaksesi hallintapaneeliin.",
+    "fillAllFields": "Täytä sekä käyttäjätunnus että salasana.",
+    "loginFailed": "Kirjautuminen epäonnistui",
+    "authorizationRequired": "Valtuutus vaaditaan"
   }
 }
 
