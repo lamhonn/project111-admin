@@ -9,8 +9,8 @@ interface DeviceDialogProps {
   open: boolean;
   device: Device | null;
   onClose: () => void;
-  onEdit: (device: Device) => void;
-  onForgetDevice: (device: Device) => void;
+  onEdit: (device: Device) => void | Promise<void>;
+  onForgetDevice: (device: Device) => void | Promise<void>;
 }
 
 export default function DeviceDialog({
@@ -46,18 +46,18 @@ export default function DeviceDialog({
     onClose();
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const updatedDevice = {
       ...device,
       ...editedData,
     };
-    onEdit(updatedDevice);
+    await onEdit(updatedDevice);
     setEditMode(false);
     setEditedData({});
   };
 
-  const handleForgetClick = () => {
-    onForgetDevice(device);
+  const handleForgetClick = async () => {
+    await onForgetDevice(device);
     onClose();
   };
 

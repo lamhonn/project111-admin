@@ -1,33 +1,40 @@
 import { useState } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Alert, CircularProgress } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { theme } from '../theme';
 import { useTranslation } from 'react-i18next';
 import DeviceList, { type Device } from '../components/deviceManagement/DeviceList';
 import DeviceDialog from '../components/deviceManagement/DeviceDialog';
-import PairDeviceDialog from '../components/deviceManagement/PairDeviceDialog';
+import PairDeviceDialog, { type PairingPinData } from '../components/deviceManagement/PairDeviceDialog';
+import { useDeviceManagement } from '../api/hooks/device.hooks';
 
 export default function DeviceManagementView() {
   const { t } = useTranslation();
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pairDialogOpen, setPairDialogOpen] = useState(false);
-  const [devices, setDevices] = useState<Device[]>([
-    { id: 1, deviceId: 'TAB-001', deviceName: 'Table A1 Tablet', tableNumber: 'A1', status: 'Connected', lastSeen: '2026-02-10 15:30', batteryLevel: 87, model: 'iPad Pro 12.9' },
-    { id: 2, deviceId: 'TAB-002', deviceName: 'Table A2 Tablet', tableNumber: 'A2', status: 'Connected', lastSeen: '2026-02-10 15:29', batteryLevel: 92, model: 'iPad Pro 12.9' },
-    { id: 3, deviceId: 'TAB-003', deviceName: 'Table B1 Tablet', tableNumber: 'B1', status: 'Connected', lastSeen: '2026-02-10 15:28', batteryLevel: 65, model: 'Samsung Tab S8' },
-    { id: 4, deviceId: 'TAB-004', deviceName: 'Table B2 Tablet', tableNumber: 'B2', status: 'Offline', lastSeen: '2026-02-10 14:45', batteryLevel: 34, model: 'Samsung Tab S8' },
-    { id: 5, deviceId: 'TAB-005', deviceName: 'Table C1 Tablet', tableNumber: 'C1', status: 'Connected', lastSeen: '2026-02-10 15:30', batteryLevel: 78, model: 'iPad Air' },
-    { id: 6, deviceId: 'TAB-006', deviceName: 'Table C2 Tablet', tableNumber: 'C2', status: 'Connected', lastSeen: '2026-02-10 15:27', batteryLevel: 95, model: 'iPad Air' },
-    { id: 7, deviceId: 'TAB-007', deviceName: 'Table D1 Tablet', tableNumber: 'D1', status: 'Connected', lastSeen: '2026-02-10 15:31', batteryLevel: 58, model: 'Samsung Tab S8' },
-    { id: 8, deviceId: 'TAB-008', deviceName: 'Table D2 Tablet', tableNumber: 'D2', status: 'Offline', lastSeen: '2026-02-10 13:20', batteryLevel: 12, model: 'iPad Pro 12.9' },
-  ]);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const {
+    devices,
+    loading,
+    error,
+    requestPairingPin,
+    latestPinIssued,
+    updateDevice,
+    deleteDevice,
+    isRequestingPin,
+    isUpdating,
+    isDeleting,
+  } = useDeviceManagement();
 
   const handlePairDevice = () => {
+    setActionError(null);
     setPairDialogOpen(true);
   };
 
   const handleRowClick = (device: Device) => {
+    setActionError(null);
     setSelectedDevice(device);
     setDialogOpen(true);
   };
@@ -36,24 +43,43 @@ export default function DeviceManagementView() {
     setDialogOpen(false);
   };
 
-  const handleEditDevice = (updatedDevice: Device) => {
-    console.log('Saving device changes:', updatedDevice);
-    // Update the device in state
-    setDevices((prevDevices) =>
-      prevDevices.map((device) =>
-        device.id === updatedDevice.id ? updatedDevice : device
-      )
-    );
-    // TODO: Persist to backend/database
-    setSelectedDevice(updatedDevice);
+  const handleEditDevice = async (updatedDevice: Device) => {
+    const parsedTableNumber = Number.parseInt(updatedDevice.tableNumber, 10);
+
+    if (!Number.isFinite(parsedTableNumber) || parsedTableNumber <= 0) {
+      setActionError(t('deviceManagement.invalidTableNumber', { defaultValue: 'Enter a valid table number' }));
+      return;
+    }
+
+    try {
+      await updateDevice(updatedDevice.id, parsedTableNumber);
+      setSelectedDevice(updatedDevice);
+      setActionError(null);
+    } catch (updateError) {
+      setActionError((updateError as Error).message);
+    }
   };
 
-  const handleForgetDevice = (device: Device) => {
-    console.log('Forgetting device:', device);
-    // Remove device from state
-    setDevices((prevDevices) => prevDevices.filter((d) => d.id !== device.id));
-    // TODO: Persist to backend/database
-    setDialogOpen(false);
+  const handleForgetDevice = async (device: Device) => {
+    try {
+      await deleteDevice(device.id);
+      setDialogOpen(false);
+      setSelectedDevice(null);
+      setActionError(null);
+    } catch (deleteError) {
+      setActionError((deleteError as Error).message);
+    }
+  };
+
+  const handleRequestPairingPin = async (tableNumber: number, existingTabletId?: string): Promise<PairingPinData> => {
+    try {
+      const pinData = await requestPairingPin(tableNumber, existingTabletId);
+      setActionError(null);
+      return pinData;
+    } catch (createError) {
+      setActionError((createError as Error).message);
+      throw createError;
+    }
   };
 
   return (
@@ -93,10 +119,26 @@ export default function DeviceManagementView() {
         </Button>
       </Box>
 
+      {actionError && (
+        <Alert severity="error" sx={{ mb: theme.spacing.md }}>
+          {actionError}
+        </Alert>
+      )}
+
+      {error && (
+        <Alert severity="error" sx={{ mb: theme.spacing.md }}>
+          {error.message}
+        </Alert>
+      )}
+
       {/* Device List */}
-      {devices.length === 0 ? (
+      {loading ? (
+        <Box sx={{ py: theme.spacing.xl, display: 'flex', justifyContent: 'center' }}>
+          <CircularProgress />
+        </Box>
+      ) : devices.length === 0 ? (
         <Typography variant="body1" sx={{ color: theme.colors.text }}>
-          No devices configured
+          {t('deviceManagement.noDevicesConfigured', { defaultValue: 'No devices configured' })}
         </Typography>
       ) : (
         <DeviceList
@@ -118,7 +160,16 @@ export default function DeviceManagementView() {
       <PairDeviceDialog
         open={pairDialogOpen}
         onClose={() => setPairDialogOpen(false)}
+        onRequestPin={handleRequestPairingPin}
+        isRequestingPin={isRequestingPin}
+        livePinUpdate={latestPinIssued}
       />
+
+      {(isUpdating || isDeleting) && (
+        <Box sx={{ pt: theme.spacing.sm, display: 'flex', justifyContent: 'center' }}>
+          <CircularProgress size={20} />
+        </Box>
+      )}
     </Box>
   );
 }

@@ -1,30 +1,27 @@
 import { Box, Typography } from '@mui/material';
 import { theme } from '../theme';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import MenuEditorHeader from '../components/menuEditor/MenuEditorHeader';
 import MenuList from '../components/menuEditor/MenuList';
 import EditMenuDialog from '../components/menuEditor/EditMenuDialog';
+import ErrorReportDialog from '../components/common/ErrorReportDialog';
 import type { MenuDataViewModel, MenuListItemViewModel } from '../viewModels';
 import { useGetMenus } from '../api/hooks/menu.hooks';
 
 export default function MenuEditorView() {
-  const { data: menuListItems } = useGetMenus();
+  const { editorData: menus, createMenu, updateMenu, deleteMenu } = useGetMenus();
   const [searchQuery, setSearchQuery] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState<MenuDataViewModel | null>(null);
-  const [menus, setMenus] = useState<MenuDataViewModel[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    setMenus(
-      menuListItems.map<MenuDataViewModel>((menu) => ({
-        menuId: menu.id,
-        menuName: menu.name,
-        description: menu.description,
-        isActive: menu.isActive,
-        categories: [],
-      }))
-    );
-  }, [menuListItems]);
+  const toErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    return String(error);
+  };
 
   const filteredMenus = menus.filter((menu) =>
     (menu.menuName || '').toLowerCase().includes(searchQuery.toLowerCase())
@@ -52,26 +49,58 @@ export default function MenuEditorView() {
     }
   };
 
-  const handleSaveMenu = (data: MenuDataViewModel) => {
-    setMenus((currentMenus) => {
+  const handleSaveMenu = async (data: MenuDataViewModel) => {
+    try {
+      const categories = data.categories ?? [];
+      const serializedCategories = JSON.stringify(
+        categories.map((category) => ({
+          id: category.id,
+          name: category.name,
+          showTopmost: Boolean(category.showTopmost),
+          productIds: (category.items ?? []).map((item) => item.id),
+        }))
+      );
+
+      const topmostCategory = categories.some((category) => Boolean(category.showTopmost));
+      const payload = {
+        name: data.menuName?.trim() || 'Menu',
+        enabled: Boolean(data.isActive),
+        categories: serializedCategories,
+        topmostCategory,
+      };
+
       if (selectedMenu?.menuId) {
-        return currentMenus.map((menu) =>
-          menu.menuId === selectedMenu.menuId
-            ? { ...menu, ...data, menuId: selectedMenu.menuId }
-            : menu
-        );
+        const result = await updateMenu({
+          id: selectedMenu.menuId,
+          ...payload,
+        });
+        if (!result.success) {
+          throw new Error(result.message);
+        }
+        return;
       }
 
-      const nextId = `menu-${Date.now()}`;
-      return [...currentMenus, { ...data, menuId: nextId }];
-    });
+      const result = await createMenu(payload);
+      if (!result.success) {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      setErrorMessage(toErrorMessage(error));
+      throw error;
+    }
   };
 
-  const handleDeleteMenu = () => {
-    if (selectedMenu) {
-      setMenus((currentMenus) =>
-        currentMenus.filter((menu) => menu.menuId !== selectedMenu.menuId)
-      );
+  const handleDeleteMenu = async () => {
+    try {
+      if (selectedMenu?.menuId) {
+        const result = await deleteMenu(selectedMenu.menuId);
+        if (!result.success) {
+          throw new Error(result.message);
+        }
+      }
+    } catch (error) {
+      setErrorMessage(toErrorMessage(error));
+      throw error;
     }
   };
 
@@ -101,6 +130,12 @@ export default function MenuEditorView() {
           initialData={initialMenuData}
         />
       )}
+
+      <ErrorReportDialog
+        open={Boolean(errorMessage)}
+        errorMessage={errorMessage ?? ''}
+        onClose={() => setErrorMessage(null)}
+      />
     </Box>
   );
 }

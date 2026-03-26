@@ -20,6 +20,8 @@ import { theme } from '../../theme/theme';
 import EditAllergensDialog, { AllergenCode } from './EditAllergensDialog';
 import EditToppingsDialog from './EditToppingsDialog';
 import EditExcludablesDialog from './EditExcludablesDialog';
+import StockPhotoDialog from './StockPhotoDialog.tsx';
+import type { StockPhoto } from './StockPhotoDialog.tsx';
 import type { ToppingRow } from './EditToppingsDialog';
 
 type SupportedLanguage = 'fi' | 'en' | 'sv';
@@ -42,6 +44,8 @@ interface ProductData {
   ingredients?: string;
   productTranslations?: ProductTranslations;
   productImage?: File | null;
+  ImgUrl?: string;
+  stockPhotoLink?: string;
   additionalImages?: File[];
   toppings?: ToppingRow[];
   excludables?: string[];
@@ -137,8 +141,8 @@ const normalizeProductTranslations = (
 interface EditProductDialogProps {
   open: boolean;
   onClose: () => void;
-  onSave: (data: ProductData) => void;
-  onDelete?: () => void;
+  onSave: (data: ProductData) => void | Promise<void>;
+  onDelete?: () => void | Promise<void>;
   initialData?: ProductData;
 }
 
@@ -168,6 +172,10 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
   const initialProductName = initialData.productName || initialProductTranslations.productName[systemLanguage] || '';
   const initialDescription = initialData.description || initialProductTranslations.description[systemLanguage] || '';
   const initialIngredients = initialData.ingredients || initialProductTranslations.ingredients[systemLanguage] || '';
+  const initialImagePreview =
+    initialData.stockPhotoLink ||
+    initialData.ImgUrl ||
+    (typeof initialData.productImage === 'string' ? initialData.productImage : null);
 
   const [formData, setFormData] = useState<ProductData>({
     productName: initialProductName,
@@ -184,10 +192,11 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
     ...initialData
   });
 
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(initialImagePreview || null);
   const [isAllergensDialogOpen, setIsAllergensDialogOpen] = useState(false);
   const [isToppingsDialogOpen, setIsToppingsDialogOpen] = useState(false);
   const [isExcludablesDialogOpen, setIsExcludablesDialogOpen] = useState(false);
+  const [isStockPhotoDialogOpen, setIsStockPhotoDialogOpen] = useState(false);
   const [translationTargetField, setTranslationTargetField] = useState<TranslationTargetField>(null);
 
   const isTranslatableField = (field: keyof ProductData): field is TranslatableField =>
@@ -243,6 +252,24 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
 
   const handleEditAllergens = () => {
     setIsAllergensDialogOpen(true);
+  };
+
+  const handleOpenStockPhotoDialog = () => {
+    setIsStockPhotoDialogOpen(true);
+  };
+
+  const handleCloseStockPhotoDialog = () => {
+    setIsStockPhotoDialogOpen(false);
+  };
+
+  const handleSaveStockPhoto = (photo: StockPhoto) => {
+    setFormData((previous) => ({
+      ...previous,
+      stockPhotoLink: photo.link,
+      ImgUrl: photo.link,
+      productImage: null,
+    }));
+    setImagePreview(photo.link);
   };
 
   const handleCloseAllergensDialog = () => {
@@ -345,14 +372,14 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
     });
   };
 
-  const handleSave = () => {
-    onSave(formData);
+  const handleSave = async () => {
+    await Promise.resolve(onSave(formData));
     onClose();
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (onDelete) {
-      onDelete();
+      await Promise.resolve(onDelete());
       onClose();
     }
   };
@@ -435,20 +462,16 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
                   border: '2px dashed',
                   borderColor: theme.colors.border,
                   borderRadius: theme.borderRadius.medium,
-                  cursor: 'pointer',
+                  cursor: 'not-allowed',
                   bgcolor: 'background.default',
                   transition: theme.transitions.normal,
-                  '&:hover': {
-                    borderColor: theme.colors.primary,
-                    bgcolor: 'action.hover',
-                  },
                   backgroundImage: imagePreview ? `url(${imagePreview})` : 'none',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   position: 'relative',
-                  overflow: 'hidden'
+                  overflow: 'hidden',
+                  opacity: 0.65,
                 }}
-                onClick={() => document.getElementById('product-image-upload')?.click()}
               >
                 {!imagePreview && (
                   <>
@@ -463,6 +486,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}
+                  disabled
                   style={{ display: 'none' }}
                 />
               </Paper>
@@ -473,13 +497,27 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
                 sx={{ 
                   display: 'block', 
                   mt: theme.spacing.sm, 
-                  cursor: 'pointer',
+                  cursor: 'not-allowed',
                   textAlign: 'center'
                 }}
-                onClick={() => document.getElementById('product-image-upload')?.click()}
               >
                 {t('admin.productEditor.dialog.moreGallery')}
               </Typography>
+
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={handleOpenStockPhotoDialog}
+                sx={{
+                  mt: theme.spacing.md,
+                  textTransform: 'none',
+                  borderColor: theme.colors.border,
+                  borderRadius: theme.borderRadius.medium,
+                  fontWeight: theme.typography.fontWeights.medium,
+                }}
+              >
+                Choose a stock photo instead
+              </Button>
             </Box>
           </Box>
 
@@ -786,6 +824,13 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
           </Box>
         </DialogContent>
       </Dialog>
+
+      <StockPhotoDialog
+        open={isStockPhotoDialogOpen}
+        onClose={handleCloseStockPhotoDialog}
+        selectedPhotoLink={formData.stockPhotoLink || formData.ImgUrl || imagePreview || undefined}
+        onSave={handleSaveStockPhoto}
+      />
     </Dialog>
   );
 };

@@ -3,14 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme';
 
 export interface Device {
-  id: number;
+  id: string;
   deviceId: string;
-  deviceName: string;
   tableNumber: string;
   status: string;
   lastSeen: string;
-  batteryLevel: number;
-  model: string;
 }
 
 interface DeviceListProps {

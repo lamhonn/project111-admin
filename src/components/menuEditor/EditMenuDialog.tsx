@@ -38,8 +38,8 @@ import type { MenuCategory, MenuData, ProductOption } from './types';
 interface EditMenuDialogProps {
   open: boolean;
   onClose: () => void;
-  onSave: (data: MenuData) => void;
-  onDelete?: () => void;
+  onSave: (data: MenuData) => void | Promise<void>;
+  onDelete?: () => void | Promise<void>;
   initialData?: MenuData;
 }
 
@@ -279,7 +279,7 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
     [menuEditorState, productOptionsById]
   );
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!isDirty) {
       onClose();
       return;
@@ -288,17 +288,17 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
     const menuNameValue = formData.menuName?.trim();
     const resolvedMenuName = menuNameValue ? menuNameValue : t('admin.menuEditor.dialog.defaultMenuName');
 
-    onSave({
+    await Promise.resolve(onSave({
       ...formData,
       menuName: resolvedMenuName,
       categories: sortedCategories,
-    });
+    }));
     onClose();
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (onDelete) {
-      onDelete();
+      await Promise.resolve(onDelete());
       setMenuDeleteConfirmOpen(false);
       onClose();
     }

@@ -274,9 +274,9 @@
     "edit": "Muokkaa",
     "forgetDevice": "Unohda laite"  },
   "tableManagement": {
-    "activeTables": "Aktiiviset Pöydät",
-    "availableTables": "Saatavilla Olevat Pöydät",
-    "tableMonitor": "Pöytäenseuranta"
+    "activeTables": "Aktiiviset pöydät",
+    "availableTables": "Saatavilla olevat pöydät",
+    "tableMonitor": "Pöytienseuranta"
   },
   "tableDialog": {
     "noOrders": "Ei tilauksia vielä",

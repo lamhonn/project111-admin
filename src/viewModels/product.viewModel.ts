@@ -10,6 +10,15 @@ export interface ProductListItemViewModel {
   name: string;
   description: string;
   enabled: boolean;
+  ingredients?: string;
+  imgUrl?: string;
+  price?: number;
+  oldPrice?: number;
+  dietaries?: number[];
+  toppings?: ProductToppingViewModel[];
+  excludables?: string[];
+  freeToppings?: number;
+  ageRestricted?: boolean;
 }
 
 export interface ProductEditorViewModel {
@@ -57,6 +66,30 @@ export const toProductListItemViewModel = (product: Product): ProductListItemVie
   name: resolveLocalizedText(product.Name),
   description: resolveLocalizedText(product.Description),
   enabled: product.Enabled,
+  ingredients: resolveLocalizedText(product.Ingredients),
+  imgUrl: product.ImgUrl,
+  price: product.Price,
+  oldPrice: product.OldPrice,
+  dietaries: product.Dietaries,
+  toppings: parseJson<Array<{
+    name?: string;
+    Name?: string | Record<string, string>;
+    priceIncrement?: number;
+    PriceIncrement?: number;
+  }>>(product.Toppings, []).map((topping) => ({
+    name:
+      topping.name ??
+      (typeof topping.Name === 'string'
+        ? topping.Name
+        : topping.Name?.en ?? topping.Name?.fi ?? topping.Name?.sv ?? '') ??
+      '',
+    priceIncrement: topping.priceIncrement ?? topping.PriceIncrement ?? 0,
+  })),
+  excludables: parseJson<Array<string | { fi?: string; en?: string; sv?: string }>>(product.Excludables, []).map((item) =>
+    typeof item === 'string' ? item : item.fi ?? item.en ?? item.sv ?? ''
+  ),
+  freeToppings: product.FreeToppings,
+  ageRestricted: product.AgeRestrictied,
 });
 
 export const toProductEditorViewModel = (product: Product): ProductEditorViewModel => {

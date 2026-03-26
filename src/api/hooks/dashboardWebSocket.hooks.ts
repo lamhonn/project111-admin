@@ -1,277 +1,403 @@
-import { useEffect } from 'react';
+import { gql } from '@apollo/client';
+import { useSubscription } from '@apollo/client/react';
 import { useSetAtom } from 'jotai';
-import { useWebSocket } from './websocket.hooks';
+import { useMemo } from 'react';
 import {
-  WebSocketEventType,
-  type OrderIncomingPayload,
-  type OrderAcceptedPayload,
-  type OrderRejectedPayload,
-  type OrderStatusChangedPayload,
-  type BillRequestedPayload,
-  type BillPaidPayload,
-  type WebSocketConfig,
-} from '../types/websocket.types';
-import {
-  incomingOrdersAtom,
-  inProcessOrdersAtom,
   billsAtom,
-  updateOrderStatusAtom,
-  deliveryStatsAtom,
+  incomingOrdersAtom,
   orderStatsAtom,
+  type OrderItemStatus,
+  updateOrderStatusAtom,
 } from '../../context/dashboardStore';
-import { apiConfig } from '../config';
-import type { OrderItemStatus } from '../../viewModels';
+import { OrderItemStatus as OrderItemStatusValues } from '../../viewModels';
+import { useOrderActions } from './dashboard.hooks';
+import { useOrganizationId } from './organization.hooks';
 
-/**
- * Hook to manage dashboard real-time updates via WebSocket
- * This connects WebSocket events to the dashboard state atoms
- */
-export const useDashboardWebSocket = (config: WebSocketConfig) => {
-  const ws = useWebSocket(config, true);
-  
-  const setIncomingOrders = useSetAtom(incomingOrdersAtom);
-  const setInProcessOrders = useSetAtom(inProcessOrdersAtom);
-  const setBills = useSetAtom(billsAtom);
-  const setDeliveryStats = useSetAtom(deliveryStatsAtom);
-  const setOrderStats = useSetAtom(orderStatsAtom);
-  const updateOrderStatus = useSetAtom(updateOrderStatusAtom);
+const WebSocketState = {
+  CONNECTING: 'connecting',
+  CONNECTED: 'connected',
+  DISCONNECTED: 'disconnected',
+  ERROR: 'error',
+} as const;
 
-  useEffect(() => {
-    if (!ws.isConnected) return;
+type WebSocketState = typeof WebSocketState[keyof typeof WebSocketState];
 
-    // Handle incoming order
-    const unsubscribeIncoming = ws.subscribe<OrderIncomingPayload>(
-      WebSocketEventType.ORDER_INCOMING,
-      (payload) => {
-        console.log('[Dashboard WS] New incoming order:', payload.order);
-        
-        setIncomingOrders((prev) => {
-          // Check if order already exists
-          if (prev.some((o) => o.id === payload.order.id)) {
-            return prev;
-          }
-          return [...prev, payload.order];
-        });
+interface WebSocketError {
+  message: string;
+  timestamp: string;
+}
 
-        // Update order stats
-        setOrderStats((prev) => ({
-          ...prev,
-          today: prev.today + 1,
-        }));
-
-        // Show notification (could integrate with a notification system)
-        if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification('New Order', {
-            body: `Order #${payload.order.orderNo} from Table ${payload.tableNumber}`,
-            icon: payload.order.image,
-          });
-        }
+const ORGANIZATION_ORDER_PLACED_SUBSCRIPTION = gql`
+  subscription OrganizationOrderPlaced($organizationId: ID!) {
+    organizationOrderPlaced(organizationId: $organizationId) {
+      orderId
+      tabletId
+      tableNumber
+      organizationId
+      timestamp
+      order {
+        id
+        tableNumber
       }
-    );
-
-    // Handle order accepted
-    const unsubscribeAccepted = ws.subscribe<OrderAcceptedPayload>(
-      WebSocketEventType.ORDER_ACCEPTED,
-      (payload) => {
-        console.log('[Dashboard WS] Order accepted:', payload.orderNo);
-        
-        // Remove from incoming orders
-        setIncomingOrders((prev) => 
-          prev.filter((order) => order.orderNo.toString() !== payload.orderNo)
-        );
+      orderProducts {
+        id
       }
-    );
+    }
+  }
+`;
 
-    // Handle order rejected
-    const unsubscribeRejected = ws.subscribe<OrderRejectedPayload>(
-      WebSocketEventType.ORDER_REJECTED,
-      (payload) => {
-        console.log('[Dashboard WS] Order rejected:', payload.orderNo, payload.reason);
-        
-        // Remove from incoming orders
-        setIncomingOrders((prev) => 
-          prev.filter((order) => order.orderNo.toString() !== payload.orderNo)
-        );
-      }
-    );
+const ORGANIZATION_ORDER_STATUS_CHANGED_SUBSCRIPTION = gql`
+  subscription OrganizationOrderStatusChanged($organizationId: ID!) {
+    organizationOrderStatusChanged(organizationId: $organizationId) {
+      orderId
+      tabletId
+      tableNumber
+      organizationId
+      newStatus
+      timestamp
+      message
+    }
+  }
+`;
 
-    // Handle order status changed
-    const unsubscribeStatusChange = ws.subscribe<OrderStatusChangedPayload>(
-      WebSocketEventType.ORDER_STATUS_CHANGED,
-      (payload) => {
-        console.log('[Dashboard WS] Order status changed:', payload);
-        
-        updateOrderStatus({
-          orderNo: payload.orderNo,
-          newStatus: payload.newStatus,
-        });
-      }
-    );
+const ORGANIZATION_BILL_REQUESTED_SUBSCRIPTION = gql`
+  subscription OrganizationBillRequested($organizationId: ID!) {
+    organizationBillRequested(organizationId: $organizationId) {
+      sessionId
+      tabletId
+      tableNumber
+      organizationId
+      totalOrders
+      totalSpent
+      timestamp
+      message
+    }
+  }
+`;
 
-    // Handle bill requested
-    const unsubscribeBillRequest = ws.subscribe<BillRequestedPayload>(
-      WebSocketEventType.BILL_REQUESTED,
-      (payload) => {
-        console.log('[Dashboard WS] Bill requested:', payload.bill);
-        
-        setBills((prev) => {
-          // Check if bill already exists
-          if (prev.some((b) => b.id === payload.bill.id)) {
-            return prev;
-          }
-          return [...prev, payload.bill];
-        });
+const ORGANIZATION_SESSION_CLOSED_SUBSCRIPTION = gql`
+  subscription OrganizationSessionClosed($organizationId: ID!) {
+    organizationSessionClosed(organizationId: $organizationId) {
+      sessionId
+      tabletId
+      tableNumber
+      organizationId
+      totalOrders
+      totalSpent
+      closedAt
+    }
+  }
+`;
 
-        // Show notification
-        if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification('Bill Requested', {
-            body: `Table ${payload.bill.tableNumber} - ${payload.bill.guestName}`,
-          });
-        }
-      }
-    );
+type BackendOrderStatus = 'Pending' | 'Preparing' | 'Ready' | 'Completed' | 'Cancelled';
 
-    // Handle bill paid
-    const unsubscribeBillPaid = ws.subscribe<BillPaidPayload>(
-      WebSocketEventType.BILL_PAID,
-      (payload) => {
-        console.log('[Dashboard WS] Bill paid:', payload.billId);
-        
-        // Remove from bills list
-        setBills((prev) => prev.filter((bill) => bill.id !== payload.billId));
-      }
-    );
-
-    // Handle order delivered
-    const unsubscribeDelivered = ws.subscribe(
-      WebSocketEventType.ORDER_DELIVERED,
-      () => {
-        setDeliveryStats((prev) => ({
-          ...prev,
-          delivered: prev.delivered + 1,
-        }));
-      }
-    );
-
-    // Handle order cancelled
-    const unsubscribeCancelled = ws.subscribe(
-      WebSocketEventType.ORDER_CANCELLED,
-      () => {
-        setDeliveryStats((prev) => ({
-          ...prev,
-          cancelled: prev.cancelled + 1,
-        }));
-      }
-    );
-
-    // Cleanup subscriptions
-    return () => {
-      unsubscribeIncoming();
-      unsubscribeAccepted();
-      unsubscribeRejected();
-      unsubscribeStatusChange();
-      unsubscribeBillRequest();
-      unsubscribeBillPaid();
-      unsubscribeDelivered();
-      unsubscribeCancelled();
-    };
-  }, [
-    ws.isConnected,
-    ws.subscribe,
-    setIncomingOrders,
-    setInProcessOrders,
-    setBills,
-    setDeliveryStats,
-    setOrderStats,
-    updateOrderStatus,
-  ]);
-
-  /**
-   * Send order acceptance notification
-   */
-  const acceptOrder = (orderNo: string, acceptedBy?: string) => {
-    console.log('[Dashboard WS] Accepting order:', orderNo);
-    
-    ws.send<OrderAcceptedPayload>(
-      WebSocketEventType.ORDER_ACCEPTED,
-      {
-        orderNo,
-        acceptedAt: new Date().toISOString(),
-        acceptedBy,
-      }
-    );
-
-    // Also update local state immediately for optimistic update
-    setIncomingOrders((prev) => 
-      prev.filter((order) => order.orderNo.toString() !== orderNo)
-    );
+interface OrganizationOrderPlacedSubscriptionData {
+  organizationOrderPlaced: {
+    orderId: string;
+    tableNumber: number;
+    order?: {
+      id: string;
+      tableNumber: number;
+    } | null;
   };
+}
 
-  /**
-   * Send order rejection notification
-   */
-  const rejectOrder = (orderNo: string, reason?: string, rejectedBy?: string) => {
-    console.log('[Dashboard WS] Rejecting order:', orderNo, reason);
-    
-    ws.send<OrderRejectedPayload>(
-      WebSocketEventType.ORDER_REJECTED,
-      {
-        orderNo,
-        rejectedAt: new Date().toISOString(),
-        reason,
-        rejectedBy,
-      }
-    );
-
-    // Also update local state immediately for optimistic update
-    setIncomingOrders((prev) => 
-      prev.filter((order) => order.orderNo.toString() !== orderNo)
-    );
+interface OrganizationOrderStatusChangedSubscriptionData {
+  organizationOrderStatusChanged: {
+    orderId: string;
+    newStatus: BackendOrderStatus;
   };
+}
 
-  /**
-   * Send order status change notification
-   */
-  const changeOrderStatus = (
+interface OrganizationBillRequestedSubscriptionData {
+  organizationBillRequested: {
+    sessionId: string;
+    tableNumber: number;
+    totalOrders: number;
+    totalSpent: number;
+  };
+}
+
+interface OrganizationSessionClosedSubscriptionData {
+  organizationSessionClosed: {
+    sessionId: string;
+  };
+}
+
+interface OrganizationSubscriptionVariables {
+  organizationId: string;
+}
+
+interface DashboardRealtimeHook {
+  state: WebSocketState;
+  error: WebSocketError | null;
+  isConnected: boolean;
+  acceptOrder: (orderNo: string, acceptedBy?: string) => Promise<{ success: boolean; error?: string }>;
+  rejectOrder: (orderNo: string, reason?: string, rejectedBy?: string) => Promise<{ success: boolean; error?: string }>;
+  changeOrderStatus: (
     orderNo: string,
     oldStatus: OrderItemStatus,
     newStatus: OrderItemStatus,
     changedBy?: string
-  ) => {
-    console.log('[Dashboard WS] Changing order status:', orderNo, oldStatus, '->', newStatus);
-    
-    ws.send<OrderStatusChangedPayload>(
-      WebSocketEventType.ORDER_STATUS_CHANGED,
-      {
-        orderNo,
-        oldStatus,
-        newStatus,
-        changedAt: new Date().toISOString(),
-        changedBy,
+  ) => Promise<{ success: boolean; error?: string }>;
+}
+
+const toFrontendStatus = (status: BackendOrderStatus): OrderItemStatus | null => {
+  switch (status) {
+    case 'Pending':
+      return OrderItemStatusValues.New;
+    case 'Preparing':
+      return OrderItemStatusValues.Preparing;
+    case 'Ready':
+      return OrderItemStatusValues.Ready;
+    case 'Completed':
+    case 'Cancelled':
+      return null;
+    default:
+      return null;
+  }
+};
+
+const toNumericOrderNo = (orderId: string): number => {
+  const digits = orderId.replace(/\D/g, '');
+  if (digits.length > 0) {
+    const parsed = Number.parseInt(digits, 10);
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
+  }
+
+  // Deterministic fallback so UI can still render order number for UUID IDs.
+  let hash = 0;
+  for (let index = 0; index < orderId.length; index += 1) {
+    hash = (hash * 31 + orderId.charCodeAt(index)) >>> 0;
+  }
+  return hash;
+};
+
+export const useDashboardWebSocket = (): DashboardRealtimeHook => {
+  const { organizationId, loading: organizationLoading, error: organizationError } = useOrganizationId();
+  const { acceptOrder, rejectOrder, markOrderReady } = useOrderActions();
+
+  const setIncomingOrders = useSetAtom(incomingOrdersAtom);
+  const setBills = useSetAtom(billsAtom);
+  const setOrderStats = useSetAtom(orderStatsAtom);
+  const updateOrderStatus = useSetAtom(updateOrderStatusAtom);
+
+  const orderPlacedSubscription = useSubscription<
+    OrganizationOrderPlacedSubscriptionData,
+    OrganizationSubscriptionVariables
+  >(ORGANIZATION_ORDER_PLACED_SUBSCRIPTION, {
+    variables: {
+      organizationId: organizationId ?? '',
+    },
+    skip: !organizationId,
+    onData: ({ data }) => {
+      const payload = data.data?.organizationOrderPlaced;
+      if (!payload) {
+        return;
       }
-    );
+
+      const orderId = payload.order?.id ?? payload.orderId;
+      const tableNumber = payload.order?.tableNumber ?? payload.tableNumber;
+
+      setIncomingOrders((previous) => {
+        if (previous.some((item) => item.id === orderId)) {
+          return previous;
+        }
+
+        return [
+          ...previous,
+          {
+            id: orderId,
+            name: `Table ${tableNumber}`,
+            orderNo: toNumericOrderNo(orderId),
+            image: '',
+          },
+        ];
+      });
+
+      setOrderStats((previous) => ({
+        ...previous,
+        today: previous.today + 1,
+      }));
+    },
+  });
+
+  const orderStatusSubscription = useSubscription<
+    OrganizationOrderStatusChangedSubscriptionData,
+    OrganizationSubscriptionVariables
+  >(ORGANIZATION_ORDER_STATUS_CHANGED_SUBSCRIPTION, {
+    variables: {
+      organizationId: organizationId ?? '',
+    },
+    skip: !organizationId,
+    onData: ({ data }) => {
+      const payload = data.data?.organizationOrderStatusChanged;
+      if (!payload) {
+        return;
+      }
+
+      const nextStatus = toFrontendStatus(payload.newStatus);
+      if (!nextStatus) {
+        return;
+      }
+
+      updateOrderStatus({
+        orderNo: payload.orderId,
+        newStatus: nextStatus,
+      });
+    },
+  });
+
+  const billRequestedSubscription = useSubscription<
+    OrganizationBillRequestedSubscriptionData,
+    OrganizationSubscriptionVariables
+  >(ORGANIZATION_BILL_REQUESTED_SUBSCRIPTION, {
+    variables: {
+      organizationId: organizationId ?? '',
+    },
+    skip: !organizationId,
+    onData: ({ data }) => {
+      const payload = data.data?.organizationBillRequested;
+      if (!payload) {
+        return;
+      }
+
+      setBills((previous) => {
+        if (previous.some((item) => item.id === payload.sessionId)) {
+          return previous;
+        }
+
+        return [
+          ...previous,
+          {
+            id: payload.sessionId,
+            tableNumber: payload.tableNumber,
+            guestName: `Table ${payload.tableNumber}`,
+            amount: payload.totalSpent,
+            items: payload.totalOrders,
+          },
+        ];
+      });
+    },
+  });
+
+  const sessionClosedSubscription = useSubscription<
+    OrganizationSessionClosedSubscriptionData,
+    OrganizationSubscriptionVariables
+  >(ORGANIZATION_SESSION_CLOSED_SUBSCRIPTION, {
+    variables: {
+      organizationId: organizationId ?? '',
+    },
+    skip: !organizationId,
+    onData: ({ data }) => {
+      const payload = data.data?.organizationSessionClosed;
+      if (!payload) {
+        return;
+      }
+
+      setBills((previous) => previous.filter((item) => item.id !== payload.sessionId));
+    },
+  });
+
+  const state = useMemo<WebSocketState>(() => {
+    if (organizationLoading) {
+      return WebSocketState.CONNECTING;
+    }
+
+    if (!organizationId) {
+      return WebSocketState.DISCONNECTED;
+    }
+
+    if (
+      organizationError ||
+      orderPlacedSubscription.error ||
+      orderStatusSubscription.error ||
+      billRequestedSubscription.error ||
+      sessionClosedSubscription.error
+    ) {
+      return WebSocketState.ERROR;
+    }
+
+    if (
+      orderPlacedSubscription.loading ||
+      orderStatusSubscription.loading ||
+      billRequestedSubscription.loading ||
+      sessionClosedSubscription.loading
+    ) {
+      return WebSocketState.CONNECTING;
+    }
+
+    return WebSocketState.CONNECTED;
+  }, [
+    billRequestedSubscription.error,
+    billRequestedSubscription.loading,
+    orderPlacedSubscription.error,
+    orderPlacedSubscription.loading,
+    orderStatusSubscription.error,
+    orderStatusSubscription.loading,
+    organizationError,
+    organizationId,
+    organizationLoading,
+    sessionClosedSubscription.error,
+    sessionClosedSubscription.loading,
+  ]);
+
+  const combinedError = useMemo<WebSocketError | null>(() => {
+    const sourceError =
+      organizationError ??
+      orderPlacedSubscription.error ??
+      orderStatusSubscription.error ??
+      billRequestedSubscription.error ??
+      sessionClosedSubscription.error;
+
+    if (!sourceError) {
+      return null;
+    }
+
+    return {
+      message: sourceError.message,
+      timestamp: new Date().toISOString(),
+    };
+  }, [
+    billRequestedSubscription.error,
+    orderPlacedSubscription.error,
+    orderStatusSubscription.error,
+    organizationError,
+    sessionClosedSubscription.error,
+  ]);
+
+  const changeOrderStatus = async (
+    orderNo: string,
+    _oldStatus: OrderItemStatus,
+    newStatus: OrderItemStatus,
+    _changedBy?: string
+  ) => {
+    if (newStatus === OrderItemStatusValues.Preparing) {
+      return acceptOrder(orderNo);
+    }
+
+    if (newStatus === OrderItemStatusValues.Ready) {
+      return markOrderReady(orderNo);
+    }
+
+    return {
+      success: false,
+      error: `Unsupported status transition target: ${newStatus}`,
+    };
   };
 
   return {
-    ...ws,
-    acceptOrder,
-    rejectOrder,
+    state,
+    error: combinedError,
+    isConnected: state === WebSocketState.CONNECTED,
+    acceptOrder: (orderNo: string, _acceptedBy?: string) => acceptOrder(orderNo),
+    rejectOrder: (orderNo: string, reason?: string, _rejectedBy?: string) => rejectOrder(orderNo, reason),
     changeOrderStatus,
   };
 };
 
-/**
- * Hook for WebSocket connection with configuration defaults
- * This provides sensible defaults for the admin dashboard
- */
 export const useAdminWebSocket = () => {
-  const config: WebSocketConfig = {
-    url: apiConfig.websocketUrl,
-    reconnectInterval: 3000,
-    reconnectAttempts: 5,
-    heartbeatInterval: 30000,
-    debug: import.meta.env.DEV,
-  };
-
-  return useDashboardWebSocket(config);
+  return useDashboardWebSocket();
 };

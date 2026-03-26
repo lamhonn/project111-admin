@@ -15,6 +15,8 @@ import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
 import { formatPriceWithEuro } from '../../utils/numberFormat';
+import { useOrderActions } from '../../api/hooks/dashboard.hooks';
+import ErrorReportDialog from '../common/ErrorReportDialog';
 import {
   selectedOrderAtom,
   orderOptionsDialogOpenAtom,
@@ -31,34 +33,56 @@ const OrderOptionsDialog: React.FC<OrderOptionsDialogProps> = () => {
   const selectedOrder = useAtomValue(selectedOrderAtom);
   const setDialogOpen = useSetAtom(orderOptionsDialogOpenAtom);
   const updateOrderStatus = useSetAtom(updateOrderStatusAtom);
+  const { acceptOrder, markOrderReady } = useOrderActions();
   const isOpen = useAtomValue(orderOptionsDialogOpenAtom);
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
   const handleClose = () => {
     setDialogOpen(false);
   };
 
-  const handleConfirmOrder = () => {
+  const handleConfirmOrder = async () => {
     if (!selectedOrder) return;
-    
-    // Move order from "New" to "Preparing"
-    updateOrderStatus({
-      orderNo: selectedOrder.orderNo,
-      newStatus: OrderItemStatus.Preparing,
-    });
-    
-    handleClose();
+
+    try {
+      const result = await acceptOrder(selectedOrder.orderNo);
+      if (!result.success) {
+        setErrorMessage(result.error ?? 'Failed to confirm order');
+        return;
+      }
+
+      // Move order from "New" to "Preparing"
+      updateOrderStatus({
+        orderNo: selectedOrder.orderNo,
+        newStatus: OrderItemStatus.Preparing,
+      });
+
+      handleClose();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : String(error));
+    }
   };
 
-  const handleOrderReady = () => {
+  const handleOrderReady = async () => {
     if (!selectedOrder) return;
-    
-    // Move order from "Preparing" to "Ready" (removes from list)
-    updateOrderStatus({
-      orderNo: selectedOrder.orderNo,
-      newStatus: OrderItemStatus.Ready,
-    });
-    
-    handleClose();
+
+    try {
+      const result = await markOrderReady(selectedOrder.orderNo);
+      if (!result.success) {
+        setErrorMessage(result.error ?? 'Failed to mark order ready');
+        return;
+      }
+
+      // Move order from "Preparing" to "Ready" (removes from list)
+      updateOrderStatus({
+        orderNo: selectedOrder.orderNo,
+        newStatus: OrderItemStatus.Ready,
+      });
+
+      handleClose();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : String(error));
+    }
   };
 
   if (!selectedOrder) {
@@ -108,6 +132,7 @@ const OrderOptionsDialog: React.FC<OrderOptionsDialogProps> = () => {
   };
 
   return (
+    <>
     <Dialog
       open={isOpen}
       onClose={handleClose}
@@ -301,6 +326,12 @@ const OrderOptionsDialog: React.FC<OrderOptionsDialogProps> = () => {
         {renderActionButton()}
       </DialogActions>
     </Dialog>
+    <ErrorReportDialog
+      open={Boolean(errorMessage)}
+      errorMessage={errorMessage ?? ''}
+      onClose={() => setErrorMessage(null)}
+    />
+    </>
   );
 };
 
