@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Typography, Button, Alert, CircularProgress } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { theme } from '../theme';
@@ -14,6 +14,8 @@ export default function DeviceManagementView() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pairDialogOpen, setPairDialogOpen] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [requestedPin, setRequestedPin] = useState<PairingPinData | null>(null);
+  const hasRequestedPinForOpenRef = useRef(false);
 
   const {
     devices,
@@ -30,8 +32,65 @@ export default function DeviceManagementView() {
 
   const handlePairDevice = () => {
     setActionError(null);
+    setRequestedPin(null);
     setPairDialogOpen(true);
   };
+
+  const resolveDefaultTableNumber = useCallback(() => {
+    const tableNumbers = devices
+      .map((device) => Number.parseInt(device.tableNumber, 10))
+      .filter((value) => Number.isFinite(value) && value > 0);
+
+    if (tableNumbers.length === 0) {
+      return 1;
+    }
+
+    return Math.max(...tableNumbers) + 1;
+  }, [devices]);
+
+  useEffect(() => {
+    if (!pairDialogOpen) {
+      hasRequestedPinForOpenRef.current = false;
+      return;
+    }
+
+    if (hasRequestedPinForOpenRef.current) {
+      return;
+    }
+
+    hasRequestedPinForOpenRef.current = true;
+
+    const run = async () => {
+      try {
+        const pin = await requestPairingPin(resolveDefaultTableNumber());
+        setRequestedPin(pin);
+        setActionError(null);
+      } catch (requestError) {
+        setActionError((requestError as Error).message);
+      }
+    };
+
+    void run();
+  }, [pairDialogOpen, requestPairingPin, resolveDefaultTableNumber]);
+
+  const dialogPin = useMemo(() => {
+    if (!requestedPin) {
+      return null;
+    }
+
+    if (latestPinIssued) {
+      const sameTablet = Boolean(
+        latestPinIssued.tabletId && requestedPin.tabletId && latestPinIssued.tabletId === requestedPin.tabletId
+      );
+      const sameTableNumber = latestPinIssued.tableNumber === requestedPin.tableNumber;
+
+      if (sameTablet || sameTableNumber) {
+        return latestPinIssued;
+      }
+    }
+
+    return requestedPin;
+  }, [latestPinIssued, requestedPin]);
 
   const handleRowClick = (device: Device) => {
     setActionError(null);
@@ -68,17 +127,6 @@ export default function DeviceManagementView() {
       setActionError(null);
     } catch (deleteError) {
       setActionError((deleteError as Error).message);
-    }
-  };
-
-  const handleRequestPairingPin = async (tableNumber: number, existingTabletId?: string): Promise<PairingPinData> => {
-    try {
-      const pinData = await requestPairingPin(tableNumber, existingTabletId);
-      setActionError(null);
-      return pinData;
-    } catch (createError) {
-      setActionError((createError as Error).message);
-      throw createError;
     }
   };
 
@@ -159,13 +207,14 @@ export default function DeviceManagementView() {
       {/* Pair Device Dialog */}
       <PairDeviceDialog
         open={pairDialogOpen}
-        onClose={() => setPairDialogOpen(false)}
-        onRequestPin={handleRequestPairingPin}
-        isRequestingPin={isRequestingPin}
-        livePinUpdate={latestPinIssued}
+        onClose={() => {
+          setPairDialogOpen(false);
+          setRequestedPin(null);
+        }}
+        livePinUpdate={dialogPin}
       />
 
-      {(isUpdating || isDeleting) && (
+      {(isUpdating || isDeleting || (pairDialogOpen && isRequestingPin && !requestedPin)) && (
         <Box sx={{ pt: theme.spacing.sm, display: 'flex', justifyContent: 'center' }}>
           <CircularProgress size={20} />
         </Box>

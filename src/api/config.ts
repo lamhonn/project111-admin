@@ -1,4 +1,4 @@
-const DEFAULT_GRAPHQL_URL = 'http://localhost:5432/graphql';
+const DEFAULT_GRAPHQL_URL = 'http://localhost:4000/graphql';
 
 const normalizeOptionalEnv = (value?: string): string | undefined => {
   const trimmed = value?.trim();

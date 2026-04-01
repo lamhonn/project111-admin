@@ -67,19 +67,19 @@ const MainView = () => {
 
     if (currentRole === 'RestaurantAdmin') {
       return new Set([
-        menuText.dashboard,
-        menuText.tableMonitor,
-        menuText.orderHistory,
+        menuText.menuEditor,
+        menuText.productEditor,
         menuText.settings,
-        menuText.deviceManagement,
       ]);
     }
 
     if (currentRole === 'RestaurantManager') {
       return new Set([
-        menuText.menuEditor,
-        menuText.productEditor,
+        menuText.dashboard,
+        menuText.tableMonitor,
+        menuText.orderHistory,
         menuText.settings,
+        menuText.deviceManagement,
       ]);
     }
 

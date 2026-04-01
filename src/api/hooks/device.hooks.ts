@@ -161,7 +161,7 @@ export interface DeviceEntity {
 }
 
 export interface PairingPinResult {
-  tabletId: string;
+  tabletId?: string;
   tableNumber: number;
   pin: string;
   expiresAt: string;
@@ -316,14 +316,14 @@ export const useDeviceManagement = () => {
     const expiresAt = response.data?.requestTabletPin?.expiresAt;
     const resolvedTabletId = response.data?.requestTabletPin?.tabletId ?? tabletId;
 
-    if (!pin || !expiresAt || !resolvedTabletId) {
+    if (!pin || !expiresAt) {
       throw new Error('Pairing PIN response is missing required values.');
     }
 
     await refetch();
 
     return {
-      tabletId: resolvedTabletId,
+      tabletId: resolvedTabletId ?? undefined,
       tableNumber,
       pin,
       expiresAt,

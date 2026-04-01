@@ -1,11 +1,11 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography, IconButton, TextField, CircularProgress } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography, IconButton, CircularProgress } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme';
 
 export interface PairingPinData {
-  tabletId: string;
+  tabletId?: string;
   tableNumber: number;
   pin: string;
   expiresAt: string;
@@ -14,32 +14,36 @@ export interface PairingPinData {
 interface PairDeviceDialogProps {
   open: boolean;
   onClose: () => void;
-  onRequestPin: (tableNumber: number, existingTabletId?: string) => Promise<PairingPinData>;
-  isRequestingPin?: boolean;
   livePinUpdate?: PairingPinData | null;
 }
 
 export default function PairDeviceDialog({
   open,
   onClose,
-  onRequestPin,
-  isRequestingPin = false,
   livePinUpdate = null,
 }: PairDeviceDialogProps) {
   const { t } = useTranslation();
-  const [tableNumber, setTableNumber] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
   const [pairingPin, setPairingPin] = useState<PairingPinData | null>(null);
   const [countdownMs, setCountdownMs] = useState<number>(0);
 
   useEffect(() => {
     if (open) {
-      setTableNumber('');
-      setErrorMessage('');
-      setPairingPin(null);
-      setCountdownMs(0);
+      setPairingPin(livePinUpdate);
+      if (livePinUpdate) {
+        setCountdownMs(Math.max(0, new Date(livePinUpdate.expiresAt).getTime() - Date.now()));
+      } else {
+        setCountdownMs(0);
+      }
     }
-  }, [open]);
+  }, [open, livePinUpdate]);
+
+  const isSamePinStream = (current: PairingPinData, incoming: PairingPinData) => {
+    if (current.tabletId && incoming.tabletId) {
+      return current.tabletId === incoming.tabletId;
+    }
+
+    return current.tableNumber === incoming.tableNumber;
+  };
 
   useEffect(() => {
     if (!livePinUpdate) {
@@ -51,7 +55,7 @@ export default function PairDeviceDialog({
         return livePinUpdate;
       }
 
-      if (previous.tabletId !== livePinUpdate.tabletId) {
+      if (!isSamePinStream(previous, livePinUpdate)) {
         return previous;
       }
 
@@ -77,24 +81,6 @@ export default function PairDeviceDialog({
     };
   }, [open, pairingPin]);
 
-  const requestPin = async (existingTabletId?: string) => {
-    const parsedTableNumber = Number.parseInt(tableNumber, 10);
-
-    if (!Number.isFinite(parsedTableNumber) || parsedTableNumber <= 0) {
-      setErrorMessage(t('deviceManagement.invalidTableNumber', { defaultValue: 'Enter a valid table number' }));
-      return;
-    }
-
-    try {
-      const result = await onRequestPin(parsedTableNumber, existingTabletId);
-      setPairingPin(result);
-      setErrorMessage('');
-      setCountdownMs(Math.max(0, new Date(result.expiresAt).getTime() - Date.now()));
-    } catch (error) {
-      setErrorMessage((error as Error).message);
-    }
-  };
-
   const formatPin = (pin: string): string => {
     if (pin.length < 8) {
       return pin;
@@ -104,7 +90,6 @@ export default function PairDeviceDialog({
   };
 
   const remainingSeconds = Math.ceil(countdownMs / 1000);
-  const isBusy = isRequestingPin;
 
   return (
     <Dialog
@@ -154,7 +139,7 @@ export default function PairDeviceDialog({
           >
             {pairingPin
               ? t('deviceManagement.pairPinInstructions', { defaultValue: 'Enter this PIN on the tablet to complete pairing.' })
-              : t('deviceManagement.pairInstructions')}
+              : t('deviceManagement.waitingPinRotation', { defaultValue: 'Waiting for server PIN rotation...' })}
           </Typography>
 
           <Box
@@ -185,35 +170,16 @@ export default function PairDeviceDialog({
                     ? t('deviceManagement.pinExpiresIn', { defaultValue: 'PIN expires in {{seconds}}s', seconds: remainingSeconds })
                     : t('deviceManagement.waitingPinRotation', { defaultValue: 'Waiting for server PIN rotation...' })}
                 </Typography>
-                <Typography variant="caption" sx={{ display: 'block', mt: 1, color: theme.colors.text, opacity: 0.7 }}>
-                  {t('deviceManagement.pairingTabletId', { defaultValue: 'Tablet ID: {{id}}', id: pairingPin.tabletId })}
-                </Typography>
+                {pairingPin.tabletId && (
+                  <Typography variant="caption" sx={{ display: 'block', mt: 1, color: theme.colors.text, opacity: 0.7 }}>
+                    {t('deviceManagement.pairingTabletId', { defaultValue: 'Tablet ID: {{id}}', id: pairingPin.tabletId })}
+                  </Typography>
+                )}
               </>
             ) : (
-              <TextField
-                fullWidth
-                autoFocus
-                type="number"
-                label={t('deviceManagement.tableNumber')}
-                value={tableNumber}
-                onChange={(event) => {
-                  setTableNumber(event.target.value);
-                  setErrorMessage('');
-                }}
-                error={Boolean(errorMessage)}
-                helperText={errorMessage || ' '}
-                inputProps={{ min: 1 }}
-              />
+              <CircularProgress size={36} />
             )}
           </Box>
-
-          {isBusy && <CircularProgress size={20} />}
-
-          {errorMessage && (
-            <Typography variant="body2" sx={{ color: '#d32f2f' }}>
-              {errorMessage}
-            </Typography>
-          )}
         </Box>
       </DialogContent>
 
@@ -226,7 +192,6 @@ export default function PairDeviceDialog({
       >
         <Button
           onClick={onClose}
-          disabled={isBusy}
           sx={{
             textTransform: 'none',
             color: theme.colors.text,
@@ -236,22 +201,6 @@ export default function PairDeviceDialog({
           }}
         >
           {t('common.cancel')}
-        </Button>
-        <Button
-          onClick={() => void requestPin(pairingPin?.tabletId)}
-          variant="contained"
-          disabled={isBusy}
-          sx={{
-            textTransform: 'none',
-            bgcolor: theme.colors.primary,
-            '&:hover': {
-              bgcolor: theme.colors.primaryHover,
-            },
-          }}
-        >
-          {pairingPin
-            ? t('deviceManagement.rotatePin', { defaultValue: 'Rotate PIN now' })
-            : t('deviceManagement.requestPin', { defaultValue: 'Request PIN' })}
         </Button>
       </DialogActions>
     </Dialog>

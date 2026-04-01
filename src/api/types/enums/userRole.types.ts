@@ -1,8 +1,8 @@
 export const UserRole = {
     User: 0,
     RestaurantUser: 1,
-    RestaurantAdmin: 2,
-    RestaurantManager: 3,
+    RestaurantManager: 2,
+    RestaurantAdmin: 3,
     Superuser: 4,
 } as const;
 
