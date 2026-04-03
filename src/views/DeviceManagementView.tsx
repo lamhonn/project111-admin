@@ -79,12 +79,14 @@ export default function DeviceManagementView() {
     }
 
     if (latestPinIssued) {
-      const sameTablet = Boolean(
-        latestPinIssued.tabletId && requestedPin.tabletId && latestPinIssued.tabletId === requestedPin.tabletId
+      const samePairingSession = Boolean(
+        latestPinIssued.pairingSessionId &&
+          requestedPin.pairingSessionId &&
+          latestPinIssued.pairingSessionId === requestedPin.pairingSessionId
       );
       const sameTableNumber = latestPinIssued.tableNumber === requestedPin.tableNumber;
 
-      if (sameTablet || sameTableNumber) {
+      if (samePairingSession || sameTableNumber) {
         return latestPinIssued;
       }
     }

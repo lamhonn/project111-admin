@@ -102,7 +102,7 @@ export type SessionClosedEvent = {
  * Represents a tablet PIN issued event
  */
 export type TabletPinIssuedEvent = {
-  tabletId: string;
+  pairingSessionId: string;
   organizationId: string;
   userId: string;
   tableNumber: number;

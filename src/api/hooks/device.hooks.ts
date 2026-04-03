@@ -61,8 +61,8 @@ const REQUEST_TABLET_PIN_MUTATION = gql`
       success
       message
       pin
+      pairingSessionId
       expiresAt
-      tabletId
     }
   }
 `;
@@ -70,7 +70,7 @@ const REQUEST_TABLET_PIN_MUTATION = gql`
 const ORGANIZATION_TABLET_PIN_ISSUED_SUBSCRIPTION = gql`
   subscription OrganizationTabletPinIssued($organizationId: ID!) {
     organizationTabletPinIssued(organizationId: $organizationId) {
-      tabletId
+      pairingSessionId
       tableNumber
       pin
       expiresAt
@@ -113,8 +113,8 @@ interface DeleteDeviceMutationData {
 interface RequestTabletPinMutationData {
   requestTabletPin?: (DeviceMutationResponse & {
     pin?: string | null;
+    pairingSessionId?: string | null;
     expiresAt?: string | null;
-    tabletId?: string | null;
   }) | null;
 }
 
@@ -138,14 +138,13 @@ interface DeleteDeviceMutationVariables {
 interface RequestTabletPinMutationVariables {
   input: {
     userId: string;
-    tabletId: string;
     tableNumber: number;
   };
 }
 
 interface OrganizationTabletPinIssuedSubscriptionData {
   organizationTabletPinIssued: {
-    tabletId: string;
+    pairingSessionId: string;
     tableNumber: number;
     pin: string;
     expiresAt: string;
@@ -161,7 +160,7 @@ export interface DeviceEntity {
 }
 
 export interface PairingPinResult {
-  tabletId?: string;
+  pairingSessionId?: string;
   tableNumber: number;
   pin: string;
   expiresAt: string;
@@ -293,18 +292,16 @@ export const useDeviceManagement = () => {
     await refetch();
   };
 
-  const requestPairingPin = async (tableNumber: number, existingTabletId?: string): Promise<PairingPinResult> => {
+  const requestPairingPin = async (tableNumber: number): Promise<PairingPinResult> => {
     const userId = resolveCurrentUserId();
     if (!userId) {
       throw new Error('Could not resolve user id from authentication token. Please log in again.');
     }
 
-    const tabletId = existingTabletId ?? crypto.randomUUID();
     const response = await requestTabletPinMutation({
       variables: {
         input: {
           userId,
-          tabletId,
           tableNumber,
         },
       },
@@ -313,8 +310,8 @@ export const useDeviceManagement = () => {
     ensureSuccess(response.data?.requestTabletPin);
 
     const pin = response.data?.requestTabletPin?.pin;
+    const pairingSessionId = response.data?.requestTabletPin?.pairingSessionId;
     const expiresAt = response.data?.requestTabletPin?.expiresAt;
-    const resolvedTabletId = response.data?.requestTabletPin?.tabletId ?? tabletId;
 
     if (!pin || !expiresAt) {
       throw new Error('Pairing PIN response is missing required values.');
@@ -323,7 +320,7 @@ export const useDeviceManagement = () => {
     await refetch();
 
     return {
-      tabletId: resolvedTabletId ?? undefined,
+      pairingSessionId: pairingSessionId ?? undefined,
       tableNumber,
       pin,
       expiresAt,
@@ -342,7 +339,7 @@ export const useDeviceManagement = () => {
     isRequestingPin: requestTabletPinState.loading,
     latestPinIssued: tabletPinIssuedSubscription.data?.organizationTabletPinIssued
       ? {
-          tabletId: tabletPinIssuedSubscription.data.organizationTabletPinIssued.tabletId,
+          pairingSessionId: tabletPinIssuedSubscription.data.organizationTabletPinIssued.pairingSessionId,
           tableNumber: tabletPinIssuedSubscription.data.organizationTabletPinIssued.tableNumber,
           pin: tabletPinIssuedSubscription.data.organizationTabletPinIssued.pin,
           expiresAt: tabletPinIssuedSubscription.data.organizationTabletPinIssued.expiresAt,

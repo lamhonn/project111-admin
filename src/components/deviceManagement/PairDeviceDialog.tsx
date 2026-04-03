@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme';
 
 export interface PairingPinData {
-  tabletId?: string;
+  pairingSessionId?: string;
   tableNumber: number;
   pin: string;
   expiresAt: string;
@@ -38,8 +38,8 @@ export default function PairDeviceDialog({
   }, [open, livePinUpdate]);
 
   const isSamePinStream = (current: PairingPinData, incoming: PairingPinData) => {
-    if (current.tabletId && incoming.tabletId) {
-      return current.tabletId === incoming.tabletId;
+    if (current.pairingSessionId && incoming.pairingSessionId) {
+      return current.pairingSessionId === incoming.pairingSessionId;
     }
 
     return current.tableNumber === incoming.tableNumber;
@@ -170,11 +170,6 @@ export default function PairDeviceDialog({
                     ? t('deviceManagement.pinExpiresIn', { defaultValue: 'PIN expires in {{seconds}}s', seconds: remainingSeconds })
                     : t('deviceManagement.waitingPinRotation', { defaultValue: 'Waiting for server PIN rotation...' })}
                 </Typography>
-                {pairingPin.tabletId && (
-                  <Typography variant="caption" sx={{ display: 'block', mt: 1, color: theme.colors.text, opacity: 0.7 }}>
-                    {t('deviceManagement.pairingTabletId', { defaultValue: 'Tablet ID: {{id}}', id: pairingPin.tabletId })}
-                  </Typography>
-                )}
               </>
             ) : (
               <CircularProgress size={36} />
