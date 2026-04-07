@@ -78,6 +78,18 @@ const ORGANIZATION_TABLET_PIN_ISSUED_SUBSCRIPTION = gql`
   }
 `;
 
+const ORGANIZATION_TABLET_PAIRED_SUBSCRIPTION = gql`
+  subscription OrganizationTabletPaired($organizationId: ID!) {
+    organizationTabletPaired(organizationId: $organizationId) {
+      pairingSessionId
+      tabletId
+      userId
+      tableNumber
+      createdAt
+    }
+  }
+`;
+
 type GraphQLTablet = {
   id: string;
   userId?: string | null;
@@ -148,6 +160,16 @@ interface OrganizationTabletPinIssuedSubscriptionData {
     tableNumber: number;
     pin: string;
     expiresAt: string;
+  };
+}
+
+interface OrganizationTabletPairedSubscriptionData {
+  organizationTabletPaired: {
+    pairingSessionId: string;
+    tabletId: string;
+    userId: string;
+    tableNumber: number;
+    createdAt: string;
   };
 }
 
@@ -244,6 +266,23 @@ export const useDeviceManagement = () => {
     },
     skip: !organizationId,
   });
+
+  useSubscription<OrganizationTabletPairedSubscriptionData, DevicesQueryVariables>(
+    ORGANIZATION_TABLET_PAIRED_SUBSCRIPTION,
+    {
+      variables: {
+        organizationId: organizationId ?? '',
+      },
+      skip: !organizationId,
+      onData: ({ data: subscriptionData }) => {
+        if (!subscriptionData.data?.organizationTabletPaired) {
+          return;
+        }
+
+        void refetch();
+      },
+    }
+  );
 
   const devices = useMemo(() => (data?.tablets ?? []).map(mapTabletToDevice), [data]);
 
