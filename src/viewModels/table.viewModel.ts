@@ -33,9 +33,11 @@ export interface TableMonitorViewModel {
   id: string;
   number: number;
   status: 'active' | 'inactive';
+  sessionId?: string;
   progress: number;
   items: number;
   value: number;
+  billRequested?: boolean;
   guestName?: string;
   locked?: boolean;
   orderItems?: OrderItemViewModel[];

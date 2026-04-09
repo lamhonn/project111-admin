@@ -41,37 +41,7 @@ export default function TableDialog({
 
   if (!table) return null;
 
-  // Mock order items if not provided
-  const orderItems = table.orderItems || [
-    {
-      id: '1',
-      productId: 'p1',
-      name: 'Bread with Avocado',
-      image: '🥑',
-      price: 12.50,
-      quantity: 1,
-      toppings: [
-        { id: 't1', name: 'Extra Cheese', price: 2.00, quantity: 1 },
-      ],
-    },
-    {
-      id: '2',
-      productId: 'p2',
-      name: 'Caesar Salad',
-      image: '🥗',
-      price: 15.00,
-      quantity: 1,
-      excludables: ['Croutons'],
-    },
-    {
-      id: '3',
-      productId: 'p3',
-      name: 'Espresso',
-      image: '☕',
-      price: 4.50,
-      quantity: 2,
-    },
-  ];
+  const orderItems = table.orderItems ?? [];
 
   const billSplitConfig = table.billSplitConfig;
 

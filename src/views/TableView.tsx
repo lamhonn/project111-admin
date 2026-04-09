@@ -7,7 +7,7 @@ import type { Table } from '../components/tableManagement';
 import { useGetTableMonitor } from '../api/hooks/table.hooks';
 
 export default function TableView() {
-  const { data: tableMonitor } = useGetTableMonitor();
+  const { data: tableMonitor, loading, error } = useGetTableMonitor();
   const { t } = useTranslation();
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -59,7 +59,15 @@ export default function TableView() {
         {t('tableManagement.tableMonitor')}
       </Typography>
 
-      {tableMonitor.length === 0 ? (
+      {loading ? (
+        <Typography variant="body1" sx={{ color: theme.colors.text }}>
+          Loading tables...
+        </Typography>
+      ) : error ? (
+        <Typography variant="body1" sx={{ color: 'error.main' }}>
+          Failed to load table monitor data
+        </Typography>
+      ) : tableMonitor.length === 0 ? (
         <Typography variant="body1" sx={{ color: theme.colors.text }}>
           No tables configured
         </Typography>
