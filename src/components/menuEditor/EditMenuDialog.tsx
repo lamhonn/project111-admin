@@ -68,7 +68,6 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [categoryNameInput, setCategoryNameInput] = useState('');
-  const [categoryShowTopmostInput, setCategoryShowTopmostInput] = useState(false);
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [itemsDialogOpen, setItemsDialogOpen] = useState(false);
   const [itemSearchQuery, setItemSearchQuery] = useState('');
@@ -114,7 +113,6 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
       categories: (initialData?.categories || []).map((category) => ({
         id: category.id,
         name: category.name,
-        showTopmost: Boolean(category.showTopmost),
         items: (category.items || []).map((item) => item.id),
       })),
     });
@@ -195,14 +193,12 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
   const handleOpenAddCategory = () => {
     setEditingCategoryId(null);
     setCategoryNameInput('');
-    setCategoryShowTopmostInput(false);
     setCategoryDialogOpen(true);
   };
 
   const handleOpenEditCategory = (category: MenuCategory) => {
     setEditingCategoryId(category.id);
     setCategoryNameInput(category.name);
-    setCategoryShowTopmostInput(Boolean(category.showTopmost));
     setCategoryDialogOpen(true);
   };
 
@@ -214,25 +210,21 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
 
     if (editingCategoryId === null) {
       upsertMenuEditorCategory({
-        showTopmost: categoryShowTopmostInput,
         name: trimmedName,
       });
     } else {
       upsertMenuEditorCategory({
         id: editingCategoryId,
         name: trimmedName,
-        showTopmost: categoryShowTopmostInput,
       });
       setCategoryDialogOpen(false);
       setCategoryNameInput('');
-      setCategoryShowTopmostInput(false);
       setEditingCategoryId(null);
       return;
     }
 
     setCategoryDialogOpen(false);
     setCategoryNameInput('');
-    setCategoryShowTopmostInput(false);
     setEditingCategoryId(null);
   };
 
@@ -253,7 +245,6 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
     setCategoryDeleteConfirmOpen(false);
     setCategoryDialogOpen(false);
     setCategoryNameInput('');
-    setCategoryShowTopmostInput(false);
     setEditingCategoryId(null);
   };
 
@@ -265,17 +256,12 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
           return {
             id: category.id,
             name: category.name,
-            showTopmost: category.showTopmost,
             items: categoryProductIds.map((productId) => ({
               id: productId,
               name: productOptionsById.get(productId) || productId,
             })),
           };
-        })
-        .sort(
-          (firstCategory, secondCategory) =>
-            Number(Boolean(secondCategory.showTopmost)) - Number(Boolean(firstCategory.showTopmost))
-        ),
+        }),
     [menuEditorState, productOptionsById]
   );
 
@@ -314,7 +300,6 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
       categories: menuEditorState.categories.map((category) => ({
         id: category.id,
         name: category.name,
-        showTopmost: Boolean(category.showTopmost),
         items: menuEditorState.productsByCategoryId[category.id] || [],
       })),
     });
@@ -516,9 +501,7 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
           open={categoryDialogOpen}
           editingCategoryId={editingCategoryId}
           categoryNameInput={categoryNameInput}
-          categoryShowTopmost={categoryShowTopmostInput}
           onCategoryNameChange={setCategoryNameInput}
-          onCategoryShowTopmostChange={setCategoryShowTopmostInput}
           onClose={() => setCategoryDialogOpen(false)}
           onSave={handleSaveCategory}
           onDeleteCategory={handleRequestDeleteCategory}

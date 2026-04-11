@@ -30,6 +30,7 @@ export default function ProductGrid({
           id={product.id}
           name={product.name}
           description={product.description}
+          imgUrl={product.imgUrl}
           onClick={onProductClick}
         />
       ))}

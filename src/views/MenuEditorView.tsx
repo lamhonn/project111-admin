@@ -23,6 +23,14 @@ export default function MenuEditorView() {
     return String(error);
   };
 
+  const createCategoryId = (): string => {
+    if (typeof globalThis.crypto?.randomUUID === 'function') {
+      return globalThis.crypto.randomUUID();
+    }
+
+    return `category-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  };
+
   const filteredMenus = menus.filter((menu) =>
     (menu.menuName || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -52,21 +60,37 @@ export default function MenuEditorView() {
   const handleSaveMenu = async (data: MenuDataViewModel) => {
     try {
       const categories = data.categories ?? [];
+      const normalizedCategories = categories.map((category, index) => ({
+        id: category.id || createCategoryId(),
+        name: category.name,
+        orderNumber: index + 1,
+        productIds: (category.items ?? []).map((item) => item.id),
+      }));
+
       const serializedCategories = JSON.stringify(
-        categories.map((category) => ({
+        normalizedCategories.map((category) => ({
           id: category.id,
-          name: category.name,
-          showTopmost: Boolean(category.showTopmost),
-          productIds: (category.items ?? []).map((item) => item.id),
+          name: JSON.stringify({
+            en: category.name,
+            fi: category.name,
+            sv: category.name,
+          }),
+          orderNumber: category.orderNumber,
         }))
       );
 
-      const topmostCategory = categories.some((category) => Boolean(category.showTopmost));
+      const menuProducts = normalizedCategories.flatMap((category) =>
+        category.productIds.map((productId) => ({
+          productId,
+          categoryId: category.id,
+        }))
+      );
+
       const payload = {
         name: data.menuName?.trim() || 'Menu',
         enabled: Boolean(data.isActive),
         categories: serializedCategories,
-        topmostCategory,
+        menuProducts,
       };
 
       if (selectedMenu?.menuId) {

@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
-import { useMutation, useQuery } from '@apollo/client/react';
+import { useApolloClient, useMutation, useQuery } from '@apollo/client/react';
 import { useMemo } from 'react';
-import { mapGraphQLMenuToMenu } from '../graphql/mappers';
+import { mapGraphQLMenuProductToMenuProduct, mapGraphQLMenuToMenu } from '../graphql/mappers';
 import {
   toMenuDataViewModel,
   toMenuListItemViewModel,
@@ -18,11 +18,29 @@ const MENUS_QUERY = gql`
       name
       enabled
       categories
-      topmostCategory
       patternStartTime
       patternEndTime
       eventStartTime
       eventEndTime
+      created
+      products {
+        id
+        menuId
+        productId
+        categoryId
+        created
+      }
+    }
+  }
+`;
+
+const MENU_PRODUCTS_QUERY = gql`
+  query GetMenuProducts($menuId: ID!) {
+    menuProducts(menuId: $menuId) {
+      id
+      menuId
+      productId
+      categoryId
       created
     }
   }
@@ -61,6 +79,27 @@ const DELETE_MENU_MUTATION = gql`
   }
 `;
 
+const CREATE_MENU_PRODUCT_MUTATION = gql`
+  mutation CreateMenuProduct($input: CreateMenuProductInput!) {
+    createMenuProduct(input: $input) {
+      success
+      message
+      menuProduct {
+        id
+      }
+    }
+  }
+`;
+
+const DELETE_MENU_PRODUCT_MUTATION = gql`
+  mutation DeleteMenuProduct($id: ID!) {
+    deleteMenuProduct(id: $id) {
+      success
+      message
+    }
+  }
+`;
+
 interface MenusQueryData {
   menus: Array<{
     id: string;
@@ -68,11 +107,27 @@ interface MenusQueryData {
     name: string;
     enabled: boolean;
     categories: string;
-    topmostCategory?: boolean | null;
     patternStartTime?: string | null;
     patternEndTime?: string | null;
     eventStartTime?: string | null;
     eventEndTime?: string | null;
+    created: string;
+    products?: Array<{
+      id: string;
+      menuId: string;
+      productId: string;
+      categoryId: string;
+      created: string;
+    }>;
+  }>;
+}
+
+interface MenuProductsQueryData {
+  menuProducts: Array<{
+    id: string;
+    menuId: string;
+    productId: string;
+    categoryId: string;
     created: string;
   }>;
 }
@@ -86,16 +141,30 @@ type MutationResponse = {
   message: string;
 };
 
+type MutationWithMenuResponse = MutationResponse & {
+  menu?: {
+    id: string;
+  } | null;
+};
+
 interface CreateMenuMutationData {
-  createMenu?: MutationResponse | null;
+  createMenu?: MutationWithMenuResponse | null;
 }
 
 interface UpdateMenuMutationData {
-  updateMenu?: MutationResponse | null;
+  updateMenu?: MutationWithMenuResponse | null;
 }
 
 interface DeleteMenuMutationData {
   deleteMenu?: MutationResponse | null;
+}
+
+interface CreateMenuProductMutationData {
+  createMenuProduct?: MutationResponse | null;
+}
+
+interface DeleteMenuProductMutationData {
+  deleteMenuProduct?: MutationResponse | null;
 }
 
 export interface SaveMenuInput {
@@ -103,17 +172,23 @@ export interface SaveMenuInput {
   name: string;
   enabled: boolean;
   categories: string;
-  topmostCategory?: boolean;
+  menuProducts: Array<{
+    productId: string;
+    categoryId: string;
+  }>;
 }
 
 export const useGetMenus = () => {
+  const apolloClient = useApolloClient();
   const { organizationId, loading: organizationLoading, error: organizationError } = useOrganizationId();
 
   const [createMenuMutation] = useMutation<CreateMenuMutationData>(CREATE_MENU_MUTATION);
   const [updateMenuMutation] = useMutation<UpdateMenuMutationData>(UPDATE_MENU_MUTATION);
   const [deleteMenuMutation] = useMutation<DeleteMenuMutationData>(DELETE_MENU_MUTATION);
+  const [createMenuProductMutation] = useMutation<CreateMenuProductMutationData>(CREATE_MENU_PRODUCT_MUTATION);
+  const [deleteMenuProductMutation] = useMutation<DeleteMenuProductMutationData>(DELETE_MENU_PRODUCT_MUTATION);
 
-  const { data, loading, error } = useQuery<MenusQueryData, MenusQueryVariables>(MENUS_QUERY, {
+  const { data, loading, error, refetch } = useQuery<MenusQueryData, MenusQueryVariables>(MENUS_QUERY, {
     variables: {
       organizationId: organizationId ?? '',
     },
@@ -126,9 +201,62 @@ export const useGetMenus = () => {
   );
 
   const menus = useMemo<MenuDataViewModel[]>(
-    () => (data?.menus ?? []).map(mapGraphQLMenuToMenu).map((menu) => toMenuDataViewModel(menu)),
+    () =>
+      (data?.menus ?? []).map((menu) =>
+        toMenuDataViewModel(
+          mapGraphQLMenuToMenu(menu),
+          (menu.products ?? []).map(mapGraphQLMenuProductToMenuProduct)
+        )
+      ),
     [data]
   );
+
+  const saveMenuProducts = async (
+    menuId: string,
+    menuProducts: SaveMenuInput['menuProducts'],
+    replaceExisting: boolean
+  ) => {
+    const uniqueMenuProducts = Array.from(
+      new Map(menuProducts.map((item) => [`${item.categoryId}:${item.productId}`, item])).values()
+    );
+
+    if (replaceExisting) {
+      const existingProductsResponse = await apolloClient.query<MenuProductsQueryData>({
+        query: MENU_PRODUCTS_QUERY,
+        variables: { menuId },
+        fetchPolicy: 'network-only',
+      });
+      const existingProducts = existingProductsResponse.data?.menuProducts ?? [];
+
+      for (const existingProduct of existingProducts) {
+        const deleteResponse = await deleteMenuProductMutation({
+          variables: { id: existingProduct.id },
+        });
+        const deletePayload = deleteResponse.data?.deleteMenuProduct;
+
+        if (!deletePayload?.success) {
+          throw new Error(deletePayload?.message ?? 'Failed to delete menu products');
+        }
+      }
+    }
+
+    for (const menuProduct of uniqueMenuProducts) {
+      const createResponse = await createMenuProductMutation({
+        variables: {
+          input: {
+            menuId,
+            productId: menuProduct.productId,
+            categoryId: menuProduct.categoryId,
+          },
+        },
+      });
+      const createPayload = createResponse.data?.createMenuProduct;
+
+      if (!createPayload?.success) {
+        throw new Error(createPayload?.message ?? 'Failed to save menu products');
+      }
+    }
+  };
 
   const createMenu = async (input: SaveMenuInput) => {
     if (!organizationId) {
@@ -142,14 +270,25 @@ export const useGetMenus = () => {
           name: input.name,
           enabled: input.enabled,
           categories: input.categories,
-          topmostCategory: input.topmostCategory,
         },
       },
-      refetchQueries: [{ query: MENUS_QUERY, variables: { organizationId } }],
-      awaitRefetchQueries: true,
     });
 
     const payload = response.data?.createMenu;
+
+    if (payload?.success && response.data?.createMenu && input.menuProducts.length > 0) {
+      const createdMenuId = response.data.createMenu.menu?.id;
+      if (!createdMenuId) {
+        throw new Error('Created menu id missing from response');
+      }
+
+      await saveMenuProducts(createdMenuId, input.menuProducts, false);
+    }
+
+    if (payload?.success) {
+      await refetch({ organizationId });
+    }
+
     return {
       success: Boolean(payload?.success),
       message: payload?.message ?? 'Failed to create menu',
@@ -168,14 +307,17 @@ export const useGetMenus = () => {
           name: input.name,
           enabled: input.enabled,
           categories: input.categories,
-          topmostCategory: input.topmostCategory,
         },
       },
-      refetchQueries: [{ query: MENUS_QUERY, variables: { organizationId } }],
-      awaitRefetchQueries: true,
     });
 
     const payload = response.data?.updateMenu;
+
+    if (payload?.success) {
+      await saveMenuProducts(input.id, input.menuProducts, true);
+      await refetch({ organizationId });
+    }
+
     return {
       success: Boolean(payload?.success),
       message: payload?.message ?? 'Failed to update menu',
@@ -189,11 +331,14 @@ export const useGetMenus = () => {
 
     const response = await deleteMenuMutation({
       variables: { id },
-      refetchQueries: [{ query: MENUS_QUERY, variables: { organizationId } }],
-      awaitRefetchQueries: true,
     });
 
     const payload = response.data?.deleteMenu;
+
+    if (payload?.success) {
+      await refetch({ organizationId });
+    }
+
     return {
       success: Boolean(payload?.success),
       message: payload?.message ?? 'Failed to delete menu',

@@ -428,10 +428,10 @@ export const useOrderActions = (): OrderActionsHook => {
         },
       });
 
-      if (response.errors?.length) {
+      if (response.error) {
         return {
           success: false,
-          error: response.errors[0].message,
+          error: response.error.message,
         };
       }
 

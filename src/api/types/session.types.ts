@@ -1,4 +1,4 @@
-import { OrderStatus } from './enums/orderStatus.types.js';
+import { OrderStatus } from "./enums/orderStatus.types";
 
 /**
  * Represents an active dining session for a tablet/table
@@ -64,7 +64,6 @@ export type OrderPlacedEvent = {
     id: string;
     orderId: string;
     productId: string;
-    campaignProductId?: string | null;
     totalPrice: number;
     created: Date;
   }>;

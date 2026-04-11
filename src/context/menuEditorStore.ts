@@ -4,7 +4,6 @@ import type { MenuCategory } from '../components/menuEditor/types';
 export interface MenuEditorCategoryState {
   id: string;
   name: string;
-  showTopmost: boolean;
 }
 
 export interface MenuEditorState {
@@ -25,7 +24,6 @@ export const initializeMenuEditorStateAtom = atom(
     const nextCategories: MenuEditorCategoryState[] = categories.map((category) => ({
       id: category.id,
       name: category.name,
-      showTopmost: Boolean(category.showTopmost),
     }));
 
     const nextProductsByCategoryId = categories.reduce<Record<string, string[]>>((result, category) => {
@@ -42,7 +40,7 @@ export const initializeMenuEditorStateAtom = atom(
 
 export const upsertMenuEditorCategoryAtom = atom(
   null,
-  (get, set, payload: { id?: string; name: string; showTopmost: boolean }) => {
+  (get, set, payload: { id?: string; name: string }) => {
     const currentState = get(menuEditorStateAtom);
     const categoryId = payload.id || `category-${Date.now()}`;
 
@@ -50,7 +48,6 @@ export const upsertMenuEditorCategoryAtom = atom(
     const nextCategory: MenuEditorCategoryState = {
       id: categoryId,
       name: payload.name,
-      showTopmost: payload.showTopmost,
     };
 
     const nextCategories =

@@ -7,6 +7,8 @@ import './i18n'; // Initialize i18n
 // import './App.css';
 
 // Create a MUI theme with brand colors
+const getModalContainer = () => document.body;
+
 const muiTheme = createTheme({
   palette: {
     primary: {
@@ -34,6 +36,18 @@ const muiTheme = createTheme({
     grey: {
       100: '#f1f3f4',
       300: '#d0d0d0',
+    },
+  },
+  components: {
+    MuiModal: {
+      defaultProps: {
+        container: getModalContainer,
+      },
+    },
+    MuiDialog: {
+      defaultProps: {
+        container: getModalContainer,
+      },
     },
   },
 });

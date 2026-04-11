@@ -13,11 +13,11 @@ export interface ProductListItemViewModel {
   ingredients?: string;
   imgUrl?: string;
   price?: number;
-  oldPrice?: number;
   dietaries?: number[];
   toppings?: ProductToppingViewModel[];
   excludables?: string[];
   freeToppings?: number;
+  maxToppings?: number;
   ageRestricted?: boolean;
 }
 
@@ -31,6 +31,8 @@ export interface ProductEditorViewModel {
   dietaries: number[];
   toppings: ProductToppingViewModel[];
   excludables: string[];
+  freeToppings: number;
+  maxToppings: number;
   ageRestricted: boolean;
   price: number;
   created: Date;
@@ -69,7 +71,6 @@ export const toProductListItemViewModel = (product: Product): ProductListItemVie
   ingredients: resolveLocalizedText(product.Ingredients),
   imgUrl: product.ImgUrl,
   price: product.Price,
-  oldPrice: product.OldPrice,
   dietaries: product.Dietaries,
   toppings: parseJson<Array<{
     name?: string;
@@ -89,6 +90,7 @@ export const toProductListItemViewModel = (product: Product): ProductListItemVie
     typeof item === 'string' ? item : item.fi ?? item.en ?? item.sv ?? ''
   ),
   freeToppings: product.FreeToppings,
+  maxToppings: product.MaxToppings,
   ageRestricted: product.AgeRestrictied,
 });
 
@@ -122,6 +124,8 @@ export const toProductEditorViewModel = (product: Product): ProductEditorViewMod
     excludables: excludables.map((item) =>
       typeof item === 'string' ? item : item.fi ?? item.en ?? item.sv ?? ''
     ),
+    freeToppings: product.FreeToppings,
+    maxToppings: product.MaxToppings,
     ageRestricted: product.AgeRestrictied,
     price: product.Price,
     created: product.Created,

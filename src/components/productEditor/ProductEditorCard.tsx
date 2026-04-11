@@ -5,6 +5,7 @@ interface ProductEditorCardProps {
   id: string;
   name: string;
   description: string;
+  imgUrl?: string;
   onClick: (id: string) => void;
 }
 
@@ -12,6 +13,7 @@ export default function ProductEditorCard({
   id,
   name,
   description,
+  imgUrl,
   onClick,
 }: ProductEditorCardProps) {
 
@@ -45,11 +47,19 @@ export default function ProductEditorCard({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            overflow: 'hidden',
           }}
         >
-          <Typography sx={{ color: 'grey.500', fontSize: '0.75rem' }}>
-            Product Image
-          </Typography>
+          <Box
+            component="img"
+            src={imgUrl || ''}
+            alt={name}
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+          />
         </Box>
 
         {/* Content Section */}

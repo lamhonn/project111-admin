@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -40,6 +40,7 @@ const SUPPORTED_LANGUAGES: Array<{ code: SupportedLanguage; labelKey: string }> 
 
 interface ProductData {
   productName?: string;
+  price?: number;
   description?: string;
   ingredients?: string;
   productTranslations?: ProductTranslations;
@@ -84,6 +85,16 @@ const normalizeExcludables = (excludables: unknown): string[] => {
   }
 
   return excludables.map((value) => String(value ?? ''));
+};
+
+const parsePriceValue = (rawValue: string): number => {
+  if (!rawValue.trim()) {
+    return 0;
+  }
+
+  const normalized = rawValue.replace(',', '.');
+  const parsed = Number.parseFloat(normalized);
+  return Number.isFinite(parsed) ? parsed : 0;
 };
 
 const getSupportedLanguage = (language: string): SupportedLanguage => {
@@ -148,15 +159,12 @@ interface EditProductDialogProps {
 
 type TranslationTargetField = 'productName' | 'description' | 'ingredients' | null;
 
-const EditProductDialog: React.FC<EditProductDialogProps> = ({ 
-  open, 
-  onClose, 
-  onSave, 
-  onDelete,
-  initialData = {} 
-}) => {
-  const { t, i18n } = useTranslation();
-  const systemLanguage = getSupportedLanguage(i18n.resolvedLanguage || i18n.language || 'en');
+const EMPTY_PRODUCT_DATA: ProductData = {};
+
+const createInitialDialogState = (
+  initialData: ProductData,
+  systemLanguage: SupportedLanguage,
+) => {
   const initialToppings = normalizeToppings(initialData.toppings);
   const initialExcludables = normalizeExcludables(initialData.excludables);
   const initialFieldValues: Record<TranslatableField, string> = {
@@ -170,6 +178,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
     systemLanguage,
   );
   const initialProductName = initialData.productName || initialProductTranslations.productName[systemLanguage] || '';
+  const initialPrice = initialData.price ?? 0;
   const initialDescription = initialData.description || initialProductTranslations.description[systemLanguage] || '';
   const initialIngredients = initialData.ingredients || initialProductTranslations.ingredients[systemLanguage] || '';
   const initialImagePreview =
@@ -177,27 +186,56 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
     initialData.ImgUrl ||
     (typeof initialData.productImage === 'string' ? initialData.productImage : null);
 
-  const [formData, setFormData] = useState<ProductData>({
-    productName: initialProductName,
-    description: initialDescription,
-    ingredients: initialIngredients,
-    productTranslations: initialProductTranslations,
-    productImage: initialData.productImage || null,
-    additionalImages: initialData.additionalImages || [],
-    toppings: initialToppings,
-    excludables: initialExcludables,
-    freeToppings: initialData.freeToppings ?? 0,
-    maxToppings: initialData.maxToppings ?? 0,
-    allergens: initialData.allergens || [],
-    ...initialData
-  });
+  return {
+    formData: {
+      ...initialData,
+      productName: initialProductName,
+      price: initialPrice,
+      description: initialDescription,
+      ingredients: initialIngredients,
+      productTranslations: initialProductTranslations,
+      productImage: initialData.productImage || null,
+      additionalImages: initialData.additionalImages || [],
+      toppings: initialToppings,
+      excludables: initialExcludables,
+      freeToppings: initialData.freeToppings ?? 0,
+      maxToppings: initialData.maxToppings ?? 0,
+      allergens: initialData.allergens || [],
+    } as ProductData,
+    imagePreview: initialImagePreview || null,
+  };
+};
 
-  const [imagePreview, setImagePreview] = useState<string | null>(initialImagePreview || null);
+const EditProductDialog: React.FC<EditProductDialogProps> = ({ 
+  open, 
+  onClose, 
+  onSave, 
+  onDelete,
+  initialData = EMPTY_PRODUCT_DATA,
+}) => {
+  const { t, i18n } = useTranslation();
+  const systemLanguage = getSupportedLanguage(i18n.resolvedLanguage || i18n.language || 'en');
+  const initialState = createInitialDialogState(initialData, systemLanguage);
+
+  const [formData, setFormData] = useState<ProductData>(initialState.formData);
+
+  const [imagePreview, setImagePreview] = useState<string | null>(initialState.imagePreview);
   const [isAllergensDialogOpen, setIsAllergensDialogOpen] = useState(false);
   const [isToppingsDialogOpen, setIsToppingsDialogOpen] = useState(false);
   const [isExcludablesDialogOpen, setIsExcludablesDialogOpen] = useState(false);
   const [isStockPhotoDialogOpen, setIsStockPhotoDialogOpen] = useState(false);
   const [translationTargetField, setTranslationTargetField] = useState<TranslationTargetField>(null);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const nextState = createInitialDialogState(initialData, systemLanguage);
+    setFormData(nextState.formData);
+    setImagePreview(nextState.imagePreview);
+    setTranslationTargetField(null);
+  }, [open]);
 
   const isTranslatableField = (field: keyof ProductData): field is TranslatableField =>
     field === 'productName' || field === 'description' || field === 'ingredients';
@@ -240,6 +278,15 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parsePriceValue(event.target.value);
+
+    setFormData((previous) => ({
+      ...previous,
+      price: value,
+    }));
   };
 
   const handleAddToppings = () => {
@@ -373,7 +420,10 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
   };
 
   const handleSave = async () => {
-    await Promise.resolve(onSave(formData));
+    await Promise.resolve(onSave({
+      ...formData,
+      price: Number.isFinite(formData.price) ? formData.price : 0,
+    }));
     onClose();
   };
 
@@ -548,6 +598,23 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
                 placeholder={t('admin.productEditor.dialog.productNamePlaceholder')}
                 value={formData.productName}
                 onChange={handleInputChange('productName')}
+                variant="outlined"
+              />
+
+              {/* Price */}
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography variant="subtitle2" color="text.secondary">
+                  {/* {t('admin.productEditor.dialog.price')} */}
+                  Price (€)
+                </Typography>
+              </Box>
+              <TextField
+                fullWidth
+                type="number"
+                inputProps={{ min: 0, step: '0.01' }}
+                placeholder="0.00"
+                value={formData.price ?? 0}
+                onChange={handlePriceChange}
                 variant="outlined"
               />
 

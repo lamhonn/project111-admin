@@ -24,6 +24,7 @@ type ProductDialogData = {
   toppings?: Array<{ name?: string; priceIncrement?: number }>;
   excludables?: string[];
   freeToppings?: number;
+  maxToppings?: number;
   enabled?: boolean;
   ageRestricted?: boolean;
   price?: number;
@@ -84,10 +85,10 @@ export default function ProductEditorView() {
         description: stringifyTranslations(productData.description, productData.productTranslations?.description),
         ingredients: stringifyTranslations(productData.ingredients, productData.productTranslations?.ingredients),
         price: productData.price ?? selectedProduct?.price ?? 0,
-        oldPrice: selectedProduct?.oldPrice,
         toppings: JSON.stringify(productData.toppings ?? selectedProduct?.toppings ?? []),
         excludables: JSON.stringify(productData.excludables ?? selectedProduct?.excludables ?? []),
         freeToppings: productData.freeToppings ?? selectedProduct?.freeToppings ?? 0,
+        maxToppings: productData.maxToppings ?? selectedProduct?.maxToppings ?? 0,
         dietaries: selectedProduct?.dietaries,
         imgUrl: productData.stockPhotoLink ?? productData.ImgUrl ?? selectedProduct?.imgUrl,
         enabled: productData.enabled ?? selectedProduct?.enabled ?? true,
@@ -106,6 +107,7 @@ export default function ProductEditorView() {
         return;
       }
 
+      console.log('Creating product with payload:', basePayload);
       const result = await createProduct(basePayload);
       if (!result.success) {
         throw new Error(result.message);
@@ -162,6 +164,7 @@ export default function ProductEditorView() {
           toppings: selectedProduct.toppings,
           excludables: selectedProduct.excludables,
           freeToppings: selectedProduct.freeToppings,
+          maxToppings: selectedProduct.maxToppings,
           ageRestricted: selectedProduct.ageRestricted,
           price: selectedProduct.price,
         } : undefined}

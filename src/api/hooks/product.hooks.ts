@@ -14,11 +14,11 @@ const PRODUCTS_QUERY = gql`
       description
       organizationId
       price
-      oldPrice
       toppings
       ingredients
       dietaries
       freeToppings
+      maxToppings
       excludables
       imgUrl
       enabled
@@ -68,11 +68,11 @@ interface ProductsQueryData {
     description?: string | null;
     organizationId: string;
     price: number;
-    oldPrice?: number | null;
     toppings?: string | null;
     ingredients?: string | null;
     dietaries?: number[] | null;
     freeToppings: number;
+    maxToppings: number;
     excludables?: string | null;
     imgUrl?: string | null;
     enabled: boolean;
@@ -126,11 +126,11 @@ export interface SaveProductInput {
   description?: string;
   organizationId?: string;
   price: number;
-  oldPrice?: number;
   toppings?: string;
   ingredients?: string;
   dietaries?: number[];
   freeToppings?: number;
+  maxToppings?: number;
   excludables?: string;
   imgUrl?: string;
   enabled?: boolean;
@@ -168,11 +168,11 @@ export const useGetProducts = () => {
           description: input.description,
           organizationId,
           price: input.price,
-          oldPrice: input.oldPrice,
           toppings: input.toppings,
           ingredients: input.ingredients,
           dietaries: mapDietariesToGraphQLEnum(input.dietaries),
           freeToppings: input.freeToppings ?? 0,
+          maxToppings: input.maxToppings ?? 0,
           excludables: input.excludables,
           imgUrl: input.imgUrl,
           enabled: input.enabled ?? true,
@@ -202,11 +202,11 @@ export const useGetProducts = () => {
           name: input.name,
           description: input.description,
           price: input.price,
-          oldPrice: input.oldPrice,
           toppings: input.toppings,
           ingredients: input.ingredients,
           dietaries: mapDietariesToGraphQLEnum(input.dietaries),
           freeToppings: input.freeToppings,
+          maxToppings: input.maxToppings,
           excludables: input.excludables,
           imgUrl: input.imgUrl,
           enabled: input.enabled,

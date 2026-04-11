@@ -7,8 +7,6 @@ import {
   Box,
   Typography,
   TextField,
-  FormControlLabel,
-  Switch,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
@@ -17,9 +15,7 @@ interface CategoryNameDialogProps {
   open: boolean;
   editingCategoryId: string | null;
   categoryNameInput: string;
-  categoryShowTopmost: boolean;
   onCategoryNameChange: (value: string) => void;
-  onCategoryShowTopmostChange: (value: boolean) => void;
   onClose: () => void;
   onSave: () => void;
   onDeleteCategory?: () => void;
@@ -29,9 +25,7 @@ const CategoryNameDialog: React.FC<CategoryNameDialogProps> = ({
   open,
   editingCategoryId,
   categoryNameInput,
-  categoryShowTopmost,
   onCategoryNameChange,
-  onCategoryShowTopmostChange,
   onClose,
   onSave,
   onDeleteCategory,
@@ -58,16 +52,6 @@ const CategoryNameDialog: React.FC<CategoryNameDialogProps> = ({
             placeholder={editingCategoryId === null ? t('admin.menuEditor.dialog.newCategoryPlaceholder') : ''}
             value={categoryNameInput}
             onChange={(event) => onCategoryNameChange(event.target.value)}
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={categoryShowTopmost}
-                onChange={(event) => onCategoryShowTopmostChange(event.target.checked)}
-                color="primary"
-              />
-            }
-            label={t('admin.menuEditor.dialog.showTopmost')}
           />
         </Box>
       </DialogContent>

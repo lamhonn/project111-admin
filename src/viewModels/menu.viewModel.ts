@@ -8,7 +8,6 @@ export interface MenuCategoryItemViewModel {
 export interface MenuCategoryViewModel {
   id: string;
   name: string;
-  showTopmost?: boolean;
   items: MenuCategoryItemViewModel[];
 }
 
@@ -42,10 +41,51 @@ type RawCategory =
   | {
       id?: string;
       name?: string;
-      showTopmost?: boolean;
+      en?: string;
+      fi?: string;
+      sv?: string;
+      orderNumber?: number;
       items?: Array<{ id?: string; name?: string }>;
       productIds?: string[];
     };
+
+const resolveCategoryName = (
+  category:
+    | {
+        name?: string;
+        en?: string;
+        fi?: string;
+        sv?: string;
+      }
+    | undefined,
+  fallbackName: string
+): string => {
+  if (!category) {
+    return fallbackName;
+  }
+
+  if (typeof category.name === 'string' && category.name.trim().length > 0) {
+    try {
+      const translated = JSON.parse(category.name) as
+        | {
+            en?: string;
+            fi?: string;
+            sv?: string;
+          }
+        | string;
+
+      if (typeof translated === 'string') {
+        return translated;
+      }
+
+      return translated.en ?? translated.fi ?? translated.sv ?? category.name;
+    } catch {
+      return category.name;
+    }
+  }
+
+  return category.en ?? category.fi ?? category.sv ?? fallbackName;
+};
 
 const parseCategories = (value: string): MenuCategoryViewModel[] => {
   if (!value) {
@@ -58,12 +98,12 @@ const parseCategories = (value: string): MenuCategoryViewModel[] => {
       return [];
     }
 
-    return parsed.map((category, index) => {
+    const normalizedCategories = parsed.map((category, index) => {
       if (typeof category === 'string') {
         return {
           id: `category-${index + 1}`,
           name: category,
-          showTopmost: false,
+          orderNumber: index + 1,
           items: [],
         };
       }
@@ -81,11 +121,15 @@ const parseCategories = (value: string): MenuCategoryViewModel[] => {
 
       return {
         id: category.id ?? `category-${index + 1}`,
-        name: category.name ?? `Category ${index + 1}`,
-        showTopmost: Boolean(category.showTopmost),
+        name: resolveCategoryName(category, `Category ${index + 1}`),
+        orderNumber: category.orderNumber ?? index + 1,
         items: itemsFromObjects.length > 0 ? itemsFromObjects : itemsFromProductIds,
       };
     });
+
+    return normalizedCategories
+      .sort((firstCategory, secondCategory) => firstCategory.orderNumber - secondCategory.orderNumber)
+      .map(({ id, name, items }) => ({ id, name, items }));
   } catch {
     return [];
   }
@@ -101,28 +145,48 @@ export const toMenuListItemViewModel = (menu: Menu): MenuListItemViewModel => ({
 export const toMenuDataViewModel = (
   menu: Menu,
   menuProducts: MenuProduct[] = []
-): MenuDataViewModel => ({
-  menuId: menu.Id,
-  menuName: menu.Name,
-  description: '',
-  isActive: menu.Enabled,
-  categories:
-    parseCategories(menu.Categories).length > 0
-      ? parseCategories(menu.Categories)
-      : (menuProducts
-          .filter((menuProduct) => menuProduct.MenuId === menu.Id)
-          .length > 0
-          ? [
-              {
-                id: `${menu.Id}-category-1`,
-                name: 'Default',
-                items: menuProducts
-                  .filter((menuProduct) => menuProduct.MenuId === menu.Id)
-                  .map((menuProduct) => ({
+): MenuDataViewModel => {
+  const parsedCategories = parseCategories(menu.Categories);
+  const menuScopedProducts = menuProducts.filter((menuProduct) => menuProduct.MenuId === menu.Id);
+
+  const categoriesWithProducts = parsedCategories.map((category) => {
+    const hasInlineItems = (category.items ?? []).length > 0;
+    if (hasInlineItems) {
+      return category;
+    }
+
+    const itemsFromMenuProducts = menuScopedProducts
+      .filter((menuProduct) => menuProduct.CategoryId === category.id)
+      .map((menuProduct) => ({
+        id: menuProduct.ProductId,
+        name: menuProduct.ProductId,
+      }));
+
+    return {
+      ...category,
+      items: itemsFromMenuProducts,
+    };
+  });
+
+  return {
+    menuId: menu.Id,
+    menuName: menu.Name,
+    description: '',
+    isActive: menu.Enabled,
+    categories:
+      categoriesWithProducts.length > 0
+        ? categoriesWithProducts
+        : (menuScopedProducts.length > 0
+            ? [
+                {
+                  id: `${menu.Id}-category-1`,
+                  name: 'Default',
+                  items: menuScopedProducts.map((menuProduct) => ({
                     id: menuProduct.ProductId,
                     name: menuProduct.ProductId,
                   })),
-              },
-            ]
-          : []),
-});
+                },
+              ]
+            : []),
+  };
+};

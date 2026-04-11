@@ -15,11 +15,11 @@ type GraphQLProduct = {
   description?: string | null;
   organizationId: string;
   price: number;
-  oldPrice?: number | null;
   toppings?: string | null;
   ingredients?: string | null;
   dietaries?: number[] | null;
   freeToppings: number;
+  maxToppings: number;
   excludables?: string | null;
   imgUrl?: string | null;
   enabled: boolean;
@@ -33,11 +33,11 @@ export const mapGraphQLProductToProduct = (product: GraphQLProduct): Product => 
   Description: product.description ?? undefined,
   OrganizationId: product.organizationId,
   Price: product.price,
-  OldPrice: product.oldPrice ?? undefined,
   Toppings: product.toppings ?? undefined,
   Ingredients: product.ingredients ?? undefined,
   Dietaries: product.dietaries?.map((value) => value as Dietary) ?? undefined,
   FreeToppings: product.freeToppings,
+  MaxToppings: product.maxToppings,
   Excludables: product.excludables ?? undefined,
   ImgUrl: product.imgUrl ?? undefined,
   Enabled: product.enabled,
@@ -51,7 +51,6 @@ type GraphQLMenu = {
   name: string;
   enabled: boolean;
   categories: string;
-  topmostCategory?: boolean | null;
   patternStartTime?: string | null;
   patternEndTime?: string | null;
   eventStartTime?: string | null;
@@ -65,7 +64,6 @@ export const mapGraphQLMenuToMenu = (menu: GraphQLMenu): Menu => ({
   Name: menu.name,
   Enabled: menu.enabled,
   Categories: menu.categories,
-  TopmostCategory: menu.topmostCategory ?? undefined,
   PatternStartTime: menu.patternStartTime ? toDate(menu.patternStartTime) : undefined,
   PatternEndTime: menu.patternEndTime ? toDate(menu.patternEndTime) : undefined,
   EventStartTime: menu.eventStartTime ? toDate(menu.eventStartTime) : undefined,
@@ -125,7 +123,6 @@ type GraphQLOrderProduct = {
   id: string;
   orderId: string;
   productId: string;
-  campaignProductId?: string | null;
   totalPrice: number;
   created: string;
 };
@@ -134,7 +131,6 @@ export const mapGraphQLOrderProductToOrderProduct = (orderProduct: GraphQLOrderP
   Id: orderProduct.id,
   OrderId: orderProduct.orderId,
   ProductId: orderProduct.productId,
-  CampaignProductId: orderProduct.campaignProductId ?? undefined,
   TotalPrice: orderProduct.totalPrice,
   Created: toDate(orderProduct.created),
 });
