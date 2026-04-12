@@ -1,7 +1,9 @@
 import { gql } from '@apollo/client';
 import { useMutation, useQuery } from '@apollo/client/react';
-import { useMemo } from 'react';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { useEffect, useMemo } from 'react';
 import type {
+  DashboardOrderSnapshot,
   IncomingOrder,
   InProcessOrder,
   Bill,
@@ -10,7 +12,12 @@ import type {
   OrderListSection,
   OrderDetails,
 } from '../../context/dashboardStore';
-import { OrderItemStatus } from '../../context/dashboardStore';
+import {
+  dashboardOrdersByIdAtom,
+  OrderItemStatus,
+  upsertDashboardSnapshotAtom,
+  visibleOrderListSectionsAtom,
+} from '../../context/dashboardStore';
 import { useOrganizationId } from './organization.hooks';
 
 const DASHBOARD_ORDERS_QUERY = gql`
@@ -18,6 +25,7 @@ const DASHBOARD_ORDERS_QUERY = gql`
     orders(organizationId: $organizationId) {
       id
       totalPrice
+      tabletId
       tableNumber
       created
       products {
@@ -31,6 +39,18 @@ const DASHBOARD_ORDERS_QUERY = gql`
           price
         }
       }
+    }
+  }
+`;
+
+const DASHBOARD_ACTIVE_DINING_SESSIONS_QUERY = gql`
+  query DashboardActiveDiningSessions($organizationId: ID!) {
+    activeDiningSessions(organizationId: $organizationId) {
+      sessionId
+      tabletId
+      tableNumber
+      orderIds
+      orderStatusByOrderId
     }
   }
 `;
@@ -59,13 +79,28 @@ interface DashboardOrderProduct {
 interface DashboardOrder {
   id: string;
   totalPrice: number;
+  tabletId?: string | null;
   tableNumber: number;
   created: string;
   products?: DashboardOrderProduct[] | null;
 }
 
+type RuntimeOrderStatus = 'Pending' | 'Preparing' | 'Ready' | 'Completed' | 'Cancelled';
+
+interface ActiveDiningSession {
+  sessionId: string;
+  tabletId?: string | null;
+  tableNumber: number;
+  orderIds: string[];
+  orderStatusByOrderId?: Record<string, RuntimeOrderStatus> | null;
+}
+
 interface DashboardOrdersQueryData {
   orders: DashboardOrder[];
+}
+
+interface DashboardActiveDiningSessionsQueryData {
+  activeDiningSessions: ActiveDiningSession[];
 }
 
 interface DashboardOrdersQueryVariables {
@@ -86,8 +121,6 @@ interface UpdateOrderStatusMutationVariables {
     message?: string;
   };
 }
-
-const latestOrderDetails = new Map<string, OrderDetails>();
 
 const formatAmount = (amount: number): string => `€${amount.toFixed(2)}`;
 
@@ -117,25 +150,76 @@ const resolveLocalizedName = (value: string): string => {
   }
 };
 
-const toIncomingOrder = (order: DashboardOrder): IncomingOrder => ({
-  id: order.id,
-  name: `Table ${order.tableNumber}`,
-  orderNo: Number.parseInt(order.id, 10) || 0,
-  image: order.products?.[0]?.product?.imgUrl ?? '',
-});
-
-const toInProcessOrder = (order: DashboardOrder): InProcessOrder => ({
-  id: order.id,
-  name: `Table ${order.tableNumber}`,
-  orderNo: Number.parseInt(order.id, 10) || 0,
-  status: 'prep',
-});
-
-const getSectionForOrder = (order: DashboardOrder): 'newOrders' | 'preparing' => {
-  return (order.products?.length ?? 0) > 0 ? 'preparing' : 'newOrders';
+const isRuntimeOrderStatus = (value: unknown): value is RuntimeOrderStatus => {
+  return (
+    value === 'Pending' ||
+    value === 'Preparing' ||
+    value === 'Ready' ||
+    value === 'Completed' ||
+    value === 'Cancelled'
+  );
 };
 
-const useDashboardOrders = () => {
+const toRuntimeOrderStatusMap = (sessions: ActiveDiningSession[]): Record<string, RuntimeOrderStatus> => {
+  const orderStatusById: Record<string, RuntimeOrderStatus> = {};
+
+  sessions.forEach((session) => {
+    const explicitStatusMap = session.orderStatusByOrderId ?? {};
+
+    Object.entries(explicitStatusMap).forEach(([orderId, status]) => {
+      if (isRuntimeOrderStatus(status)) {
+        orderStatusById[orderId] = status;
+      }
+    });
+
+    session.orderIds.forEach((orderId) => {
+      if (!orderStatusById[orderId]) {
+        orderStatusById[orderId] = 'Pending';
+      }
+    });
+  });
+
+  return orderStatusById;
+};
+
+const toFrontendStatus = (status: RuntimeOrderStatus): (typeof OrderItemStatus)[keyof typeof OrderItemStatus] => {
+  switch (status) {
+    case 'Preparing':
+      return OrderItemStatus.Preparing;
+    case 'Ready':
+      return OrderItemStatus.Ready;
+    case 'Pending':
+    case 'Completed':
+    case 'Cancelled':
+    default:
+      return OrderItemStatus.New;
+  }
+};
+
+const isActiveDashboardStatus = (status: RuntimeOrderStatus): boolean => {
+  return status === 'Pending' || status === 'Preparing';
+};
+
+const toDashboardSnapshot = (
+  order: DashboardOrder,
+  runtimeStatus: RuntimeOrderStatus
+): DashboardOrderSnapshot => ({
+  orderNo: order.id,
+  tableNumber: order.tableNumber,
+  time: formatOrderTime(order.created),
+  amount: formatAmount(order.totalPrice),
+  total: order.totalPrice,
+  status: toFrontendStatus(runtimeStatus),
+  products: (order.products ?? []).map((orderProduct) => ({
+    id: orderProduct.id,
+    name: resolveLocalizedName(orderProduct.product?.name ?? orderProduct.productId),
+    image: orderProduct.product?.imgUrl ?? '',
+    price: orderProduct.product?.price ?? orderProduct.totalPrice,
+    quantity: 1,
+  })),
+});
+
+const useDashboardRuntimeOrders = () => {
   const { organizationId, loading: organizationLoading, error: organizationError } = useOrganizationId();
 
   const { data, loading, error } = useQuery<DashboardOrdersQueryData, DashboardOrdersQueryVariables>(
@@ -149,11 +233,64 @@ const useDashboardOrders = () => {
     }
   );
 
+  const {
+    data: sessionsData,
+    loading: sessionsLoading,
+    error: sessionsError,
+  } = useQuery<DashboardActiveDiningSessionsQueryData, DashboardOrdersQueryVariables>(
+    DASHBOARD_ACTIVE_DINING_SESSIONS_QUERY,
+    {
+      variables: {
+        organizationId: organizationId ?? '',
+      },
+      skip: !organizationId,
+      pollInterval: 15000,
+    }
+  );
+
+  const orders = useMemo(() => data?.orders ?? [], [data]);
+  const activeSessions = useMemo(() => sessionsData?.activeDiningSessions ?? [], [sessionsData]);
+
+  const snapshots = useMemo<DashboardOrderSnapshot[]>(() => {
+    const runtimeStatusByOrderId = toRuntimeOrderStatusMap(activeSessions);
+    const nextSnapshots: DashboardOrderSnapshot[] = [];
+
+    orders.forEach((order) => {
+      const runtimeStatus = runtimeStatusByOrderId[order.id];
+      if (!runtimeStatus || !isActiveDashboardStatus(runtimeStatus)) {
+        return;
+      }
+
+      const snapshot = toDashboardSnapshot(order, runtimeStatus);
+      nextSnapshots.push(snapshot);
+    });
+
+    return nextSnapshots;
+  }, [activeSessions, orders]);
+
   return {
-    orders: data?.orders ?? [],
-    loading: organizationLoading || loading,
-    error: organizationError ?? error,
+    orders,
+    snapshots,
+    loading: organizationLoading || loading || sessionsLoading,
+    error: organizationError ?? error ?? sessionsError,
   };
+};
+
+export const useSyncDashboardOrders = () => {
+  const { snapshots, loading, error } = useDashboardRuntimeOrders();
+  const upsertSnapshot = useSetAtom(upsertDashboardSnapshotAtom);
+
+  useEffect(() => {
+    upsertSnapshot({
+      orders: snapshots,
+      source: 'poll',
+    });
+  }, [snapshots, upsertSnapshot]);
+
+  return {
+    loading,
+    error,
+  } as const;
 };
 
 interface DashboardData {
@@ -169,15 +306,25 @@ interface DashboardData {
  * Used for: Dashboard overview, order management
  */
 export const useGetDashboardData = () => {
-  const { orders, loading, error } = useDashboardOrders();
+  const { orders, snapshots, loading, error } = useDashboardRuntimeOrders();
 
   const data = useMemo<DashboardData>(() => {
-    const incomingOrders = orders
-      .filter((order) => getSectionForOrder(order) === 'newOrders')
-      .map(toIncomingOrder);
-    const inProcessOrders = orders
-      .filter((order) => getSectionForOrder(order) === 'preparing')
-      .map(toInProcessOrder);
+    const incomingOrders = snapshots
+      .filter((order) => order.status === OrderItemStatus.New)
+      .map<IncomingOrder>((order) => ({
+        id: order.orderNo,
+        name: `Table ${order.tableNumber}`,
+        orderNo: Number.parseInt(order.orderNo, 10) || 0,
+        image: order.products[0]?.image ?? '',
+      }));
+    const inProcessOrders = snapshots
+      .filter((order) => order.status === OrderItemStatus.Preparing)
+      .map<InProcessOrder>((order) => ({
+        id: order.orderNo,
+        name: `Table ${order.tableNumber}`,
+        orderNo: Number.parseInt(order.orderNo, 10) || 0,
+        status: 'prep',
+      }));
 
     const delivered = 0;
     const onTheWay = inProcessOrders.length;
@@ -212,7 +359,7 @@ export const useGetDashboardData = () => {
       },
       orderStats,
     };
-  }, [orders]);
+  }, [orders, snapshots]);
 
   return {
     data,
@@ -277,88 +424,31 @@ export const useGetOrderStats = () => {
  * Hook to fetch order list sections
  */
 export const useGetOrderListSections = (): { data: OrderListSection[]; loading: boolean; error: undefined } => {
-  const { orders, loading } = useDashboardOrders();
-
-  const data = useMemo<OrderListSection[]>(() => {
-    const newOrders = orders.filter((order) => getSectionForOrder(order) === 'newOrders');
-    const preparingOrders = orders.filter((order) => getSectionForOrder(order) === 'preparing');
-
-    latestOrderDetails.clear();
-    orders.forEach((order) => {
-      latestOrderDetails.set(order.id, {
-        orderNo: order.id,
-        tableNumber: order.tableNumber,
-        time: formatOrderTime(order.created),
-        status: getSectionForOrder(order) === 'newOrders' ? OrderItemStatus.New : OrderItemStatus.Preparing,
-        products: (order.products ?? []).map((orderProduct) => ({
-          id: orderProduct.id,
-          name: resolveLocalizedName(orderProduct.product?.name ?? orderProduct.productId),
-          image: orderProduct.product?.imgUrl ?? '',
-          price: orderProduct.product?.price ?? orderProduct.totalPrice,
-          quantity: 1,
-        })),
-        total: order.totalPrice,
-      });
-    });
-
-    return [
-      {
-        section: 'newOrders',
-        count: newOrders.length,
-        orders: newOrders.map((order) => ({
-          orderNo: order.id,
-          brand: '',
-          tableNumber: order.tableNumber,
-          time: formatOrderTime(order.created),
-          amount: formatAmount(order.totalPrice),
-          status: 'view',
-          statusColor: 'primary',
-          internalStatus: OrderItemStatus.New,
-        })),
-      },
-      {
-        section: 'preparing',
-        count: preparingOrders.length,
-        orders: preparingOrders.map((order) => ({
-          orderNo: order.id,
-          brand: '',
-          tableNumber: order.tableNumber,
-          time: formatOrderTime(order.created),
-          amount: formatAmount(order.totalPrice),
-          status: 'ready',
-          statusColor: 'success',
-          internalStatus: OrderItemStatus.Preparing,
-        })),
-      },
-      {
-        section: 'billRequests',
-        count: 0,
-        orders: [],
-      },
-    ];
-  }, [orders]);
+  const sections = useAtomValue(visibleOrderListSectionsAtom);
+  const { loading } = useSyncDashboardOrders();
 
   return {
-    data,
+    data: sections,
     loading,
     error: undefined,
   } as const;
 };
 
-const parseOrderAmount = (amount: string): number => {
-  const normalized = amount.replace(/[^\d.,-]/g, '').replace(',', '.');
-  const parsed = Number.parseFloat(normalized);
-  return Number.isNaN(parsed) ? 0 : parsed;
-};
-
-export const getOrderDetails = (orderNo: string, sections: OrderListSection[]): OrderDetails | null => {
-  const liveOrderDetails = latestOrderDetails.get(orderNo);
-  if (liveOrderDetails) {
-    return liveOrderDetails;
-  }
-
-  const order = sections.flatMap((section) => section.orders).find((item) => item.orderNo === orderNo);
-
+export const getOrderDetails = (
+  orderNo: string,
+  dashboardOrdersById: Record<
+    string,
+    {
+      orderNo: string;
+      tableNumber: number;
+      time: string;
+      total: number;
+      status: (typeof OrderItemStatus)[keyof typeof OrderItemStatus];
+      products: OrderDetails['products'];
+    }
+  >
+): OrderDetails | null => {
+  const order = dashboardOrdersById[orderNo];
   if (!order) {
     return null;
   }
@@ -367,10 +457,14 @@ export const getOrderDetails = (orderNo: string, sections: OrderListSection[]): 
     orderNo: order.orderNo,
     tableNumber: order.tableNumber,
     time: order.time,
-    status: order.internalStatus ?? OrderItemStatus.New,
-    products: [],
-    total: parseOrderAmount(order.amount),
+    status: order.status,
+    products: order.products,
+    total: order.total,
   };
+};
+
+export const useDashboardOrdersById = () => {
+  return useAtomValue(dashboardOrdersByIdAtom);
 };
 
 /**

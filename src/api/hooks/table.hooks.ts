@@ -85,7 +85,7 @@ interface TabletsQueryData {
 interface ActiveDiningSessionsQueryData {
   activeDiningSessions: Array<{
     sessionId: string;
-    tabletId: string;
+    tabletId: string | null;
     tableNumber: number;
     organizationId: string;
     totalOrders?: number | null;
@@ -102,7 +102,7 @@ interface OrganizationScopedVariables {
 interface OrganizationSessionStartedSubscriptionData {
   organizationSessionStarted: {
     sessionId: string;
-    tabletId: string;
+    tabletId: string | null;
     tableNumber: number;
     organizationId: string;
     startedAt: string;
@@ -112,23 +112,39 @@ interface OrganizationSessionStartedSubscriptionData {
 interface OrganizationSessionClosedSubscriptionData {
   organizationSessionClosed: {
     sessionId: string;
-    tabletId: string;
+    tabletId: string | null;
+    tableNumber: number;
+    organizationId: string;
+    totalOrders: number;
+    totalSpent: number;
+    closedAt: string;
   };
 }
 
 interface OrganizationBillRequestedSubscriptionData {
   organizationBillRequested: {
     sessionId: string;
+    tabletId: string | null;
+    tableNumber: number;
+    organizationId: string;
+    totalOrders: number;
+    totalSpent: number;
+    timestamp: string;
+    message: string;
   };
 }
 
 type ActiveSessionState = {
   sessionId: string;
-  tabletId: string;
+  tabletId: string | null;
   tableNumber: number;
   organizationId: string;
   totalOrders: number;
   totalSpent: number;
+};
+
+const getSessionStateKey = (sessionId: string, tabletId: string | null): string => {
+  return tabletId ?? `session:${sessionId}`;
 };
 
 export const useGetTableMonitor = () => {
@@ -162,7 +178,7 @@ export const useGetTableMonitor = () => {
   useEffect(() => {
     const nextState = (activeSessionsData?.activeDiningSessions ?? []).reduce<Record<string, ActiveSessionState>>(
       (accumulator, session) => {
-        accumulator[session.tabletId] = {
+        accumulator[getSessionStateKey(session.sessionId, session.tabletId)] = {
           sessionId: session.sessionId,
           tabletId: session.tabletId,
           tableNumber: session.tableNumber,
@@ -226,17 +242,27 @@ export const useGetTableMonitor = () => {
         return;
       }
 
-      setActiveSessionsByTablet((previous) => ({
-        ...previous,
-        [payload.tabletId]: {
+      setActiveSessionsByTablet((previous) => {
+        const next = { ...previous };
+
+        Object.keys(next).forEach((id) => {
+          const session = next[id];
+          if (session.sessionId === payload.sessionId || session.tableNumber === payload.tableNumber) {
+            delete next[id];
+          }
+        });
+
+        next[getSessionStateKey(payload.sessionId, payload.tabletId)] = {
           sessionId: payload.sessionId,
           tabletId: payload.tabletId,
           tableNumber: payload.tableNumber,
           organizationId: payload.organizationId,
           totalOrders: 0,
           totalSpent: 0,
-        },
-      }));
+        };
+
+        return next;
+      });
     },
   });
 

@@ -24,11 +24,7 @@ import {
   OrderItemStatus,
 } from '../../context/dashboardStore';
 
-interface OrderOptionsDialogProps {
-  // Props can be added if needed
-}
-
-const OrderOptionsDialog: React.FC<OrderOptionsDialogProps> = () => {
+const OrderOptionsDialog: React.FC = () => {
   const { t } = useTranslation();
   const selectedOrder = useAtomValue(selectedOrderAtom);
   const setDialogOpen = useSetAtom(orderOptionsDialogOpenAtom);

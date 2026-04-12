@@ -12,10 +12,10 @@ import {
 import { UserRole, type UserRoleName } from '../types/enums';
 import {
   billsAtom,
+  clearDashboardOrdersAtom,
   deliveryStatsAtom,
   inProcessOrdersAtom,
   incomingOrdersAtom,
-  orderListSectionsAtom,
   orderOptionsDialogOpenAtom,
   orderStatsAtom,
   restaurantOpenAtom,
@@ -45,7 +45,7 @@ const resetAppState = () => {
     lastMonth: 0,
   });
   jotaiStore.set(restaurantOpenAtom, true);
-  jotaiStore.set(orderListSectionsAtom, []);
+  jotaiStore.set(clearDashboardOrdersAtom);
   jotaiStore.set(selectedOrderAtom, null);
   jotaiStore.set(orderOptionsDialogOpenAtom, false);
   jotaiStore.set(menuEditorStateAtom, {

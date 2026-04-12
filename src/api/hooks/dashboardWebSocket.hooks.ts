@@ -4,8 +4,10 @@ import { useSetAtom } from 'jotai';
 import { useMemo } from 'react';
 import {
   billsAtom,
-  incomingOrdersAtom,
   orderStatsAtom,
+  removeDashboardOrdersByTableNumberAtom,
+  upsertDashboardSnapshotAtom,
+  type DashboardOrderSnapshot,
   type OrderItemStatus,
   updateOrderStatusAtom,
 } from '../../context/dashboardStore';
@@ -94,33 +96,52 @@ type BackendOrderStatus = 'Pending' | 'Preparing' | 'Ready' | 'Completed' | 'Can
 interface OrganizationOrderPlacedSubscriptionData {
   organizationOrderPlaced: {
     orderId: string;
+    tabletId?: string | null;
     tableNumber: number;
+    organizationId: string;
+    timestamp: string;
     order?: {
       id: string;
       tableNumber: number;
     } | null;
+    orderProducts?: Array<{ id: string }> | null;
   };
 }
 
 interface OrganizationOrderStatusChangedSubscriptionData {
   organizationOrderStatusChanged: {
     orderId: string;
+    tabletId?: string | null;
+    tableNumber: number;
+    organizationId: string;
     newStatus: BackendOrderStatus;
+    timestamp: string;
+    message?: string | null;
   };
 }
 
 interface OrganizationBillRequestedSubscriptionData {
   organizationBillRequested: {
     sessionId: string;
+    tabletId?: string | null;
     tableNumber: number;
+    organizationId: string;
     totalOrders: number;
     totalSpent: number;
+    timestamp: string;
+    message?: string | null;
   };
 }
 
 interface OrganizationSessionClosedSubscriptionData {
   organizationSessionClosed: {
     sessionId: string;
+    tabletId?: string | null;
+    tableNumber: number;
+    organizationId: string;
+    totalOrders: number;
+    totalSpent: number;
+    closedAt: string;
   };
 }
 
@@ -152,36 +173,20 @@ const toFrontendStatus = (status: BackendOrderStatus): OrderItemStatus | null =>
       return OrderItemStatusValues.Ready;
     case 'Completed':
     case 'Cancelled':
-      return null;
+      return OrderItemStatusValues.Ready;
     default:
       return null;
   }
-};
-
-const toNumericOrderNo = (orderId: string): number => {
-  const digits = orderId.replace(/\D/g, '');
-  if (digits.length > 0) {
-    const parsed = Number.parseInt(digits, 10);
-    if (!Number.isNaN(parsed)) {
-      return parsed;
-    }
-  }
-
-  // Deterministic fallback so UI can still render order number for UUID IDs.
-  let hash = 0;
-  for (let index = 0; index < orderId.length; index += 1) {
-    hash = (hash * 31 + orderId.charCodeAt(index)) >>> 0;
-  }
-  return hash;
 };
 
 export const useDashboardWebSocket = (): DashboardRealtimeHook => {
   const { organizationId, loading: organizationLoading, error: organizationError } = useOrganizationId();
   const { acceptOrder, rejectOrder, markOrderReady } = useOrderActions();
 
-  const setIncomingOrders = useSetAtom(incomingOrdersAtom);
   const setBills = useSetAtom(billsAtom);
   const setOrderStats = useSetAtom(orderStatsAtom);
+  const upsertSnapshot = useSetAtom(upsertDashboardSnapshotAtom);
+  const removeOrdersByTableNumber = useSetAtom(removeDashboardOrdersByTableNumberAtom);
   const updateOrderStatus = useSetAtom(updateOrderStatusAtom);
 
   const orderPlacedSubscription = useSubscription<
@@ -200,21 +205,22 @@ export const useDashboardWebSocket = (): DashboardRealtimeHook => {
 
       const orderId = payload.order?.id ?? payload.orderId;
       const tableNumber = payload.order?.tableNumber ?? payload.tableNumber;
+      const snapshot: DashboardOrderSnapshot = {
+        orderNo: orderId,
+        tableNumber,
+        time: new Date(payload.timestamp).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        amount: '€0.00',
+        total: 0,
+        status: OrderItemStatusValues.New,
+        products: [],
+      };
 
-      setIncomingOrders((previous) => {
-        if (previous.some((item) => item.id === orderId)) {
-          return previous;
-        }
-
-        return [
-          ...previous,
-          {
-            id: orderId,
-            name: `Table ${tableNumber}`,
-            orderNo: toNumericOrderNo(orderId),
-            image: '',
-          },
-        ];
+      upsertSnapshot({
+        orders: [snapshot],
+        source: 'websocket',
       });
 
       setOrderStats((previous) => ({
@@ -298,6 +304,7 @@ export const useDashboardWebSocket = (): DashboardRealtimeHook => {
       }
 
       setBills((previous) => previous.filter((item) => item.id !== payload.sessionId));
+      removeOrdersByTableNumber(payload.tableNumber);
     },
   });
 
@@ -370,10 +377,13 @@ export const useDashboardWebSocket = (): DashboardRealtimeHook => {
 
   const changeOrderStatus = async (
     orderNo: string,
-    _oldStatus: OrderItemStatus,
+    oldStatus: OrderItemStatus,
     newStatus: OrderItemStatus,
-    _changedBy?: string
+    changedBy?: string
   ) => {
+    void oldStatus;
+    void changedBy;
+
     if (newStatus === OrderItemStatusValues.Preparing) {
       return acceptOrder(orderNo);
     }
@@ -392,8 +402,14 @@ export const useDashboardWebSocket = (): DashboardRealtimeHook => {
     state,
     error: combinedError,
     isConnected: state === WebSocketState.CONNECTED,
-    acceptOrder: (orderNo: string, _acceptedBy?: string) => acceptOrder(orderNo),
-    rejectOrder: (orderNo: string, reason?: string, _rejectedBy?: string) => rejectOrder(orderNo, reason),
+    acceptOrder: (orderNo: string, acceptedBy?: string) => {
+      void acceptedBy;
+      return acceptOrder(orderNo);
+    },
+    rejectOrder: (orderNo: string, reason?: string, rejectedBy?: string) => {
+      void rejectedBy;
+      return rejectOrder(orderNo, reason);
+    },
     changeOrderStatus,
   };
 };

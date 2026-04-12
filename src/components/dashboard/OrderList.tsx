@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   Box,
   Paper,
@@ -11,40 +11,27 @@ import {
   Button,
   Typography,
 } from '@mui/material';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
 import { 
-  orderListSectionsAtom, 
   selectedOrderAtom,
   orderOptionsDialogOpenAtom,
   type OrderListSection 
 } from '../../context/dashboardStore';
-import { useGetOrderListSections, getOrderDetails } from '../../api/hooks/dashboard.hooks';
+import { useDashboardOrdersById, useGetOrderListSections, getOrderDetails } from '../../api/hooks/dashboard.hooks';
 import OrderOptionsDialog from './OrderOptionsDialog';
 
-interface OrderListProps {
-  // Props can be added later if needed
-}
-
-const OrderList: React.FC<OrderListProps> = () => {
+const OrderList: React.FC = () => {
   const { t } = useTranslation();
-  const setOrderSections = useSetAtom(orderListSectionsAtom);
-  const orderSections = useAtomValue(orderListSectionsAtom);
   const setSelectedOrder = useSetAtom(selectedOrderAtom);
   const setDialogOpen = useSetAtom(orderOptionsDialogOpenAtom);
-  const { data } = useGetOrderListSections();
-
-  // Populate atom with data from hook
-  useEffect(() => {
-    if (data) {
-      setOrderSections(data);
-    }
-  }, [data, setOrderSections]);
+  const { data: orderSections } = useGetOrderListSections();
+  const dashboardOrdersById = useDashboardOrdersById();
 
   // Handle row click to open dialog
   const handleRowClick = (orderNo: string) => {
-    const orderDetails = getOrderDetails(orderNo, orderSections);
+    const orderDetails = getOrderDetails(orderNo, dashboardOrdersById);
     if (orderDetails) {
       setSelectedOrder(orderDetails);
       setDialogOpen(true);
