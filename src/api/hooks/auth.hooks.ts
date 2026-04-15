@@ -137,6 +137,7 @@ const normalizeRoleName = (role: unknown): UserRoleName | null => {
   return null;
 };
 
+//TODO: This helper function is implemented in 3 different files
 const parseJwtPayload = (token: string): JwtPayload | null => {
   try {
     const payloadSegment = token.split('.')[1];
