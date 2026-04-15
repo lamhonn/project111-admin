@@ -5,6 +5,7 @@ import { createClient } from 'graphql-ws';
 import { apiConfig } from '../config';
 import { getValidStoredToken } from '../auth/tokenStorage';
 
+//TODO: According to Claude Haiku 4.5, using ApolloLink for authentication vs SetContextLink is an older way. For consistency which are we going to pick?  
 const httpLink = new HttpLink({
   uri: apiConfig.graphqlUrl,
 });
