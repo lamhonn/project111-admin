@@ -18,6 +18,14 @@ import {
   upsertDashboardSnapshotAtom,
   visibleOrderListSectionsAtom,
 } from '../../context/dashboardStore';
+import {
+  formatOrderTimestamp,
+  isActiveRuntimeOrderStatus,
+  isRuntimeOrderStatus,
+  resolveLocalizedName,
+  toOrderItemStatus,
+  type RuntimeOrderStatus,
+} from '../../viewModels';
 import { useOrganizationId } from './organization.hooks';
 
 const DASHBOARD_ORDERS_QUERY = gql`
@@ -85,8 +93,6 @@ interface DashboardOrder {
   products?: DashboardOrderProduct[] | null;
 }
 
-type RuntimeOrderStatus = 'Pending' | 'Preparing' | 'Ready' | 'Completed' | 'Cancelled';
-
 interface ActiveDiningSession {
   sessionId: string;
   tabletId?: string | null;
@@ -124,42 +130,6 @@ interface UpdateOrderStatusMutationVariables {
 
 const formatAmount = (amount: number): string => `€${amount.toFixed(2)}`;
 
-const formatOrderTime = (timestamp: string): string => {
-  const parsed = new Date(timestamp);
-  if (Number.isNaN(parsed.getTime())) {
-    return timestamp;
-  }
-
-  return parsed.toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
-const resolveLocalizedName = (value: string): string => {
-  const trimmed = value.trim();
-  if (!trimmed.startsWith('{')) {
-    return value;
-  }
-
-  try {
-    const parsed = JSON.parse(trimmed) as Record<string, string>;
-    return parsed.en ?? parsed.fi ?? parsed.sv ?? Object.values(parsed)[0] ?? value;
-  } catch {
-    return value;
-  }
-};
-
-const isRuntimeOrderStatus = (value: unknown): value is RuntimeOrderStatus => {
-  return (
-    value === 'Pending' ||
-    value === 'Preparing' ||
-    value === 'Ready' ||
-    value === 'Completed' ||
-    value === 'Cancelled'
-  );
-};
-
 const toRuntimeOrderStatusMap = (sessions: ActiveDiningSession[]): Record<string, RuntimeOrderStatus> => {
   const orderStatusById: Record<string, RuntimeOrderStatus> = {};
 
@@ -182,34 +152,16 @@ const toRuntimeOrderStatusMap = (sessions: ActiveDiningSession[]): Record<string
   return orderStatusById;
 };
 
-const toFrontendStatus = (status: RuntimeOrderStatus): (typeof OrderItemStatus)[keyof typeof OrderItemStatus] => {
-  switch (status) {
-    case 'Preparing':
-      return OrderItemStatus.Preparing;
-    case 'Ready':
-      return OrderItemStatus.Ready;
-    case 'Pending':
-    case 'Completed':
-    case 'Cancelled':
-    default:
-      return OrderItemStatus.New;
-  }
-};
-
-const isActiveDashboardStatus = (status: RuntimeOrderStatus): boolean => {
-  return status === 'Pending' || status === 'Preparing';
-};
-
 const toDashboardSnapshot = (
   order: DashboardOrder,
   runtimeStatus: RuntimeOrderStatus
 ): DashboardOrderSnapshot => ({
   orderNo: order.id,
   tableNumber: order.tableNumber,
-  time: formatOrderTime(order.created),
+  time: formatOrderTimestamp(order.created),
   amount: formatAmount(order.totalPrice),
   total: order.totalPrice,
-  status: toFrontendStatus(runtimeStatus),
+  status: toOrderItemStatus(runtimeStatus),
   products: (order.products ?? []).map((orderProduct) => ({
     id: orderProduct.id,
     name: resolveLocalizedName(orderProduct.product?.name ?? orderProduct.productId),
@@ -257,7 +209,7 @@ const useDashboardRuntimeOrders = () => {
 
     orders.forEach((order) => {
       const runtimeStatus = runtimeStatusByOrderId[order.id];
-      if (!runtimeStatus || !isActiveDashboardStatus(runtimeStatus)) {
+      if (!runtimeStatus || !isActiveRuntimeOrderStatus(runtimeStatus)) {
         return;
       }
 

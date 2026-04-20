@@ -9,13 +9,23 @@ import {
   Divider,
   Avatar,
   Chip,
+  CircularProgress,
 } from '@mui/material';
 import { useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { useTranslation } from 'react-i18next';
+import { useOrderActions } from '../../api/hooks/dashboard.hooks';
 import { theme } from '../../theme/theme';
+import { formatPriceWithEuro } from '../../utils/numberFormat';
 import ConfirmationDialog from '../common/ConfirmationDialog';
+import ErrorReportDialog from '../common/ErrorReportDialog';
+import {
+  OrderItemStatus,
+  RuntimeOrderStatus,
+  type SessionOrderDetailsViewModel,
+} from '../../viewModels';
 import type { Table, OrderItem } from './types';
 
 interface TableDialogProps {
@@ -25,6 +35,13 @@ interface TableDialogProps {
   onDiscard?: () => void;
   onFinalize?: () => void;
   onToggleLock?: () => void;
+  sessionOrders?: SessionOrderDetailsViewModel[];
+  sessionOrdersLoading?: boolean;
+  sessionOrdersError?: string;
+  onRefreshSessionOrders?: () => Promise<void>;
+  finalizing?: boolean;
+  finalizeErrorMessage?: string | null;
+  onFinalizeErrorClose?: () => void;
 }
 
 export default function TableDialog({
@@ -34,14 +51,27 @@ export default function TableDialog({
   onDiscard,
   onFinalize,
   onToggleLock,
+  sessionOrders = [],
+  sessionOrdersLoading = false,
+  sessionOrdersError,
+  onRefreshSessionOrders,
+  finalizing = false,
+  finalizeErrorMessage,
+  onFinalizeErrorClose,
 }: TableDialogProps) {
   const { t } = useTranslation();
+  const { acceptOrder, markOrderReady } = useOrderActions();
   const [actionsOpen, setActionsOpen] = useState(false);
   const [discardConfirmOpen, setDiscardConfirmOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [activeOrderMutationId, setActiveOrderMutationId] = useState<string | null>(null);
+  const [refreshingOrders, setRefreshingOrders] = useState(false);
 
   if (!table) return null;
 
   const orderItems = table.orderItems ?? [];
+  const hasSummaryOrders = orderItems.length > 0;
+  const hasSessionOrders = sessionOrders.length > 0;
 
   const billSplitConfig = table.billSplitConfig;
 
@@ -83,16 +113,40 @@ export default function TableDialog({
   const taxes = subtotal * 0.14; // 14% tax
   const beforeTaxes = subtotal - taxes;
 
+  const getRuntimeStatusChipStyles = (status: RuntimeOrderStatus) => {
+    switch (status) {
+      case RuntimeOrderStatus.Preparing:
+        return {
+          backgroundColor: theme.colors.primaryLight,
+          color: theme.colors.primary,
+        };
+      case RuntimeOrderStatus.Ready:
+        return {
+          backgroundColor: '#dcfce7',
+          color: '#166534',
+        };
+      case RuntimeOrderStatus.Completed:
+        return {
+          backgroundColor: '#e5e7eb',
+          color: '#4b5563',
+        };
+      case RuntimeOrderStatus.Cancelled:
+        return {
+          backgroundColor: '#fee2e2',
+          color: '#991b1b',
+        };
+      case RuntimeOrderStatus.Pending:
+      default:
+        return {
+          backgroundColor: '#fef3c7',
+          color: '#92400e',
+        };
+    }
+  };
+
   const handleDiscard = () => {
     if (onDiscard) {
       onDiscard();
-    }
-    onClose();
-  };
-
-  const handleFinalize = () => {
-    if (onFinalize) {
-      onFinalize();
     }
     onClose();
   };
@@ -116,10 +170,103 @@ export default function TableDialog({
 
   const handleFinalizeAction = () => {
     setActionsOpen(false);
-    handleFinalize();
+    if (onFinalize) {
+      void onFinalize();
+    }
+  };
+
+  const handleForceRefreshSessionOrders = async () => {
+    if (!onRefreshSessionOrders || refreshingOrders) {
+      return;
+    }
+
+    try {
+      setRefreshingOrders(true);
+      // Debug-only manual force refresh to bypass polling wait.
+      await onRefreshSessionOrders();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : String(error));
+    } finally {
+      setRefreshingOrders(false);
+    }
+  };
+
+  const runSessionOrderAction = async (
+    orderNo: string,
+    action: 'confirm' | 'ready'
+  ) => {
+    setActiveOrderMutationId(orderNo);
+
+    try {
+      const result = action === 'confirm'
+        ? await acceptOrder(orderNo)
+        : await markOrderReady(orderNo);
+
+      if (!result.success) {
+        setErrorMessage(
+          result.error ??
+            (action === 'confirm' ? 'Failed to confirm order' : 'Failed to mark order ready')
+        );
+        return;
+      }
+
+      if (onRefreshSessionOrders) {
+        // Debug-only force refresh after order actions to surface updates immediately.
+        await onRefreshSessionOrders();
+      }
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : String(error));
+    } finally {
+      setActiveOrderMutationId(null);
+    }
+  };
+
+  const renderSessionOrderAction = (order: SessionOrderDetailsViewModel) => {
+    if (order.status === OrderItemStatus.New) {
+      return (
+        <Button
+          variant="contained"
+          color="primary"
+          size="small"
+          disabled={activeOrderMutationId === order.orderNo}
+          onClick={() => void runSessionOrderAction(order.orderNo, 'confirm')}
+          sx={{
+            borderRadius: theme.borderRadius.medium,
+            textTransform: 'none',
+            fontWeight: theme.typography.fontWeights.semibold,
+            px: 2.5,
+          }}
+        >
+          {t('orderOptionsDialog.actions.confirm')}
+        </Button>
+      );
+    }
+
+    if (order.status === OrderItemStatus.Preparing) {
+      return (
+        <Button
+          variant="contained"
+          color="success"
+          size="small"
+          disabled={activeOrderMutationId === order.orderNo}
+          onClick={() => void runSessionOrderAction(order.orderNo, 'ready')}
+          sx={{
+            borderRadius: theme.borderRadius.medium,
+            textTransform: 'none',
+            fontWeight: theme.typography.fontWeights.semibold,
+            px: 2.5,
+          }}
+        >
+          {t('orderOptionsDialog.actions.orderReady')}
+        </Button>
+      );
+    }
+
+    return null;
   };
 
   return (
+    <>
     <Dialog
       open={open}
       onClose={onClose}
@@ -162,7 +309,7 @@ export default function TableDialog({
 
       {/* Order Items */}
       <DialogContent sx={{ p: theme.spacing.lg }}>
-        {orderItems.length === 0 ? (
+        {!hasSummaryOrders && !hasSessionOrders && !sessionOrdersLoading && !sessionOrdersError ? (
           <Box
             sx={{
               display: 'flex',
@@ -178,7 +325,7 @@ export default function TableDialog({
               {t('tableDialog.noOrders')}
             </Typography>
           </Box>
-        ) : (
+        ) : hasSummaryOrders ? (
           <>
             {/* Show bill splits if they exist */}
             {billSplitConfig ? (
@@ -660,7 +807,236 @@ export default function TableDialog({
               </Box>
             </Box>
           </>
-        )}
+        ) : null}
+
+        <Box
+          sx={{
+            mt: hasSummaryOrders ? theme.spacing.xl : 0,
+            pt: hasSummaryOrders ? theme.spacing.lg : 0,
+            borderTop: hasSummaryOrders ? `1px solid ${theme.colors.border}` : 'none',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: theme.spacing.md,
+            }}
+          >
+            <Typography
+              variant="body1"
+              fontWeight={theme.typography.fontWeights.semibold}
+            >
+              {t('orderOptionsDialog.title')}
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: theme.spacing.sm }}>
+              {onRefreshSessionOrders && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => void handleForceRefreshSessionOrders()}
+                  disabled={refreshingOrders}
+                  startIcon={refreshingOrders ? <CircularProgress size={14} /> : <RefreshIcon fontSize="small" />}
+                  sx={{
+                    textTransform: 'none',
+                    borderRadius: theme.borderRadius.large,
+                  }}
+                >
+                  Refresh
+                </Button>
+              )}
+              {hasSessionOrders && (
+                <Chip
+                  label={`${sessionOrders.length} ${sessionOrders.length === 1 ? t('tableDialog.item') : t('tableDialog.items')}`}
+                  size="small"
+                  sx={{
+                    bgcolor: theme.colors.primaryLight,
+                    color: theme.colors.primary,
+                    fontWeight: theme.typography.fontWeights.medium,
+                  }}
+                />
+              )}
+            </Box>
+          </Box>
+
+          {sessionOrdersLoading ? (
+            <Typography variant="body2" color="text.secondary">
+              Loading order details...
+            </Typography>
+          ) : sessionOrdersError ? (
+            <Typography variant="body2" color="error.main">
+              {sessionOrdersError}
+            </Typography>
+          ) : hasSessionOrders ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+              {sessionOrders.map((order) => {
+                const statusChipStyles = getRuntimeStatusChipStyles(order.runtimeStatus);
+
+                return (
+                  <Box
+                    key={order.orderNo}
+                    sx={{
+                      border: `1px solid ${theme.colors.border}`,
+                      borderRadius: theme.borderRadius.large,
+                      p: theme.spacing.lg,
+                      backgroundColor: '#fff',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
+                        gap: theme.spacing.md,
+                        mb: theme.spacing.md,
+                      }}
+                    >
+                      <Box>
+                        <Typography
+                          variant="body1"
+                          fontWeight={theme.typography.fontWeights.semibold}
+                        >
+                          {t('orderOptionsDialog.orderNumber', { number: order.orderNo })}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                          {t('orderOptionsDialog.table', { number: order.tableNumber })} • {order.time}
+                        </Typography>
+                      </Box>
+                      <Chip
+                        label={order.runtimeStatus}
+                        size="small"
+                        sx={{
+                          backgroundColor: statusChipStyles.backgroundColor,
+                          color: statusChipStyles.color,
+                          fontWeight: theme.typography.fontWeights.semibold,
+                        }}
+                      />
+                    </Box>
+
+                    {order.products.length === 0 ? (
+                      <Typography variant="body2" color="text.secondary">
+                        {t('orderOptionsDialog.noProducts')}
+                      </Typography>
+                    ) : (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+                        {order.products.map((product) => {
+                          const itemTotalPrice = product.price * product.quantity;
+
+                          return (
+                            <Box
+                              key={product.id}
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                gap: theme.spacing.sm,
+                                pb: theme.spacing.md,
+                                borderBottom: `1px solid ${theme.colors.border}`,
+                                '&:last-child': {
+                                  borderBottom: 'none',
+                                },
+                              }}
+                            >
+                              <Avatar
+                                src={product.image}
+                                alt={product.name}
+                                variant="rounded"
+                                sx={{
+                                  width: 56,
+                                  height: 56,
+                                  borderRadius: theme.borderRadius.medium,
+                                }}
+                              />
+                              <Box sx={{ flex: 1 }}>
+                                <Box
+                                  sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'flex-start',
+                                    gap: theme.spacing.sm,
+                                  }}
+                                >
+                                  <Typography
+                                    variant="body1"
+                                    fontWeight={theme.typography.fontWeights.semibold}
+                                    sx={{ color: theme.colors.text }}
+                                  >
+                                    {product.name}
+                                  </Typography>
+                                  <Typography
+                                    variant="body1"
+                                    fontWeight={theme.typography.fontWeights.bold}
+                                    sx={{ color: theme.colors.primary }}
+                                  >
+                                    {formatPriceWithEuro(itemTotalPrice)}
+                                  </Typography>
+                                </Box>
+                                <Typography
+                                  variant="body2"
+                                  sx={{ color: theme.colors.text, opacity: 0.6, mt: 0.5 }}
+                                >
+                                  {t('orderOptionsDialog.quantity')}: {product.quantity} × {formatPriceWithEuro(product.price)}
+                                </Typography>
+                                {product.notes && (
+                                  <Typography
+                                    variant="caption"
+                                    sx={{
+                                      color: theme.colors.text,
+                                      opacity: 0.7,
+                                      mt: 1,
+                                      display: 'block',
+                                      fontStyle: 'italic',
+                                    }}
+                                  >
+                                    {t('orderOptionsDialog.notes')}: {product.notes}
+                                  </Typography>
+                                )}
+                              </Box>
+                            </Box>
+                          );
+                        })}
+                      </Box>
+                    )}
+
+                    <Box
+                      sx={{
+                        mt: theme.spacing.md,
+                        pt: theme.spacing.md,
+                        borderTop: `1px solid ${theme.colors.border}`,
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: theme.spacing.md,
+                      }}
+                    >
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mb: 0.5 }}
+                        >
+                          {t('orderOptionsDialog.total')}
+                        </Typography>
+                        <Typography
+                          variant="h6"
+                          fontWeight={theme.typography.fontWeights.bold}
+                          sx={{ color: theme.colors.primary }}
+                        >
+                          {formatPriceWithEuro(order.total)}
+                        </Typography>
+                      </Box>
+                      {renderSessionOrderAction(order)}
+                    </Box>
+                  </Box>
+                );
+              })}
+            </Box>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              {t('tableDialog.noOrders')}
+            </Typography>
+          )}
+        </Box>
       </DialogContent>
 
       {/* Footer */}
@@ -745,7 +1121,8 @@ export default function TableDialog({
               onClick={handleFinalizeAction}
               variant="contained"
               fullWidth
-              disabled={orderItems.length === 0}
+              disabled={orderItems.length === 0 && sessionOrders.length === 0 || finalizing}
+              startIcon={finalizing ? <CircularProgress size={16} sx={{ color: 'white' }} /> : null}
               sx={{
                 backgroundColor: theme.colors.primary,
                 color: 'white',
@@ -779,5 +1156,16 @@ export default function TableDialog({
         onConfirm={handleConfirmDiscard}
       />
     </Dialog>
+    <ErrorReportDialog
+      open={Boolean(errorMessage)}
+      errorMessage={errorMessage ?? ''}
+      onClose={() => setErrorMessage(null)}
+    />
+    <ErrorReportDialog
+      open={Boolean(finalizeErrorMessage)}
+      errorMessage={finalizeErrorMessage ?? ''}
+      onClose={() => onFinalizeErrorClose?.()}
+    />
+    </>
   );
 }

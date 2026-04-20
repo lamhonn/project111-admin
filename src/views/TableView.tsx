@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { theme } from '../theme/theme';
 import { ActiveTablesGrid, AvailableTablesGrid, TableDialog } from '../components/tableManagement';
 import type { Table } from '../components/tableManagement';
-import { useGetTableMonitor } from '../api/hooks/table.hooks';
+import { useGetTableMonitor, useGetTableSessionOrders, useCloseTableSession } from '../api/hooks/table.hooks';
 
 export default function TableView() {
   const { data: tableMonitor, loading, error } = useGetTableMonitor();
@@ -12,6 +12,17 @@ export default function TableView() {
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [lockedTables, setLockedTables] = useState<Set<string>>(new Set());
+  const [finalizeErrorMessage, setFinalizeErrorMessage] = useState<string | null>(null);
+  const { closeSession, closing: finalizing } = useCloseTableSession();
+  const selectedSessionId = dialogOpen ? selectedTable?.sessionId : undefined;
+  const {
+    data: sessionOrders,
+    loading: sessionOrdersLoading,
+    error: sessionOrdersError,
+    refetch: refetchSessionOrders,
+  } = useGetTableSessionOrders(selectedSessionId, {
+    enabled: dialogOpen,
+  });
 
   const activeTables = tableMonitor
     .filter((table) => table.status === 'active')
@@ -33,9 +44,14 @@ export default function TableView() {
     console.log('Discarding order for table:', selectedTable?.number);
   };
 
-  const handleFinalize = () => {
-    // TODO: Implement finalize logic
-    console.log('Finalizing order for table:', selectedTable?.number);
+  const handleFinalize = async () => {
+    if (!selectedTable?.sessionId) return;
+    const result = await closeSession(selectedTable.sessionId);
+    if (result.success) {
+      handleDialogClose();
+    } else {
+      setFinalizeErrorMessage(result.message);
+    }
   };
 
   const handleToggleLock = () => {
@@ -94,6 +110,13 @@ export default function TableView() {
         onDiscard={handleDiscard}
         onFinalize={handleFinalize}
         onToggleLock={handleToggleLock}
+        sessionOrders={sessionOrders}
+        sessionOrdersLoading={sessionOrdersLoading}
+        sessionOrdersError={sessionOrdersError?.message}
+        onRefreshSessionOrders={refetchSessionOrders}
+        finalizing={finalizing}
+        finalizeErrorMessage={finalizeErrorMessage}
+        onFinalizeErrorClose={() => setFinalizeErrorMessage(null)}
       />
     </Box>
   );
