@@ -4,45 +4,30 @@ import { useMemo, useState } from 'react';
 import MenuEditorHeader from '../components/menuEditor/MenuEditorHeader';
 import MenuList from '../components/menuEditor/MenuList';
 import EditMenuDialog from '../components/menuEditor/EditMenuDialog';
-import ErrorReportDialog from '../components/common/ErrorReportDialog';
-import type { MenuDataViewModel, MenuListItemViewModel } from '../viewModels';
+import type { MenuListItemViewModel } from '../viewModels';
 import { useGetMenus } from '../api/hooks/menu.hooks';
 
 export default function MenuEditorView() {
-  const { editorData: menus, createMenu, updateMenu, deleteMenu } = useGetMenus();
+  const { data: menus } = useGetMenus();
   const [searchQuery, setSearchQuery] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedMenu, setSelectedMenu] = useState<MenuDataViewModel | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const toErrorMessage = (error: unknown): string => {
-    if (error instanceof Error) {
-      return error.message;
-    }
-
-    return String(error);
-  };
-
-  const createCategoryId = (): string => {
-    if (typeof globalThis.crypto?.randomUUID === 'function') {
-      return globalThis.crypto.randomUUID();
-    }
-
-    return `category-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  };
+  const [selectedMenu, setSelectedMenu] = useState<MenuListItemViewModel | null>(null);
 
   const filteredMenus = menus.filter((menu) =>
-    (menu.menuName || '').toLowerCase().includes(searchQuery.toLowerCase())
+    menu.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredMenuListItems = filteredMenus.map<MenuListItemViewModel>((menu, index) => ({
-    id: menu.menuId || `menu-${index}`,
-    name: menu.menuName || '',
-    description: menu.description || '',
-    isActive: Boolean(menu.isActive),
-  }));
-
-  const initialMenuData = useMemo(() => selectedMenu ?? undefined, [selectedMenu]);
+  const initialMenuData = useMemo(
+    () =>
+      selectedMenu
+        ? {
+            menuName: selectedMenu.name,
+            description: selectedMenu.description,
+            isActive: selectedMenu.isActive,
+          }
+        : undefined,
+    [selectedMenu]
+  );
 
   const handleAddMenu = () => {
     setSelectedMenu(null);
@@ -50,81 +35,22 @@ export default function MenuEditorView() {
   };
 
   const handleMenuClick = (id: string) => {
-    const menu = menus.find((item) => item.menuId === id);
+    const menu = filteredMenus.find((item) => item.id === id);
     if (menu) {
       setSelectedMenu(menu);
       setDialogOpen(true);
     }
   };
 
-  const handleSaveMenu = async (data: MenuDataViewModel) => {
-    try {
-      const categories = data.categories ?? [];
-      const normalizedCategories = categories.map((category, index) => ({
-        id: category.id || createCategoryId(),
-        name: category.name,
-        orderNumber: index + 1,
-        productIds: (category.items ?? []).map((item) => item.id),
-      }));
-
-      const serializedCategories = JSON.stringify(
-        normalizedCategories.map((category) => ({
-          id: category.id,
-          name: JSON.stringify({
-            en: category.name,
-            fi: category.name,
-            sv: category.name,
-          }),
-          orderNumber: category.orderNumber,
-        }))
-      );
-
-      const menuProducts = normalizedCategories.flatMap((category) =>
-        category.productIds.map((productId) => ({
-          productId,
-          categoryId: category.id,
-        }))
-      );
-
-      const payload = {
-        name: data.menuName?.trim() || 'Menu',
-        enabled: Boolean(data.isActive),
-        categories: serializedCategories,
-        menuProducts,
-      };
-
-      if (selectedMenu?.menuId) {
-        const result = await updateMenu({
-          id: selectedMenu.menuId,
-          ...payload,
-        });
-        if (!result.success) {
-          throw new Error(result.message);
-        }
-        return;
-      }
-
-      const result = await createMenu(payload);
-      if (!result.success) {
-        throw new Error(result.message);
-      }
-    } catch (error) {
-      setErrorMessage(toErrorMessage(error));
-      throw error;
-    }
+  const handleSaveMenu = (data: any) => {
+    // TODO: Implement save menu functionality
+    console.log('Save menu:', data);
   };
 
-  const handleDeleteMenu = async () => {
-    try {
-      if (selectedMenu?.menuId) {
-        const result = await deleteMenu(selectedMenu.menuId);
-        if (!result.success) {
-          throw new Error(result.message);
-        }
-      }
-    } catch (error) {
-      setErrorMessage(toErrorMessage(error));
-      throw error;
+  const handleDeleteMenu = () => {
+    if (selectedMenu) {
+      // TODO: Implement delete menu functionality
+      console.log('Delete menu:', selectedMenu.id);
     }
   };
 
@@ -141,12 +67,12 @@ export default function MenuEditorView() {
           No menus configured
         </Typography>
       ) : (
-        <MenuList menus={filteredMenuListItems} onMenuClick={handleMenuClick} />
+        <MenuList menus={filteredMenus} onMenuClick={handleMenuClick} />
       )}
 
       {dialogOpen && (
         <EditMenuDialog
-          key={selectedMenu?.menuId ?? 'new-menu'}
+          key={selectedMenu?.id ?? 'new-menu'}
           open={dialogOpen}
           onClose={() => setDialogOpen(false)}
           onSave={handleSaveMenu}
@@ -154,12 +80,12 @@ export default function MenuEditorView() {
           initialData={initialMenuData}
         />
       )}
-
+{/* 
       <ErrorReportDialog
         open={Boolean(errorMessage)}
         errorMessage={errorMessage ?? ''}
         onClose={() => setErrorMessage(null)}
-      />
+      /> */}
     </Box>
   );
 }

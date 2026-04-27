@@ -18,7 +18,7 @@ interface CategoryNameDialogProps {
   onCategoryNameChange: (value: string) => void;
   onClose: () => void;
   onSave: () => void;
-  onDeleteCategory?: () => void;
+  onOpenItemsDialog: () => void;
 }
 
 const CategoryNameDialog: React.FC<CategoryNameDialogProps> = ({
@@ -28,7 +28,7 @@ const CategoryNameDialog: React.FC<CategoryNameDialogProps> = ({
   onCategoryNameChange,
   onClose,
   onSave,
-  onDeleteCategory,
+  onOpenItemsDialog,
 }) => {
   const { t } = useTranslation();
 
@@ -49,23 +49,20 @@ const CategoryNameDialog: React.FC<CategoryNameDialogProps> = ({
             autoFocus
             fullWidth
             label={t('admin.menuEditor.dialog.categoryName')}
-            placeholder={editingCategoryId === null ? t('admin.menuEditor.dialog.newCategoryPlaceholder') : ''}
             value={categoryNameInput}
             onChange={(event) => onCategoryNameChange(event.target.value)}
           />
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: theme.spacing.lg, pb: theme.spacing.lg }}>
-        {editingCategoryId !== null && onDeleteCategory && (
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={onDeleteCategory}
-            sx={{ textTransform: 'none', mr: 'auto' }}
-          >
-            {t('admin.menuEditor.dialog.deleteCategory')}
-          </Button>
-        )}
+        <Button
+          variant="outlined"
+          onClick={onOpenItemsDialog}
+          sx={{ textTransform: 'none', mr: 'auto' }}
+          disabled={editingCategoryId === null}
+        >
+          {t('admin.menuEditor.dialog.addRemoveItemsFromMenu')}
+        </Button>
         <Button onClick={onClose} sx={{ textTransform: 'none' }}>
           {t('common.cancel')}
         </Button>

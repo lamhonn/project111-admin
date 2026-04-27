@@ -8,7 +8,9 @@ import {
   Typography,
   TextField,
   Checkbox,
-  Paper,
+  List,
+  ListItem,
+  ListItemText,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
@@ -41,8 +43,6 @@ const CategoryItemsDialog: React.FC<CategoryItemsDialogProps> = ({
     product.name.toLowerCase().includes(itemSearchQuery.toLowerCase())
   );
 
-  const sortedProductOptions = filteredProductOptions;
-
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogContent sx={{ p: theme.spacing.lg }}>
@@ -62,51 +62,43 @@ const CategoryItemsDialog: React.FC<CategoryItemsDialogProps> = ({
             onChange={(event) => onSearchChange(event.target.value)}
           />
 
-          <Box
+          <List
             sx={{
-              maxHeight: '60vh',
+              border: `1px solid ${theme.colors.border}`,
+              borderRadius: theme.borderRadius.medium,
+              maxHeight: 320,
               overflow: 'auto',
-              pr: theme.spacing.xs,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: theme.spacing.sm,
+              p: 0,
             }}
           >
-            {sortedProductOptions.map((product) => {
-              const isSelected = selectedProductIds.includes(product.id);
-
-              return (
-              <Paper
+            {filteredProductOptions.map((product) => (
+              <ListItem
                 key={product.id}
-                elevation={0}
                 sx={{
-                  border: `1px solid ${isSelected ? theme.colors.primary : theme.colors.border}`,
-                  borderRadius: 999,
-                  px: theme.spacing.md,
-                  py: theme.spacing.xs,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  bgcolor: isSelected ? theme.colors.primaryLight : 'transparent',
+                  borderBottom: `1px solid ${theme.colors.border}`,
+                  '&:last-child': { borderBottom: 'none' },
                 }}
+                secondaryAction={
+                  <Checkbox
+                    edge="end"
+                    checked={selectedProductIds.includes(product.id)}
+                    onChange={() => onToggleProductSelection(product.id)}
+                  />
+                }
               >
-                <Typography variant="body2" fontWeight={theme.typography.fontWeights.medium}>
-                  {product.name}
-                </Typography>
-                <Checkbox
-                  edge="end"
-                  checked={isSelected}
-                  onChange={() => onToggleProductSelection(product.id)}
-                />
-              </Paper>
-            )})}
+                <ListItemText primary={product.name} />
+              </ListItem>
+            ))}
 
-            {sortedProductOptions.length === 0 && (
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                {t('admin.menuEditor.dialog.noProductsFound')}
-              </Typography>
+            {filteredProductOptions.length === 0 && (
+              <ListItem>
+                <ListItemText
+                  primary={t('admin.menuEditor.dialog.noProductsFound')}
+                  primaryTypographyProps={{ color: 'text.secondary' }}
+                />
+              </ListItem>
             )}
-          </Box>
+          </List>
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: theme.spacing.lg, pb: theme.spacing.lg }}>

@@ -18,14 +18,6 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { useTranslation } from 'react-i18next';
 import { useOrderActions } from '../../api/hooks/dashboard.hooks';
 import { theme } from '../../theme/theme';
-import { formatPriceWithEuro } from '../../utils/numberFormat';
-import ConfirmationDialog from '../common/ConfirmationDialog';
-import ErrorReportDialog from '../common/ErrorReportDialog';
-import {
-  OrderItemStatus,
-  RuntimeOrderStatus,
-  type SessionOrderDetailsViewModel,
-} from '../../viewModels';
 import type { Table, OrderItem } from './types';
 
 interface TableDialogProps {
@@ -62,10 +54,6 @@ export default function TableDialog({
   const { t } = useTranslation();
   const { acceptOrder, markOrderReady } = useOrderActions();
   const [actionsOpen, setActionsOpen] = useState(false);
-  const [discardConfirmOpen, setDiscardConfirmOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [activeOrderMutationId, setActiveOrderMutationId] = useState<string | null>(null);
-  const [refreshingOrders, setRefreshingOrders] = useState(false);
 
   if (!table) return null;
 
@@ -160,11 +148,6 @@ export default function TableDialog({
 
   const handleDiscardAction = () => {
     setActionsOpen(false);
-    setDiscardConfirmOpen(true);
-  };
-
-  const handleConfirmDiscard = () => {
-    setDiscardConfirmOpen(false);
     handleDiscard();
   };
 
@@ -1144,17 +1127,6 @@ export default function TableDialog({
           </Box>
         </DialogContent>
       </Dialog>
-
-      <ConfirmationDialog
-        open={discardConfirmOpen}
-        title={t('tableDialog.discardTableTitle')}
-        message={t('tableDialog.discardTableMessage')}
-        confirmLabel={t('common.confirm')}
-        cancelLabel={t('common.cancel')}
-        confirmButtonColor="error"
-        onClose={() => setDiscardConfirmOpen(false)}
-        onConfirm={handleConfirmDiscard}
-      />
     </Dialog>
     <ErrorReportDialog
       open={Boolean(errorMessage)}

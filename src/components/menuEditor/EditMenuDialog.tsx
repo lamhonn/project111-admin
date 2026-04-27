@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -17,22 +17,11 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import AddIcon from '@mui/icons-material/Add';
 import { useTranslation } from 'react-i18next';
-import { useAtomValue, useSetAtom } from 'jotai';
 import { theme } from '../../theme/theme';
-import ConfirmationDialog from '../common/ConfirmationDialog';
 import CategoryNameDialog from './CategoryNameDialog';
 import MenuSettingsDialog from './MenuSettingsDialog';
 import CategoryItemsDialog from './CategoryItemsDialog';
-import { useGetProducts } from '../../api/hooks/product.hooks';
-import {
-  menuEditorStateAtom,
-  initializeMenuEditorStateAtom,
-  upsertMenuEditorCategoryAtom,
-  setMenuEditorCategoryProductsAtom,
-  deleteMenuEditorCategoryAtom,
-} from '../../context/menuEditorStore';
 import type { MenuCategory, MenuData, ProductOption } from './types';
 
 interface EditMenuDialogProps {
@@ -43,6 +32,33 @@ interface EditMenuDialogProps {
   initialData?: MenuData;
 }
 
+const defaultCategories: MenuCategory[] = [
+  {
+    id: '1',
+    name: 'New Orders',
+    showTopmost: false,
+    items: [
+      { id: '1', name: 'Classic Burger' },
+      { id: '2', name: 'Chicken Caesar Salad' },
+    ],
+  },
+  {
+    id: '2',
+    name: 'Preparing',
+    showTopmost: false,
+    items: [
+      { id: '3', name: 'Margherita Pizza' },
+      { id: '4', name: 'Pasta Carbonara' },
+    ],
+  },
+  {
+    id: '3',
+    name: 'Bill Requests',
+    showTopmost: false,
+    items: [{ id: '5', name: 'Tiramisu' }],
+  },
+];
+
 const buildInitialFormData = (initialData?: MenuData): MenuData => ({
   menuName: initialData?.menuName || '',
   description: initialData?.description || '',
@@ -52,7 +68,7 @@ const buildInitialFormData = (initialData?: MenuData): MenuData => ({
   activeDays: initialData?.activeDays || [],
   activeFrom: initialData?.activeFrom || '09:00',
   activeTo: initialData?.activeTo || '17:00',
-  categories: initialData?.categories || [],
+  categories: initialData?.categories || defaultCategories,
   ...(initialData || {}),
 });
 
@@ -72,51 +88,16 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
   const [itemsDialogOpen, setItemsDialogOpen] = useState(false);
   const [itemSearchQuery, setItemSearchQuery] = useState('');
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
-  const [pendingProductDelete, setPendingProductDelete] = useState<{
-    categoryId: string;
-    productId: string;
-    productName: string;
-  } | null>(null);
-  const [menuDeleteConfirmOpen, setMenuDeleteConfirmOpen] = useState(false);
-  const [categoryDeleteConfirmOpen, setCategoryDeleteConfirmOpen] = useState(false);
-  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
-  const menuEditorState = useAtomValue(menuEditorStateAtom);
-  const initializeMenuEditorState = useSetAtom(initializeMenuEditorStateAtom);
-  const upsertMenuEditorCategory = useSetAtom(upsertMenuEditorCategoryAtom);
-  const setMenuEditorCategoryProducts = useSetAtom(setMenuEditorCategoryProductsAtom);
-  const deleteMenuEditorCategory = useSetAtom(deleteMenuEditorCategoryAtom);
-  const { data: productsData = [] } = useGetProducts();
 
   const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const productOptions: ProductOption[] = useMemo(
-    () => productsData.map((product) => ({ id: product.id, name: product.name })),
-    [productsData]
-  );
-
-  const productOptionsById = useMemo(
-    () => new Map(productOptions.map((product) => [product.id, product.name])),
-    [productOptions]
-  );
-
-  const initialSnapshotRef = useRef<string>('');
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const nextFormData = buildInitialFormData(initialData);
-    setFormData(nextFormData);
-    initializeMenuEditorState(initialData?.categories || []);
-    initialSnapshotRef.current = JSON.stringify({
-      menu: nextFormData,
-      categories: (initialData?.categories || []).map((category) => ({
-        id: category.id,
-        name: category.name,
-        items: (category.items || []).map((item) => item.id),
-      })),
-    });
-  }, [open, initialData, initializeMenuEditorState]);
+  const productOptions: ProductOption[] = [
+    { id: '1', name: 'Product 1' },
+    { id: '2', name: 'Product 2' },
+    { id: '3', name: 'Product 3' },
+    { id: '4', name: 'Product 4' },
+    { id: '5', name: 'Product 5' },
+    { id: '6', name: 'Product 6' },
+  ];
 
   const handleSettingsInputChange = (field: keyof MenuData) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -145,10 +126,19 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
     });
   };
 
-  const handleOpenItemsDialog = (categoryId: string) => {
-    const selectedIds = menuEditorState.productsByCategoryId[categoryId] || [];
+  const handleOpenItemsDialog = () => {
+    if (editingCategoryId === null) {
+      return;
+    }
 
-    setEditingCategoryId(categoryId);
+    const category = (formData.categories || []).find((item) => item.id === editingCategoryId);
+    const selectedIds = (category?.items || [])
+      .map((item) => {
+        const product = productOptions.find((option) => option.name === item.name);
+        return product?.id;
+      })
+      .filter((id): id is string => id !== undefined);
+
     setSelectedProductIds(selectedIds);
     setItemSearchQuery('');
     setItemsDialogOpen(true);
@@ -167,27 +157,19 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
       return;
     }
 
-    setMenuEditorCategoryProducts({ categoryId: editingCategoryId, productIds: selectedProductIds });
-    setItemsDialogOpen(false);
-  };
+    const selectedItems = productOptions
+      .filter((product) => selectedProductIds.includes(product.id))
+      .map((product) => ({ id: product.id, name: product.name }));
 
-  const handleRequestDeleteProduct = (categoryId: string, productId: string, productName: string) => {
-    setPendingProductDelete({ categoryId, productId, productName });
-  };
+    const updatedCategories = (formData.categories || []).map((category) =>
+      category.id === editingCategoryId ? { ...category, items: selectedItems } : category
+    );
 
-  const handleConfirmDeleteProduct = () => {
-    if (!pendingProductDelete) {
-      return;
-    }
-
-    const currentCategoryProducts = menuEditorState.productsByCategoryId[pendingProductDelete.categoryId] || [];
-    const nextCategoryProducts = currentCategoryProducts.filter((productId) => productId !== pendingProductDelete.productId);
-
-    setMenuEditorCategoryProducts({
-      categoryId: pendingProductDelete.categoryId,
-      productIds: nextCategoryProducts,
+    setFormData({
+      ...formData,
+      categories: updatedCategories,
     });
-    setPendingProductDelete(null);
+    setItemsDialogOpen(false);
   };
 
   const handleOpenAddCategory = () => {
@@ -208,14 +190,28 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
       return;
     }
 
+    const categories = (formData.categories || []).slice();
+
     if (editingCategoryId === null) {
-      upsertMenuEditorCategory({
+      const nextId =
+        categories.length > 0
+          ? Math.max(...categories.map((category) => Number(category.id))) + 1
+          : 1;
+      categories.push({
+        id: String(nextId),
         name: trimmedName,
+        showTopmost: categoryShowTopmostInput,
+        items: [],
       });
     } else {
-      upsertMenuEditorCategory({
-        id: editingCategoryId,
-        name: trimmedName,
+      const updated = categories.map((category) =>
+        category.id === editingCategoryId
+          ? { ...category, name: trimmedName, showTopmost: categoryShowTopmostInput }
+          : category
+      );
+      setFormData({
+        ...formData,
+        categories: updated,
       });
       setCategoryDialogOpen(false);
       setCategoryNameInput('');
@@ -223,114 +219,45 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
       return;
     }
 
-    setCategoryDialogOpen(false);
-    setCategoryNameInput('');
-    setEditingCategoryId(null);
-  };
-
-  const handleRequestDeleteCategory = () => {
-    if (editingCategoryId === null) {
-      return;
-    }
-
-    setCategoryDeleteConfirmOpen(true);
-  };
-
-  const handleConfirmDeleteCategory = () => {
-    if (editingCategoryId === null) {
-      return;
-    }
-
-    deleteMenuEditorCategory(editingCategoryId);
-    setCategoryDeleteConfirmOpen(false);
-    setCategoryDialogOpen(false);
-    setCategoryNameInput('');
-    setEditingCategoryId(null);
-  };
-
-  const sortedCategories: MenuCategory[] = useMemo(
-    () =>
-      menuEditorState.categories
-        .map((category) => {
-          const categoryProductIds = menuEditorState.productsByCategoryId[category.id] || [];
-          return {
-            id: category.id,
-            name: category.name,
-            items: categoryProductIds.map((productId) => ({
-              id: productId,
-              name: productOptionsById.get(productId) || productId,
-            })),
-          };
-        }),
-    [menuEditorState, productOptionsById]
-  );
-
-  const handleSave = async () => {
-    if (!isDirty) {
-      onClose();
-      return;
-    }
-
-    const menuNameValue = formData.menuName?.trim();
-    const resolvedMenuName = menuNameValue ? menuNameValue : t('admin.menuEditor.dialog.defaultMenuName');
-
-    await Promise.resolve(onSave({
+    setFormData({
       ...formData,
-      menuName: resolvedMenuName,
-      categories: sortedCategories,
-    }));
+      categories,
+    });
+    setCategoryDialogOpen(false);
+    setCategoryNameInput('');
+    setEditingCategoryId(null);
+  };
+
+  const sortedCategories = (formData.categories || [])
+    .slice()
+    .sort((firstCategory, secondCategory) => Number(Boolean(secondCategory.showTopmost)) - Number(Boolean(firstCategory.showTopmost)));
+
+  const handleSave = () => {
+    onSave(formData);
     onClose();
   };
 
   const handleDelete = async () => {
     if (onDelete) {
-      await Promise.resolve(onDelete());
-      setMenuDeleteConfirmOpen(false);
+      onDelete();
       onClose();
     }
   };
 
-  const isDirty = useMemo(() => {
-    if (!open) {
-      return false;
-    }
-
-    const currentSnapshot = JSON.stringify({
-      menu: formData,
-      categories: menuEditorState.categories.map((category) => ({
-        id: category.id,
-        name: category.name,
-        items: menuEditorState.productsByCategoryId[category.id] || [],
-      })),
-    });
-
-    return currentSnapshot !== initialSnapshotRef.current;
-  }, [formData, menuEditorState, open]);
-
-  const handleAttemptClose = () => {
-    if (isDirty) {
-      setCancelConfirmOpen(true);
-      return;
-    }
-
-    onClose();
-  };
-
   const handleClose = () => {
-    handleAttemptClose();
+    onClose();
   };
 
   return (
     <Dialog 
       open={open} 
       onClose={handleClose}
-      maxWidth="lg"
+      maxWidth="md"
       fullWidth
       PaperProps={{
         sx: {
           borderRadius: theme.borderRadius.medium,
           boxShadow: theme.shadows.lg,
-          maxHeight: '90vh',
         }
       }}
     >
@@ -354,7 +281,7 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
         </Typography>
         <IconButton
           aria-label="close"
-          onClick={handleAttemptClose}
+          onClick={handleClose}
           sx={{
             color: 'text.secondary',
           }}
@@ -364,7 +291,7 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
       </Box>
 
       {/* Content */}
-      <DialogContent sx={{ p: theme.spacing.lg, overflowY: 'auto' }}>
+      <DialogContent sx={{ p: theme.spacing.lg }}>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: theme.spacing.sm, mb: theme.spacing.md }}>
           <Button
             variant="outlined"
@@ -418,22 +345,13 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
                         >
                           {category.name} ({category.items.length})
                         </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: theme.spacing.xs }}>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleOpenEditCategory(category)}
-                            sx={{ color: theme.colors.text }}
-                          >
-                            <EditOutlinedIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleOpenItemsDialog(category.id)}
-                            sx={{ color: theme.colors.text }}
-                          >
-                            <AddIcon fontSize="small" />
-                          </IconButton>
-                        </Box>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenEditCategory(category)}
+                          sx={{ color: theme.colors.text }}
+                        >
+                          <EditOutlinedIcon fontSize="small" />
+                        </IconButton>
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -461,13 +379,12 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
                           borderBottom: `1px solid ${theme.colors.border}`,
                         }}
                       >
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleRequestDeleteProduct(category.id, item.id, item.name)}
+                        <Typography
+                          variant="caption"
+                          sx={{ color: theme.colors.text, opacity: 0.65 }}
                         >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
+                          {t('admin.menuEditor.dialog.item')}
+                        </Typography>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -483,16 +400,6 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
                   )}
                 </React.Fragment>
               ))}
-
-              {sortedCategories.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={2} sx={{ py: 2 }}>
-                    <Typography variant="body2" sx={{ color: theme.colors.text, opacity: 0.65 }}>
-                      {t('admin.menuEditor.dialog.addCategory')}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -504,7 +411,7 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
           onCategoryNameChange={setCategoryNameInput}
           onClose={() => setCategoryDialogOpen(false)}
           onSave={handleSaveCategory}
-          onDeleteCategory={handleRequestDeleteCategory}
+          onOpenItemsDialog={handleOpenItemsDialog}
         />
 
         <MenuSettingsDialog
@@ -527,53 +434,6 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
           onClose={() => setItemsDialogOpen(false)}
           onSave={handleSaveCategoryItems}
         />
-
-        <ConfirmationDialog
-          open={pendingProductDelete !== null}
-          title={t('admin.menuEditor.dialog.deleteItemTitle')}
-          message={
-            pendingProductDelete
-              ? t('admin.menuEditor.dialog.deleteItemMessage', { itemName: pendingProductDelete.productName })
-              : ''
-          }
-          confirmLabel={t('common.confirm')}
-          cancelLabel={t('common.cancel')}
-          onClose={() => setPendingProductDelete(null)}
-          onConfirm={handleConfirmDeleteProduct}
-        />
-
-        <ConfirmationDialog
-          open={menuDeleteConfirmOpen}
-          title={t('admin.menuEditor.dialog.deleteMenuTitle')}
-          message={t('admin.menuEditor.dialog.deleteMenuMessage')}
-          confirmLabel={t('common.confirm')}
-          cancelLabel={t('common.cancel')}
-          onClose={() => setMenuDeleteConfirmOpen(false)}
-          onConfirm={handleDelete}
-        />
-
-        <ConfirmationDialog
-          open={categoryDeleteConfirmOpen}
-          title={t('admin.menuEditor.dialog.deleteCategoryTitle')}
-          message={t('admin.menuEditor.dialog.deleteCategoryMessage')}
-          confirmLabel={t('common.confirm')}
-          cancelLabel={t('common.cancel')}
-          onClose={() => setCategoryDeleteConfirmOpen(false)}
-          onConfirm={handleConfirmDeleteCategory}
-        />
-
-        <ConfirmationDialog
-          open={cancelConfirmOpen}
-          title={t('admin.menuEditor.dialog.cancelEditTitle')}
-          message={t('admin.menuEditor.dialog.cancelEditMessage')}
-          confirmLabel={t('common.confirm')}
-          cancelLabel={t('common.cancel')}
-          onClose={() => setCancelConfirmOpen(false)}
-          onConfirm={() => {
-            setCancelConfirmOpen(false);
-            onClose();
-          }}
-        />
       </DialogContent>
 
       {/* Actions */}
@@ -591,7 +451,7 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
               variant="outlined"
               color="error"
               startIcon={<DeleteIcon />}
-              onClick={() => setMenuDeleteConfirmOpen(true)}
+              onClick={handleDelete}
               sx={{
                 borderRadius: theme.borderRadius.large,
                 textTransform: 'none',
@@ -603,7 +463,7 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
         </Box>
         <Box sx={{ display: 'flex', gap: theme.spacing.sm }}>
           <Button 
-            onClick={handleAttemptClose}
+            onClick={handleClose}
             sx={{
               borderRadius: theme.borderRadius.large,
               textTransform: 'none',
