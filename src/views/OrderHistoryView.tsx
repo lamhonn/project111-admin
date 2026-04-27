@@ -19,7 +19,7 @@ export default function OrderHistoryView() {
 
   // Filter orders based on selected preset or custom date range
   const filteredOrders = useMemo(() => {
-    const now = new Date('2026-02-12'); // Current date from context
+    const now = new Date();
     let filterStartDate: Date;
 
     if (filterPreset === 'custom') {
