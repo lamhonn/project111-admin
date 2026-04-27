@@ -1,0 +1,322 @@
+{
+  "common": {
+    "cancel": "Peruuta",
+    "confirm": "Vahvista",
+    "close": "Sulje",
+    "save": "Tallenna",
+    "bill": "Lasku",
+    "total": "Loppusumma",
+    "table": "Pöytä",
+    "campaigns": "Kampanjat"  },
+  "dashboard": {
+    "title": "Hallintapaneeli",
+    "welcome": "Hei {{name}}, Tervetuloa Spooniin!",
+    "restaurantOpen": "Ravintola Auki",
+    "restaurantClosed": "Ravintola Suljettu",
+    "lastLogin": "Viimeisin kirjautuminen: {{time}}",
+    "menu": {
+      "dashboard": "Hallintapaneeli",
+      "tableMonitor": "Tilaustenseuranta",
+      "allOrders": "Kaikki Tilaukset",
+      "foodMenu": "Ruokalista",
+      "liveKitchen": "Keittiö Reaaliaikana",
+      "deliveriesStaff": "Toimitukset/Henkilökunta",
+      "tableBooking": "Pöytävaraukset",
+      "analytics": "Analytiikka",
+      "payments": "Maksut",
+      "manageStaff": "Hallitse Henkilökuntaa",
+      "customerReviews": "Asiakasarvostelut ja Valitukset",
+      "settings": "Asetukset",
+      "orderHistory": "Tilaushistoria"
+    },
+    "orders": {
+      "newActive": "Uudet Aktiiviset Tilaukset",
+      "incoming": "Saapuvat Tilaukset",
+      "inProcess": "Käsittelyssä Olevat Tilaukset",
+      "orderNo": "Tilaus nro: {{number}}",
+      "status": {
+        "ready": "Valmis",
+        "prep": "Valmistelu",
+        "cooking": "Kypsennetään"
+      }
+    },    "bills": {
+      "title": "Saapuvat laskut",
+      "pending": "Odottavat laskut",
+      "items": "tuotetta"
+    },    "delivery": {
+      "title": "Toimituksen Tila",
+      "delivered": "Tilaus Toimitettu",
+      "onTheWay": "Tilaus Matkalla",
+      "cancelled": "Tilaus Peruttu",
+      "view": "Näytä"
+    },
+    "stats": {
+      "title": "Tämän Päivän Tilaukset",
+      "today": "Tänään",
+      "yesterday": "Eilen",
+      "lastMonth": "Viime Kuussa"
+    },
+    "orderList": {
+      "headers": {
+        "orderNo": "Tilauksen nro",
+        "table": "Pöytä",
+        "time": "Aika",
+        "amount": "Summa",
+        "action": "Toiminto"
+      },
+      "sections": {
+        "newOrders": "Uudet Tilaukset",
+        "preparing": "Valmistuksessa",
+        "billRequests": "Laskupyynnöt"
+      },
+      "actions": {
+        "view": "Näytä",
+        "ready": "Valmis",
+        "print": "Tulosta"
+      },
+      "viewOrder": "Näytä Tilaus",
+      "tableLabel": "Pöytä {{number}}"
+    }
+  },
+  "orderOptionsDialog": {
+    "title": "Tilauksen Tiedot",
+    "orderNumber": "Tilaus #{{number}}",
+    "table": "Pöytä {{number}}",
+    "noProducts": "Ei tuotteita tässä tilauksessa",
+    "quantity": "Määrä",
+    "notes": "Huomautukset",
+    "total": "Yhteensä",
+    "actions": {
+      "confirm": "Vahvista Tilaus",
+      "orderReady": "Tilaus Valmis"
+    }
+  },
+  "admin": {
+    "title": "Ylläpitotyökalut",
+    "menu": {
+      "productEditor": "Tuoteeditori",
+      "menuEditor": "Menueditori",
+      "campaignEditor": "Kampanjaeditori",
+      "deviceManagement": "Laitehallinta"
+    },
+    "productEditor": {
+      "title": "Tuoteeditori",
+      "search": "Etsi tuotteita...",
+      "addProduct": "Lisää tuote",
+      "edit": "Muokkaa",
+      "delete": "Poista",
+      "dialog": {
+        "title": "Tuoteeditori",
+        "productImage": "Tuotekuva",
+        "browseImage": "Selaa kuvaa",
+        "moreGallery": "Lisää galleriavaihtoehtoja",
+        "productName": "Tuotteen nimi",
+        "addTranslation": "Lisää käännös",
+        "productNamePlaceholder": "Syötä tuotteen nimi",
+        "description": "Kuvaus",
+        "descriptionPlaceholder": "Syötä tuotteen kuvaus...",
+        "addToppings": "Lisää/poista lisätäytteet",
+        "addToppingPlaceholder": "lisää täyte",
+        "addToppingButton": "Lisää täyte",
+        "removeTopping": "Poista täyte",
+        "priceIncrement": "Hintalisä",
+        "freeToppings": "Ilmaiset täytteet",
+        "maxToppings": "Täytteitä enintään",
+        "toppingNameHeader": "Nimi",
+        "toppingPriceHeader": "Hinta",
+        "toppingRemoveHeader": "Poista",
+        "addExcludables": "Lisää/poista poistettavat",
+        "addExcludablePlaceholder": "lisää poistettava",
+        "addExcludableButton": "Lisää poistettava",
+        "removeExcludable": "Poista poistettava",
+        "ingredients": "Ainesosatiedot",
+        "ingredientsPlaceholder": "Luettele ainesosat...",
+        "editAllergens": "Muokkaa allergeeneja",
+        "languages": {
+          "finnish": "Suomi",
+          "english": "Englanti",
+          "swedish": "Ruotsi"
+        },
+        "allergens": {
+          "glutenFree": "Gluteeniton",
+          "lactoseFree": "Laktoositon",
+          "lowLactose": "Vähälaktoosinen",
+          "vegetarian": "Kasvis",
+          "vegan": "Vegaaninen"
+        },
+        "noneSelected": "Ei valittuja",
+        "deleteProduct": "Poista tuote",
+        "saveProduct": "Tallenna tuote"
+      }
+    },
+    "menuEditor": {
+      "title": "Menueditori",
+      "pageTitle": "Menueditori",
+      "pageSubtitle": "Muokkaa menuita",
+      "products": "tuotetta",
+      "search": "Etsi menuita...",
+      "addMenu": "Lisää menu",
+      "active": "Aktiivinen",
+      "inactive": "Ei aktiivinen",
+      "dialog": {
+        "title": "Muokkaa menua",
+        "menuName": "Menun nimi",
+        "menuNamePlaceholder": "Syötä menun nimi",
+        "description": "Kuvaus",
+        "descriptionPlaceholder": "Syötä menun kuvaus",
+        "activeStatus": "Aktiivinen",
+        "menuSettings": "Menun asetukset",
+        "addCategory": "Lisää kategoria",
+        "renameCategory": "Nimeä kategoria uudelleen",
+        "addRemoveItemsFromMenu": "Lisää/poista tuotteita",
+        "categoryName": "Kategorian nimi",
+        "searchProductsPlaceholder": "Etsi tuotteita...",
+        "noProductsFound": "Tuotteita ei löytynyt",
+        "noCategoryItems": "Tässä kategoriassa ei ole vielä tuotteita",
+        "item": "Tuote",
+        "showTopmost": "Näytä ylimpänä",
+        "activePeriod": "Aktiivinen ajanjakso",
+        "activePeriodStart": "Alkupäivä",
+        "activePeriodEnd": "Loppupäivä",
+        "automaticActiveDays": "Automaattiset aktiiviset päivät",
+        "activeFrom": "Alkaen",
+        "activeTo": "Päättyen",
+        "save": "Tallenna",
+        "cancel": "Peruuta",
+        "delete": "Poista menu"
+      }
+    },
+    "campaignEditor": {
+      "title": "Kampanjaeditori",
+      "pageTitle": "Kampanjaeditori",
+      "pageSubtitle": "Muokkaa kampanjoita",
+      "products": "tuotetta",
+      "search": "Etsi kampanjoita...",
+      "addCampaign": "Lisää kampanja",
+      "active": "Aktiivinen",
+      "inactive": "Ei aktiivinen",
+      "dialog": { 
+        "title": "Muokkaa kampanjaa",
+        "campaignName": "Kampanjan nimi",
+        "campaignNamePlaceholder": "Syötä kampanjan nimi",
+        "description": "Kuvaus",
+        "descriptionPlaceholder": "Syötä kampanjan kuvaus",
+        "activeStatus": "Aktiivinen",
+        "campaignSettings": "Kampanjan asetukset",
+        "addCategory": "Lisää kategoria",
+        "renameCategory": "Nimeä kategoria uudelleen",
+        "addRemoveItemsFromMenu": "Lisää/poista tuotteita",
+        "categoryName": "Kategorian nimi",
+        "searchProductsPlaceholder": "Etsi tuotteita...",
+        "noProductsFound": "Tuotteita ei löytynyt",
+        "noCategoryItems": "Tässä kategoriassa ei ole vielä tuotteita",
+        "item": "Tuote",
+        "automaticActiveDays": "Automaattiset aktiiviset päivät",
+        "activeFrom": "Alkaen",
+        "activeTo": "Päättyen",
+        "save": "Tallenna",
+        "cancel": "Peruuta",
+        "delete": "Poista kampanja"
+      }
+    }
+  },
+  "orderHistory": {
+    "title": "Tilaushistoria",
+    "orderNumber": "Tilausnumero",
+    "date": "Päivämäärä & Aika",
+    "table": "Pöytä",
+    "items": "Tuotteet",
+    "total": "Yhteensä",
+    "status": "Tila",
+    "server": "Tarjoilija",
+    "filters": {
+      "showLast": "Näytä viimeiset",
+      "today": "Tänään",
+      "threeDays": "3 päivää",
+      "week": "Viikko",
+      "month": "Kuukausi",
+      "custom": "Mukautettu",
+      "showBetween": "Näytä tilaukset välillä",
+      "to": "–",
+      "showing": "Näytetään {{count}} tilausta"
+    },
+    "dialog": {
+      "title": "Tilauksen Kuitti",
+      "noProducts": "Ei tuotteita tässä tilauksessa",
+      "quantity": "Määrä",
+      "notes": "Huomautukset",
+      "total": "Yhteensä"
+    }
+  },
+  "deviceManagement": {
+    "title": "Laitehallinta",
+    "pairDevice": "Liitä laite",
+    "pairInstructions": "Syötä seuraava PIN-koodi laitteeseen laitteen liittämiseksi",
+    "deviceId": "Laitteen ID",
+    "deviceName": "Laitteen nimi",
+    "tableNumber": "Pöytänumero",
+    "status": "Tila",
+    "lastSeen": "Viimeksi nähty",
+    "batteryLevel": "Akun taso",
+    "model": "Malli",
+    "deviceDetails": "Laitteen tiedot",
+    "edit": "Muokkaa",
+    "forgetDevice": "Unohda laite"  },
+  "tableManagement": {
+    "activeTables": "Aktiiviset pöydät",
+    "availableTables": "Saatavilla olevat pöydät",
+    "tableMonitor": "Pöytienseuranta"
+  },
+  "tableDialog": {
+    "noOrders": "Ei tilauksia vielä",
+    "bill": "Lasku",
+    "requested": "Pyydetty",
+    "item": "tuote",
+    "items": "tuotetta",
+    "primaryBill": "Päälasku",
+    "allItems": "Kaikki tuotteet",
+    "paymentSummary": "Maksun Yhteenveto",
+    "priceBeforeVat": "Hinta ennen ALV:a",
+    "vat": "ALV (14%)",
+    "actions": "Toiminnot",
+    "lockTable": "Lukitse pöytä",
+    "unlockTable": "Avaa pöytä",
+    "discard": "Hylkää",
+    "finalize": "Viimeistele"
+  },
+  "settings": {
+    "organizationAndBrand": "Organisaatio ja Brändi",
+    "organizationSettings": "Organisaation Asetukset",
+    "restaurantName": "Ravintolan Nimi",
+    "colorSettings": "Värien Asetukset",
+    "accentColor": "Aksenttiväri",
+    "backgroundColor": "Taustaväri",
+    "dialogColor": "Dialogi Väri",
+    "textColor": "Teksti Väri",
+    "actionBarColor": "Toimintopalkki Väri",
+    "credentials": "Tunnistetiedot",
+    "username": "Käyttäjänimi",
+    "email": "Sähköposti",
+    "changePasswordWip": "Vaihda salasana (WIP)",
+    "oldPassword": "Vanha Salasana",
+    "newPassword": "Uusi Salasana",
+    "logout": "Kirjaudu ulos",
+    "saveChanges": "Tallenna Muutokset",
+    "systemSettings": "Järjestelmän Asetukset",
+    "systemLanguage": "Järjestelmän Kieli",
+    "languageEnglish": "Englanti",
+    "languageFinnish": "Suomi",
+    "languageSwedish": "Ruotsi"
+  },
+  "auth": {
+    "login": "Kayttajatunnus",
+    "password": "Salasana",
+    "forgotPassword": "Unohditko salasanasi?",
+    "loginButton": "Kirjaudu",
+    "loginSubtitle": "Kirjaudu sisään jatkaaksesi hallintapaneeliin.",
+    "fillAllFields": "Täytä sekä käyttäjätunnus että salasana.",
+    "loginFailed": "Kirjautuminen epäonnistui",
+    "authorizationRequired": "Valtuutus vaaditaan"
+  }
+}
+

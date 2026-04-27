@@ -1,0 +1,325 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "save": "Save",
+    "bill": "Bill",
+    "total": "Total",
+    "table": "Table",
+    "campaigns": "Campaigns"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Hello {{name}}, Welcome to Spoon!",
+    "restaurantOpen": "Restaurant Open",
+    "restaurantClosed": "Restaurant Closed",
+    "lastLogin": "Last login: {{time}}",
+    "menu": {
+      "dashboard": "Dashboard",
+      "tableMonitor": "Table Monitor",
+      "allOrders": "All Orders",
+      "foodMenu": "Food Menu",
+      "liveKitchen": "Live Kitchen",
+      "deliveriesStaff": "Deliveries/Staff",
+      "tableBooking": "Table Booking",
+      "analytics": "Analytics",
+      "payments": "Payments",
+      "manageStaff": "Manage Staff",
+      "customerReviews": "Customer Reviews and Complaints",
+      "settings": "Settings",
+      "orderHistory": "Order History"
+    },
+    "orders": {
+      "newActive": "New Active Orders",
+      "incoming": "Incoming Orders",
+      "inProcess": "In Process Orders",
+      "orderNo": "Order no: {{number}}",
+      "status": {
+        "ready": "Ready",
+        "prep": "Prep",
+        "cooking": "Cooking"
+      }
+    },
+    "bills": {
+      "title": "Incoming Bills",
+      "pending": "Pending Bills",
+      "items": "items"
+    },
+    "delivery": {
+      "title": "Delivery Status",
+      "delivered": "Order Delivered",
+      "onTheWay": "Order On the Way",
+      "cancelled": "Order Cancelled",
+      "view": "View"
+    },
+    "stats": {
+      "title": "Today's Order Stats",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "lastMonth": "Last Month"
+    },
+    "orderList": {
+      "headers": {
+        "orderNo": "Order no.",
+        "table": "Table",
+        "time": "Time",
+        "amount": "Amount",
+        "action": "Action"
+      },
+      "sections": {
+        "newOrders": "New Orders",
+        "preparing": "Preparing",
+        "billRequests": "Bill Requests"
+      },
+      "actions": {
+        "view": "View",
+        "ready": "Ready",
+        "print": "Print"
+      },
+      "viewOrder": "View Order",
+      "tableLabel": "Table {{number}}"
+    }
+  },
+  "orderOptionsDialog": {
+    "title": "Order Details",
+    "orderNumber": "Order #{{number}}",
+    "table": "Table {{number}}",
+    "noProducts": "No products in this order",
+    "quantity": "Qty",
+    "notes": "Notes",
+    "total": "Total",
+    "actions": {
+      "confirm": "Confirm Order",
+      "orderReady": "Order Ready"
+    }
+  },
+  "admin": {
+    "title": "Admin Tools",
+    "menu": {
+      "productEditor": "Product Editor",
+      "menuEditor": "Menu Editor",
+      "campaignEditor": "Campaign Editor",
+      "deviceManagement": "Device Management"
+    },
+    "productEditor": {
+      "title": "Product Editor",
+      "search": "Search products...",
+      "addProduct": "Add Product",
+      "edit": "Edit",
+      "delete": "Delete",
+      "dialog": {
+        "title": "Product Editor",
+        "productImage": "Product Image",
+        "browseImage": "Browse Image",
+        "moreGallery": "More Gallery Options",
+        "productName": "Product Name",
+        "addTranslation": "Add translation",
+        "productNamePlaceholder": "Enter product name",
+        "description": "Description",
+        "descriptionPlaceholder": "Enter product description...",
+        "addToppings": "Add/Remove Extra Toppings",
+        "addToppingPlaceholder": "add a topping",
+        "addToppingButton": "Add a topping",
+        "removeTopping": "Remove topping",
+        "priceIncrement": "Price increment",
+        "freeToppings": "Free toppings",
+        "maxToppings": "Max toppings",
+        "toppingNameHeader": "Name",
+        "toppingPriceHeader": "Price",
+        "toppingRemoveHeader": "Remove",
+        "addExcludables": "Add/Remove Excludables",
+        "addExcludablePlaceholder": "add an excludable",
+        "addExcludableButton": "Add an excludable",
+        "removeExcludable": "Remove excludable",
+        "ingredients": "Ingredient Information",
+        "ingredientsPlaceholder": "List ingredients...",
+        "editAllergens": "Edit Allergens",
+        "languages": {
+          "finnish": "Finnish",
+          "english": "English",
+          "swedish": "Swedish"
+        },
+        "allergens": {
+          "glutenFree": "Gluten free",
+          "lactoseFree": "Lactose free",
+          "lowLactose": "Low lactose",
+          "vegetarian": "Vegetarian",
+          "vegan": "Vegan"
+        },
+        "noneSelected": "None selected",
+        "deleteProduct": "Delete Product",
+        "saveProduct": "Save Product"
+      }
+    },
+    "menuEditor": {
+      "title": "Menu Editor",
+      "pageTitle": "Menu Editor",
+      "pageSubtitle": "Edit menus",
+      "products": "products",
+      "search": "Search menus...",
+      "addMenu": "Add Menu",
+      "active": "Active",
+      "inactive": "Inactive",
+      "dialog": {
+        "title": "Edit Menu",
+        "menuName": "Menu Name",
+        "menuNamePlaceholder": "Enter menu name",
+        "description": "Description",
+        "descriptionPlaceholder": "Enter menu description",
+        "activeStatus": "Active",
+        "menuSettings": "Menu settings",
+        "addCategory": "Add a category",
+        "renameCategory": "Rename category",
+        "addRemoveItemsFromMenu": "Add/remove items from menu",
+        "categoryName": "Category name",
+        "searchProductsPlaceholder": "Search products...",
+        "noProductsFound": "No products found",
+        "noCategoryItems": "No items in this category yet",
+        "item": "Item",
+        "showTopmost": "Show topmost",
+        "activePeriod": "Active period",
+        "activePeriodStart": "Start date",
+        "activePeriodEnd": "End date",
+        "automaticActiveDays": "Automatic active days",
+        "activeFrom": "From",
+        "activeTo": "To",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete Menu"
+      }
+    },
+    "campaignEditor": {
+      "title": "Campaign Editor",
+      "pageTitle": "Campaign Editor",
+      "pageSubtitle": "Edit campaigns",
+      "products": "products",
+      "search": "Search campaigns...",
+      "addCampaign": "Add Campaign",
+      "active": "Active",
+      "inactive": "Inactive",
+      "dialog": {
+        "title": "Edit Campaign",
+        "campaignName": "Campaign Name",
+        "campaignNamePlaceholder": "Enter campaign name",
+        "description": "Description",
+        "descriptionPlaceholder": "Enter campaign description",
+        "activeStatus": "Active",
+        "campaignSettings": "Campaign settings",
+        "addCategory": "Add a category",
+        "renameCategory": "Rename category",
+        "addRemoveItemsFromMenu": "Add/remove items from menu",
+        "categoryName": "Category name",
+        "searchProductsPlaceholder": "Search products...",
+        "noProductsFound": "No products found",
+        "noCategoryItems": "No items in this category yet",
+        "item": "Item",
+        "automaticActiveDays": "Automatic active days",
+        "activeFrom": "From",
+        "activeTo": "To",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete Campaign"
+      }
+    }
+  },
+  "orderHistory": {
+    "title": "Order History",
+    "orderNumber": "Order Number",
+    "date": "Date & Time",
+    "table": "Table",
+    "items": "Items",
+    "total": "Total",
+    "status": "Status",
+    "server": "Server",
+    "filters": {
+      "showLast": "Show last",
+      "today": "Today",
+      "threeDays": "3 days",
+      "week": "Week",
+      "month": "Month",
+      "custom": "Custom",
+      "showBetween": "Show orders between",
+      "to": "to",
+      "showing": "Showing {{count}} orders"
+    },
+    "dialog": {
+      "title": "Order Receipt",
+      "noProducts": "No products in this order",
+      "quantity": "Qty",
+      "notes": "Notes",
+      "total": "Total"
+    }
+  },
+  "deviceManagement": {
+    "title": "Device Management",
+    "pairDevice": "Pair a Device",
+    "pairInstructions": "Enter the following PIN to the device to pair the device",
+    "deviceId": "Device ID",
+    "deviceName": "Device Name",
+    "tableNumber": "Table Number",
+    "status": "Status",
+    "lastSeen": "Last Seen",
+    "batteryLevel": "Battery Level",
+    "model": "Model",
+    "deviceDetails": "Device Details",
+    "edit": "Edit",
+    "forgetDevice": "Forget Device"
+  },
+  "tableManagement": {
+    "activeTables": "Active Tables",
+    "availableTables": "Available Tables",
+    "tableMonitor": "Table Monitor"
+  },
+  "tableDialog": {
+    "noOrders": "No orders yet",
+    "bill": "Bill",
+    "requested": "Requested",
+    "item": "item",
+    "items": "items",
+    "primaryBill": "Primary Bill",
+    "allItems": "All Items",
+    "paymentSummary": "Payment Summary",
+    "priceBeforeVat": "Price before VAT",
+    "vat": "VAT (14%)",
+    "actions": "Actions",
+    "lockTable": "Lock Table",
+    "unlockTable": "Unlock Table",
+    "discard": "Discard",
+    "finalize": "Finalize"
+  },
+  "settings": {
+    "organizationAndBrand": "Organization and Brand",
+    "organizationSettings": "Organization Settings",
+    "restaurantName": "Restaurant Name",
+    "colorSettings": "Color Settings",
+    "accentColor": "Accent Color",
+    "backgroundColor": "Background Color",
+    "dialogColor": "Dialog Color",
+    "textColor": "Text Color",
+    "actionBarColor": "Action Bar Color",
+    "credentials": "Credentials",
+    "username": "Username",
+    "email": "Email",
+    "changePasswordWip": "Change Password (WIP)",
+    "oldPassword": "Old Password",
+    "newPassword": "New Password",
+    "logout": "Log out",
+    "saveChanges": "Save Changes",
+    "systemSettings": "System Settings",
+    "systemLanguage": "System Language",
+    "languageEnglish": "English",
+    "languageFinnish": "Finnish",
+    "languageSwedish": "Swedish"
+  },
+  "auth": {
+    "login": "Login",
+    "password": "Password",
+    "forgotPassword": "Forgot your password?",
+    "loginButton": "Login",
+    "loginSubtitle": "Sign in to continue to your dashboard.",
+    "fillAllFields": "Please fill in both login and password.",
+    "loginFailed": "Login failed",
+    "authorizationRequired": "Authorization required"
+  }
+}

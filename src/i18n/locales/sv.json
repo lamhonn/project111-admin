@@ -1,0 +1,323 @@
+{
+  "common": {
+    "cancel": "Avbryt",
+    "confirm": "Bekräfta",
+    "close": "Stäng",
+    "save": "Spara",
+    "bill": "Totalt",
+    "total": "Totalt",
+    "table": "Bord",
+    "campaigns": "Kampanjer"  },
+  "dashboard": {
+    "title": "Instrumentpanel",
+    "welcome": "Hej {{name}}, Välkommen till Spoon!",
+    "restaurantOpen": "Restaurangen Öppen",
+    "restaurantClosed": "Restaurangen Stängd",
+    "lastLogin": "Senaste inloggning: {{time}}",
+    "menu": {
+      "dashboard": "Instrumentpanel",
+      "tableMonitor": "Bordövervakning",
+      "allOrders": "Alla Beställningar",
+      "foodMenu": "Matmeny",
+      "liveKitchen": "Kök Live",
+      "deliveriesStaff": "Leveranser/Personal",
+      "tableBooking": "Bordsbokningar",
+      "analytics": "Analys",
+      "payments": "Betalningar",
+      "manageStaff": "Hantera Personal",
+      "customerReviews": "Kundrecensioner och Klagomål",
+      "settings": "Inställningar",
+      "orderHistory": "Beställningshistorik"
+    },
+    "orders": {
+      "newActive": "Nya Aktiva Beställningar",
+      "incoming": "Inkommande Beställningar",
+      "inProcess": "Beställningar Under Behandling",
+      "orderNo": "Beställning nr: {{number}}",
+      "status": {
+        "ready": "Klar",
+        "prep": "Förberedelse",
+        "cooking": "Tillagning"
+      }
+    },
+    "bills": {
+      "title": "Inkommande Räkningar",
+      "pending": "Väntande Räkningar",
+      "items": "artiklar"
+    },
+    "delivery": {
+      "title": "Leveransstatus",
+      "delivered": "Beställning Levererad",
+      "onTheWay": "Beställning På Väg",
+      "cancelled": "Beställning Avbruten",
+      "view": "Visa"
+    },
+    "stats": {
+      "title": "Dagens Beställningsstatistik",
+      "today": "Idag",
+      "yesterday": "Igår",
+      "lastMonth": "Förra Månaden"
+    },
+    "orderList": {
+      "headers": {
+        "orderNo": "Beställning Nr.",
+        "table": "Bord",
+        "time": "Tid",
+        "amount": "Summa",
+        "action": "Åtgärd"
+      },
+      "sections": {
+        "newOrders": "Nya Beställningar",
+        "preparing": "Förbereder",
+        "billRequests": "Räkningsförfrågningar"
+      },
+      "actions": {
+        "view": "Visa",
+        "ready": "Klar",
+        "print": "Skriv ut"
+      },
+      "viewOrder": "Visa Beställning",
+      "tableLabel": "Bord {{number}}"
+    }
+  },
+  "orderOptionsDialog": {
+    "title": "Beställningsdetaljer",
+    "orderNumber": "Beställning #{{number}}",
+    "table": "Bord {{number}}",
+    "noProducts": "Inga produkter i denna beställning",
+    "quantity": "Antal",
+    "notes": "Anmärkningar",
+    "total": "Totalt",
+    "actions": {
+      "confirm": "Bekräfta Beställning",
+      "orderReady": "Beställning Klar"
+    }
+  },
+  "admin": {
+    "title": "Administrationsverktyg",
+    "menu": {
+      "productEditor": "Produktredigerare",
+      "menuEditor": "Menyredigerare",
+      "campaignEditor": "Kampanjredigerare",
+      "deviceManagement": "Enhetshantering"
+    },
+    "productEditor": {
+      "title": "Produktredigerare",
+      "search": "Sök produkter...",
+      "addProduct": "Lägg till produkt",
+      "edit": "Redigera",
+      "delete": "Radera",
+      "dialog": {
+        "title": "Produktredigerare",
+        "productImage": "Produktbild",
+        "browseImage": "Bläddra bild",
+        "moreGallery": "Fler gallerialternativ",
+        "productName": "Produktnamn",
+        "addTranslation": "Lägg till översättning",
+        "productNamePlaceholder": "Ange produktnamn",
+        "description": "Beskrivning",
+        "descriptionPlaceholder": "Ange produktbeskrivning...",
+        "addToppings": "Lägg till/ta bort extra pålägg",
+        "addToppingPlaceholder": "lägg till ett pålägg",
+        "addToppingButton": "Lägg till ett pålägg",
+        "removeTopping": "Ta bort pålägg",
+        "priceIncrement": "Pristillägg",
+        "freeToppings": "Gratis pålägg",
+        "maxToppings": "Max pålägg",
+        "toppingNameHeader": "Namn",
+        "toppingPriceHeader": "Pris",
+        "toppingRemoveHeader": "Ta bort",
+        "addExcludables": "Lägg till/ta bort exkluderbara",
+        "addExcludablePlaceholder": "lägg till ett exkluderbart",
+        "addExcludableButton": "Lägg till ett exkluderbart",
+        "removeExcludable": "Ta bort exkluderbart",
+        "ingredients": "Ingrediensinformation",
+        "ingredientsPlaceholder": "Lista ingredienser...",
+        "editAllergens": "Redigera allergener",
+        "languages": {
+          "finnish": "Finska",
+          "english": "Engelska",
+          "swedish": "Svenska"
+        },
+        "allergens": {
+          "glutenFree": "Glutenfri",
+          "lactoseFree": "Laktosfri",
+          "lowLactose": "Låglaktos",
+          "vegetarian": "Vegetarisk",
+          "vegan": "Vegansk"
+        },
+        "noneSelected": "Inga valda",
+        "deleteProduct": "Radera produkt",
+        "saveProduct": "Spara produkt"
+      }
+    },
+    "menuEditor": {
+      "title": "Menyredigerare",
+      "pageTitle": "Menyredigerare",
+      "pageSubtitle": "Redigera menyer",
+      "products": "produkter",
+      "search": "Sök menyer...",
+      "addMenu": "Lägg till meny",
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "dialog": {
+        "title": "Redigera meny",
+        "menuName": "Menynamn",
+        "menuNamePlaceholder": "Ange menynamn",
+        "description": "Beskrivning",
+        "descriptionPlaceholder": "Ange menybeskrivning",
+        "activeStatus": "Aktiv",
+        "menuSettings": "Menyinställningar",
+        "addCategory": "Lägg till en kategori",
+        "renameCategory": "Byt namn på kategori",
+        "addRemoveItemsFromMenu": "Lägg till/ta bort artiklar från menyn",
+        "categoryName": "Kategorinamn",
+        "searchProductsPlaceholder": "Sök produkter...",
+        "noProductsFound": "Inga produkter hittades",
+        "noCategoryItems": "Inga artiklar i denna kategori ännu",
+        "item": "Artikel",
+        "showTopmost": "Visa överst",
+        "activePeriod": "Aktiv period",
+        "activePeriodStart": "Startdatum",
+        "activePeriodEnd": "Slutdatum",
+        "automaticActiveDays": "Automatiska aktiva dagar",
+        "activeFrom": "Från",
+        "activeTo": "Till",
+        "save": "Spara",
+        "cancel": "Avbryt",
+        "delete": "Radera meny"
+      }
+    },
+    "campaignEditor": {
+      "title": "Kampanjredigerare",
+      "pageTitle": "Kampanjredigerare",
+      "pageSubtitle": "Redigera kampanjer",
+      "products": "produkter",
+      "search": "Sök kampanjer...",
+      "addCampaign": "Lägg till kampanj",
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "dialog": {
+        "title": "Redigera kampanj",
+        "campaignName": "Kampanjnamn",
+        "campaignNamePlaceholder": "Ange kampanjnamn",
+        "description": "Beskrivning",
+        "descriptionPlaceholder": "Ange kampanjbeskrivning",
+        "activeStatus": "Aktiv",
+        "campaignSettings": "Kampanjinställningar",
+        "addCategory": "Lägg till en kategori",
+        "renameCategory": "Byt namn på kategori",
+        "addRemoveItemsFromMenu": "Lägg till/ta bort artiklar från menyn",
+        "categoryName": "Kategorinamn",
+        "searchProductsPlaceholder": "Sök produkter...",
+        "noProductsFound": "Inga produkter hittades",
+        "noCategoryItems": "Inga artiklar i denna kategori ännu",
+        "item": "Artikel",
+        "automaticActiveDays": "Automatiska aktiva dagar",
+        "activeFrom": "Från",
+        "activeTo": "Till",
+        "save": "Spara",
+        "cancel": "Avbryt",
+        "delete": "Radera kampanj"
+      }
+    }
+  },
+  "orderHistory": {
+    "title": "Beställningshistorik",
+    "orderNumber": "Beställningsnummer",
+    "date": "Datum & Tid",
+    "table": "Bord",
+    "items": "Artiklar",
+    "total": "Totalt",
+    "status": "Status",
+    "server": "Servitör",
+    "filters": {
+      "showLast": "Visa senaste",
+      "today": "Idag",
+      "threeDays": "3 dagar",
+      "week": "Vecka",
+      "month": "Månad",
+      "custom": "Anpassad",
+      "showBetween": "Visa beställningar mellan",
+      "to": "till",
+      "showing": "Visar {{count}} beställningar"
+    },
+    "dialog": {
+      "title": "Beställningskvitto",
+      "noProducts": "Inga produkter i denna beställning",
+      "quantity": "Antal",
+      "notes": "Anmärkningar",
+      "total": "Totalt"
+    }
+  },
+  "deviceManagement": {
+    "title": "Enhetshantering",
+    "pairDevice": "Para en enhet",
+    "pairInstructions": "Ange följande PIN-kod till enheten för att para enheten",
+    "deviceId": "Enhets-ID",
+    "deviceName": "Enhetsnamn",
+    "tableNumber": "Bordsnummer",
+    "status": "Status",
+    "lastSeen": "Senast sedd",
+    "batteryLevel": "Batterinivå",
+    "model": "Modell",
+    "deviceDetails": "Enhetsinformation",
+    "edit": "Redigera",
+    "forgetDevice": "Glöm enhet"  },
+  "tableManagement": {
+    "activeTables": "Aktiva Bord",
+    "availableTables": "Tillgängliga Bord",
+    "tableMonitor": "Bordövervakning"
+  },
+  "tableDialog": {
+    "noOrders": "Inga beställningar än",
+    "bill": "Notering",
+    "requested": "Begärd",
+    "item": "artikel",
+    "items": "artiklar",
+    "primaryBill": "Primär not.",
+    "allItems": "Alla artiklar",
+    "paymentSummary": "Betalningssammanfattning",
+    "priceBeforeVat": "Pris före moms",
+    "vat": "Moms (14%)",
+    "actions": "Åtgärder",
+    "lockTable": "Lås bord",
+    "unlockTable": "Lås upp bord",
+    "discard": "Förkasta",
+    "finalize": "Slutför"
+  },
+  "settings": {
+    "organizationAndBrand": "Organisation och Varumärke",
+    "organizationSettings": "Organisationsinställningar",
+    "restaurantName": "Restaurangnamn",
+    "colorSettings": "Färginställningar",
+    "accentColor": "Accentfärg",
+    "backgroundColor": "Bakgrundsfärg",
+    "dialogColor": "Dialogfärg",
+    "textColor": "Textfärg",
+    "actionBarColor": "Åtgärdsfältfärg",
+    "credentials": "Autentiseringsuppgifter",
+    "username": "Användarnamn",
+    "email": "E-post",
+    "changePasswordWip": "Byt lösenord (WIP)",
+    "oldPassword": "Gammalt Lösenord",
+    "newPassword": "Nytt Lösenord",
+    "logout": "Logga ut",
+    "saveChanges": "Spara Ändringar",
+    "systemSettings": "Systeminställningar",
+    "systemLanguage": "Systemspråk",
+    "languageEnglish": "Engelska",
+    "languageFinnish": "Finska",
+    "languageSwedish": "Svenska"
+  },
+  "auth": {
+    "login": "Anvandarnamn",
+    "password": "Losenord",
+    "forgotPassword": "Glomt ditt losenord?",
+    "loginButton": "Logga in",
+    "loginSubtitle": "Logga in for att fortsatta till din instrumentpanel.",
+    "fillAllFields": "Fyll i bade anvandarnamn och losenord.",
+    "loginFailed": "Inloggning misslyckades",
+    "authorizationRequired": "Auktorisering kravs"
+  }
+}
