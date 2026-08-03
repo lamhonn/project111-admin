@@ -1,0 +1,7 @@
+export enum UserRole {
+    UNKNOWN,
+    TABLET,
+    RESTAURANT_STAFF,
+    RESTAURANT_MANAGER,
+    SUPERUSER,
+}
