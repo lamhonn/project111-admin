@@ -4,7 +4,7 @@ import { useState } from 'react';
 import ProductEditorHeader from '../components/productEditor/ProductEditorHeader';
 import ProductGrid from '../components/productEditor/ProductGrid';
 import EditProductDialog from '../components/productEditor/EditProductDialog';
-import ErrorReportDialog from '../components/common/ErrorReportDialog';
+import ErrorDialog from '../components/common/ErrorDialog';
 import type { ProductListItemViewModel } from '../viewModels';
 import { useGetProducts } from '../api/hooks/product.hooks';
 
@@ -170,7 +170,7 @@ export default function ProductEditorView() {
         } : undefined}
       />
 
-      <ErrorReportDialog
+      <ErrorDialog
         open={Boolean(errorMessage)}
         errorMessage={errorMessage ?? ''}
         onClose={() => setErrorMessage(null)}

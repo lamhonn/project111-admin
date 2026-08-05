@@ -1,26 +1,21 @@
 import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Chip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme';
+import { selectedTabletIdAtom, tabletsAtom } from '../../state/tabletStore';
+import { useAtomValue, useSetAtom } from 'jotai';
+import DeviceDialog from './DeviceDialog';
+import { useState } from 'react';
 
-export interface Device {
-  id: string;
-  deviceId: string;
-  tableNumber: string;
-  status: string;
-  lastSeen: string;
-}
+export default function DeviceList() {
+  const { t, i18n } = useTranslation();
+  const tablets = useAtomValue(tabletsAtom);
+  const [tabletDialogOpen, setTabletDialogOpen] = useState<boolean>(false);
+  const setSelectedTablet = useSetAtom(selectedTabletIdAtom);
 
-interface DeviceListProps {
-  devices: Device[];
-  onRowClick: (device: Device) => void;
-}
-
-export default function DeviceList({ devices, onRowClick }: DeviceListProps) {
-  const { t } = useTranslation();
-
-  const getStatusColor = (status: string) => {
-    return status === 'Connected' ? 'success' : 'default';
-  };
+  const handleRowClick = (tabletId: string) => {
+    setSelectedTablet(tabletId);
+    setTabletDialogOpen(true);
+  }
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -66,53 +61,62 @@ export default function DeviceList({ devices, onRowClick }: DeviceListProps) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {devices.map((device) => (
-              <TableRow
-                key={device.id}
-                hover
-                onClick={() => onRowClick(device)}
-                sx={{ 
-                  '&:last-child td, &:last-child th': { border: 0 },
-                  transition: theme.transitions.fast,
-                  cursor: 'pointer',
-                  '&:hover': {
-                    bgcolor: theme.colors.primaryLight,
-                  }
-                }}
-              >
-                <TableCell>
-                  <Typography 
-                    variant="body2" 
-                    fontWeight={theme.typography.fontWeights.semibold}
-                    sx={{ color: theme.colors.text }}
-                  >
-                    {device.deviceId}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography 
-                    variant="body2" 
-                    sx={{ color: theme.colors.text }}
-                  >
-                    {device.tableNumber}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    label={device.status}
-                    color={getStatusColor(device.status)}
-                    size="small"
-                    sx={{
-                      borderRadius: theme.borderRadius.large,
-                      fontWeight: theme.typography.fontWeights.semibold,
+            {tablets.length > 0 ? (
+              <>
+                {tablets.map((tablet) => (
+                  <TableRow
+                    key={tablet.Id}
+                    hover
+                    onClick={() => handleRowClick(tablet.Id)}
+                    sx={{ 
+                      '&:last-child td, &:last-child th': { border: 0 },
+                      transition: theme.transitions.fast,
+                      cursor: 'pointer',
+                      '&:hover': {
+                        bgcolor: theme.colors.primaryLight,
+                      }
                     }}
-                  />
-                </TableCell>
+                  >
+                    <TableCell>
+                      <Typography 
+                        variant="body2" 
+                        fontWeight={theme.typography.fontWeights.semibold}
+                        sx={{ color: theme.colors.text }}
+                      >
+                        {tablet.Id}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ color: theme.colors.text }}
+                      >
+                        {tablet.TableNumber}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </>
+            )
+            :
+            (
+              <TableRow>
+                <Typography variant="body1" sx={{ color: theme.colors.text }}>
+                  {t('deviceManagement.noDevicesConfigured', { defaultValue: 'No devices configured' })}
+                </Typography>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Device Dialog */}
+      <DeviceDialog 
+        isOpen={tabletDialogOpen}
+        onClose={() => {
+          setTabletDialogOpen(false);
+        }}
+      />
     </Box>
   );
 }

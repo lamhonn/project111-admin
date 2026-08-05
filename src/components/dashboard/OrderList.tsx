@@ -11,35 +11,29 @@ import {
   Button,
   Typography,
 } from '@mui/material';
-import { useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
-import { 
-  selectedOrderAtom,
-  orderOptionsDialogOpenAtom,
-  type OrderListSection 
-} from '../../context/dashboardStore';
-import { useDashboardOrdersById, useGetOrderListSections, getOrderDetails } from '../../api/hooks/dashboard.hooks';
 import OrderOptionsDialog from './OrderOptionsDialog';
+import { newOrdersAtom, preparingOrdersAtom, selectedOrderIdAtom } from '../../state/orderStore';
+import { orderOptionsDialogOpenAtom } from '../../state/orderStore';
+import { OrderViewModel } from '../../types/viewModels/orderViewModel';
 
 const OrderList: React.FC = () => {
   const { t } = useTranslation();
-  const setSelectedOrder = useSetAtom(selectedOrderAtom);
+  const setSelectedOrder = useSetAtom(selectedOrderIdAtom);
   const setDialogOpen = useSetAtom(orderOptionsDialogOpenAtom);
-  const { data: orderSections } = useGetOrderListSections();
-  const dashboardOrdersById = useDashboardOrdersById();
+  const newOrders = useAtomValue(newOrdersAtom);
+  const preparingOrders = useAtomValue(preparingOrdersAtom);
 
   // Handle row click to open dialog
-  const handleRowClick = (orderNo: string) => {
-    const orderDetails = getOrderDetails(orderNo, dashboardOrdersById);
-    if (orderDetails) {
-      setSelectedOrder(orderDetails);
-      setDialogOpen(true);
-    }
+  const handleRowClick = (orderId: string) => {
+    setSelectedOrder(orderId);
+    setDialogOpen(true);
   };
 
-  const renderSection = (section: OrderListSection) => (
-    <React.Fragment key={section.section}>
+  const renderSection = (section: string, orders: OrderViewModel[]) => (
+    <React.Fragment key={section}>  
       <TableRow>
         <TableCell 
           colSpan={5} 
@@ -54,15 +48,15 @@ const OrderList: React.FC = () => {
             fontWeight={theme.typography.fontWeights.semibold}
             sx={{ color: theme.colors.text }}
           >
-            {t(`dashboard.orderList.sections.${section.section}`)} ({section.count})
+            {t(`dashboard.orderList.sections.${section}`)} ({orders.length})
           </Typography>
         </TableCell>
       </TableRow>
-      {section.orders.map((order, idx) => (
+      {orders.map((order, idx) => (
         <TableRow
-          key={`${order.orderNo}-${idx}`}
+          key={`${order.Id}-${idx}`}
           hover
-          onClick={() => handleRowClick(order.orderNo)}
+          onClick={() => handleRowClick(order.Id)}
           sx={{ 
             '&:last-child td, &:last-child th': { border: 0 },
             transition: theme.transitions.fast,
@@ -78,7 +72,7 @@ const OrderList: React.FC = () => {
               fontWeight={theme.typography.fontWeights.semibold}
               sx={{ color: theme.colors.text }}
             >
-              {order.orderNo}
+              {order.Id}
             </Typography>
           </TableCell>
           <TableCell>
@@ -87,7 +81,7 @@ const OrderList: React.FC = () => {
               fontWeight={theme.typography.fontWeights.medium}
               sx={{ color: theme.colors.text }}
             >
-              {t('dashboard.orderList.tableLabel', { number: order.tableNumber })}
+              {t('dashboard.orderList.tableLabel', { number: order.TableNumber })}
             </Typography>
           </TableCell>
           <TableCell>
@@ -95,7 +89,7 @@ const OrderList: React.FC = () => {
               variant="caption" 
               sx={{ color: theme.colors.text, opacity: 0.6 }}
             >
-              {order.time}
+              {order.Created.toLocaleDateString()}
             </Typography>
           </TableCell>
           <TableCell>
@@ -104,14 +98,13 @@ const OrderList: React.FC = () => {
               fontWeight={theme.typography.fontWeights.semibold}
               sx={{ color: theme.colors.text }}
             >
-              {order.amount}
+              {order.OrderProducts.length}
             </Typography>
           </TableCell>
           <TableCell align="right">
             <Button
               variant="contained"
               size="small"
-              color={order.statusColor}
               sx={{
                 borderRadius: theme.borderRadius.xlarge,
                 textTransform: 'none',
@@ -124,7 +117,7 @@ const OrderList: React.FC = () => {
                 }
               }}
             >
-              {t(`dashboard.orderList.actions.${order.status}`)}
+              {t(`dashboard.orderList.actions.${order.OrderStatus}`)}
             </Button>
           </TableCell>
         </TableRow>
@@ -194,7 +187,10 @@ const OrderList: React.FC = () => {
               </TableCell>
             </TableRow>
           </TableHead>
-          <TableBody>{orderSections.map(renderSection)}</TableBody>
+          <TableBody>
+            {renderSection("newOrders", newOrders)}
+            {renderSection("preparing", preparingOrders)}
+          </TableBody>
         </Table>
       </TableContainer>
       </Box>

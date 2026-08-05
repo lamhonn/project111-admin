@@ -10,11 +10,14 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../theme/theme';
-import { useAuthorization } from '../api/hooks/auth.hooks';
+import { errorAtom, loadingAtom, loginAtom } from '../state/authStore';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 const UnauthorizedView: React.FC = () => {
   const { t } = useTranslation();
-  const { authorizeWithCredentials, isAuthorizing } = useAuthorization();
+  const loading = useAtomValue(loadingAtom);
+  const loginError = useAtomValue(errorAtom);
+  const tryLogin = useSetAtom(loginAtom);
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string>('');
@@ -27,10 +30,11 @@ const UnauthorizedView: React.FC = () => {
       return;
     }
 
-    const result = await authorizeWithCredentials(login.trim(), password);
-    if (!result.success) {
-      setError(result.error || t('auth.loginFailed'));
-      return;
+    try {
+      tryLogin({ Login: login, Password: password });
+    }
+    catch {
+      setError(loginError ?? 'Unknown error');
     }
 
     setError('');
@@ -116,7 +120,7 @@ const UnauthorizedView: React.FC = () => {
               type="submit" 
               variant="contained" 
               fullWidth 
-              disabled={isAuthorizing} 
+              disabled={loading} 
               sx={{ 
                 borderRadius: theme.borderRadius.medium,
                 height: theme.height.xxlarge, 

@@ -3,83 +3,26 @@ import { Close as CloseIcon } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme';
-
-export interface PairingPinData {
-  pairingSessionId?: string;
-  tableNumber: number;
-  pin: string;
-  expiresAt: string;
-}
+import { startTabletPairingAtom, tabletPairingPinAtom } from '../../state/tabletStore';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 interface PairDeviceDialogProps {
-  open: boolean;
+  isOpen: boolean;
   onClose: () => void;
-  livePinUpdate?: PairingPinData | null;
 }
 
 export default function PairDeviceDialog({
-  open,
+  isOpen,
   onClose,
-  livePinUpdate = null,
 }: PairDeviceDialogProps) {
   const { t } = useTranslation();
-  const [pairingPin, setPairingPin] = useState<PairingPinData | null>(null);
-  const [countdownMs, setCountdownMs] = useState<number>(0);
+
+  const startPairing = useSetAtom(startTabletPairingAtom);
+  const pairingPin = useAtomValue(tabletPairingPinAtom);
 
   useEffect(() => {
-    if (open) {
-      setPairingPin(livePinUpdate);
-      if (livePinUpdate) {
-        setCountdownMs(Math.max(0, new Date(livePinUpdate.expiresAt).getTime() - Date.now()));
-      } else {
-        setCountdownMs(0);
-      }
-    }
-  }, [open, livePinUpdate]);
-
-  const isSamePinStream = (current: PairingPinData, incoming: PairingPinData) => {
-    if (current.pairingSessionId && incoming.pairingSessionId) {
-      return current.pairingSessionId === incoming.pairingSessionId;
-    }
-
-    return current.tableNumber === incoming.tableNumber;
-  };
-
-  useEffect(() => {
-    if (!livePinUpdate) {
-      return;
-    }
-
-    setPairingPin((previous) => {
-      if (!previous) {
-        return livePinUpdate;
-      }
-
-      if (!isSamePinStream(previous, livePinUpdate)) {
-        return previous;
-      }
-
-      return livePinUpdate;
-    });
-  }, [livePinUpdate]);
-
-  useEffect(() => {
-    if (!open || !pairingPin) {
-      return;
-    }
-
-    const updateCountdown = () => {
-      const remaining = Math.max(0, new Date(pairingPin.expiresAt).getTime() - Date.now());
-      setCountdownMs(remaining);
-    };
-
-    updateCountdown();
-    const intervalId = window.setInterval(updateCountdown, 1000);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [open, pairingPin]);
+    startPairing();
+  }, []);
 
   const formatPin = (pin: string): string => {
     if (pin.length < 8) {
@@ -89,11 +32,9 @@ export default function PairDeviceDialog({
     return `${pin.slice(0, 4)} ${pin.slice(4, 8)}`;
   };
 
-  const remainingSeconds = Math.ceil(countdownMs / 1000);
-
   return (
     <Dialog
-      open={open}
+      open={isOpen}
       onClose={onClose}
       maxWidth="sm"
       fullWidth
@@ -163,12 +104,7 @@ export default function PairDeviceDialog({
                     fontFamily: 'monospace',
                   }}
                 >
-                  {formatPin(pairingPin.pin)}
-                </Typography>
-                <Typography variant="body2" sx={{ mt: 1, color: theme.colors.text, opacity: 0.8 }}>
-                  {remainingSeconds > 0
-                    ? t('deviceManagement.pinExpiresIn', { defaultValue: 'PIN expires in {{seconds}}s', seconds: remainingSeconds })
-                    : t('deviceManagement.waitingPinRotation', { defaultValue: 'Waiting for server PIN rotation...' })}
+                  {formatPin(pairingPin)}
                 </Typography>
               </>
             ) : (

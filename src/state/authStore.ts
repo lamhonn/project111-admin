@@ -3,6 +3,7 @@ import { atom } from 'jotai';
 import { atomWithStorage, atomWithReset } from 'jotai/utils';
 import { AuthService } from '../api/services/authService';
 import { parseUserRole } from '../utils/userRoleUtils';
+import { LoginDto } from '../types/dtos/loginDto';
 
 interface TokenPayload extends JwtPayload {
     organizationId: string,
@@ -66,18 +67,24 @@ export const currentPinAtom = atom<string>('');
 
 export const errorAtom = atom<string | null>(null);
 
+export const loadingAtom = atom<boolean>(false);
+
 export const loginAtom = atom(
     null,
-    async (get, set, pin: string) => {
+    async (get, set, login: LoginDto) => {
         try {
+            set(loadingAtom, true);
             set(errorAtom, null);
 
-            const response = await AuthService.login(pin);
+            const response = await AuthService.login(login);
 
             set(tokenAtom, response);
         }
         catch {
-            set(errorAtom, "Authnentication error");
+            set(errorAtom, "Authentication error");
+        }
+        finally {
+            set(loadingAtom, false);
         }
     }
 );

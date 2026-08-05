@@ -12,16 +12,17 @@ import CloseIcon from '@mui/icons-material/Close';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
-import type { HistoryOrderViewModel } from '../../viewModels';
+import type { OrderViewModel } from '../../types/viewModels/orderViewModel'; 
+import { getTranslation } from '../../utils/multilingualNameUtils';
 
 interface OrderHistoryDialogProps {
   open: boolean;
-  order: HistoryOrderViewModel | null;
+  order: OrderViewModel | null;
   onClose: () => void;
 }
 
 const OrderHistoryDialog: React.FC<OrderHistoryDialogProps> = ({ open, order, onClose }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   if (!order) {
     return null;
@@ -60,7 +61,7 @@ const OrderHistoryDialog: React.FC<OrderHistoryDialogProps> = ({ open, order, on
             color="text.secondary"
             sx={{ mt: 0.5 }}
           >
-            {order.orderNumber} • {order.date}
+            {order.Id} • {order.Created.toLocaleDateString()}
           </Typography>
         </Box>
         <IconButton
@@ -78,7 +79,7 @@ const OrderHistoryDialog: React.FC<OrderHistoryDialogProps> = ({ open, order, on
 
       {/* Order Products */}
       <DialogContent sx={{ p: theme.spacing.lg }}>
-        {order.products.length === 0 ? (
+        {order.OrderProducts.length === 0 ? (
           <Box
             sx={{
               display: 'flex',
@@ -96,12 +97,10 @@ const OrderHistoryDialog: React.FC<OrderHistoryDialogProps> = ({ open, order, on
           </Box>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-            {order.products.map((product) => {
-              const itemTotalPrice = product.price * product.quantity;
-
+            {order.OrderProducts.map((product) => {
               return (
                 <Box
-                  key={product.id}
+                  key={product.Id}
                   sx={{
                     display: 'flex',
                     alignItems: 'flex-start',
@@ -113,10 +112,10 @@ const OrderHistoryDialog: React.FC<OrderHistoryDialogProps> = ({ open, order, on
                     },
                   }}
                 >
-                  {product.image && (
+                  {product.ImgUrl && (
                     <Avatar
-                      src={product.image}
-                      alt={product.name}
+                      src={product.ImgUrl}
+                      alt={getTranslation(product.Name, i18n.language)}
                       variant="rounded"
                       sx={{
                         width: 56,
@@ -136,23 +135,25 @@ const OrderHistoryDialog: React.FC<OrderHistoryDialogProps> = ({ open, order, on
                         fontWeight={theme.typography.fontWeights.semibold}
                         sx={{ color: theme.colors.text }}
                       >
-                        {product.name}
+                        {getTranslation(product.Name, i18n.language)}
                       </Typography>
                       <Typography
                         variant="body1"
                         fontWeight={theme.typography.fontWeights.bold}
                         sx={{ color: theme.colors.primary }}
                       >
-                        €{itemTotalPrice.toFixed(2)}
+                        {product.Price}€
                       </Typography>
                     </Box>
-                    <Typography
+                    {/* TODO: quantity */}
+                    {/* <Typography
                       variant="body2"
                       sx={{ color: theme.colors.text, opacity: 0.6, mt: 0.5 }}
                     >
-                      {t('orderHistory.dialog.quantity')}: {product.quantity} × €{product.price.toFixed(2)}
-                    </Typography>
-                    {product.notes && (
+                      {product.Price}€
+                    </Typography> */}
+                    {/* TODO: add when notes are available in Product entity */}
+                    {/* {product.notes && (
                       <Typography
                         variant="caption"
                         sx={{ 
@@ -165,7 +166,7 @@ const OrderHistoryDialog: React.FC<OrderHistoryDialogProps> = ({ open, order, on
                       >
                         {t('orderHistory.dialog.notes')}: {product.notes}
                       </Typography>
-                    )}
+                    )} */}
                   </Box>
                 </Box>
               );
@@ -174,7 +175,7 @@ const OrderHistoryDialog: React.FC<OrderHistoryDialogProps> = ({ open, order, on
         )}
 
         {/* Total */}
-        {order.products.length > 0 && (
+        {order.OrderProducts.length > 0 && (
           <Box
             sx={{
               mt: theme.spacing.lg,
@@ -197,7 +198,7 @@ const OrderHistoryDialog: React.FC<OrderHistoryDialogProps> = ({ open, order, on
               fontWeight={theme.typography.fontWeights.bold}
               sx={{ color: theme.colors.primary }}
             >
-              €{order.total.toFixed(2)}
+              {order.TotalPrice}€
             </Typography>
           </Box>
         )}

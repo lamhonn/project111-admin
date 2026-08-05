@@ -20,8 +20,8 @@ export const TabletService = {
         return data;
     },
 
-    update: async (tabletDto: TabletDto, id: string) => {
-        const { data } = await api.put<TabletDto>(`${baseUrl}/${id}`, tabletDto);
+    update: async (tabletDto: TabletDto) => {
+        const { data } = await api.put<TabletDto>(`${baseUrl}`, tabletDto);
         return data;
     },
 

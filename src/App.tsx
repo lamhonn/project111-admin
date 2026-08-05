@@ -2,8 +2,9 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import MainView from './views/MainView';
 import UnauthorizedView from './views/UnauthorizedView';
-import { useAuthorization } from './api/hooks/auth.hooks';
 import './i18n'; // Initialize i18n
+import { useAtomValue } from 'jotai';
+import { isAuthorizedAtom } from './state/authStore';
 // import './App.css';
 
 // Create a MUI theme with brand colors
@@ -53,7 +54,7 @@ const muiTheme = createTheme({
 });
 
 function App() {
-  const { isAuthorized } = useAuthorization();
+  const isAuthorized = useAtomValue(isAuthorizedAtom);
 
   return (
     <ThemeProvider theme={muiTheme}>

@@ -14,21 +14,22 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
-import {
-  selectedOrderAtom,
-  orderOptionsDialogOpenAtom,
-  updateOrderStatusAtom,
-  OrderItemStatus,
-} from '../../context/dashboardStore';
+import { errorAtom, selectedOrderAtom, updateOrderStatusAtom } from '../../state/orderStore';
+import { orderOptionsDialogOpenAtom } from '../../state/orderStore';
+import { OrderStatus } from '../../types/enums/orderStatus';
+import { OrderDto } from '../../types/dtos/orderDto';
+import { getTranslation } from '../../utils/multilingualNameUtils';
+import ErrorDialog from '../common/ErrorDialog';
+
 
 const OrderOptionsDialog: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const selectedOrder = useAtomValue(selectedOrderAtom);
   const setDialogOpen = useSetAtom(orderOptionsDialogOpenAtom);
   const updateOrderStatus = useSetAtom(updateOrderStatusAtom);
-  const { acceptOrder, markOrderReady } = useOrderActions();
   const isOpen = useAtomValue(orderOptionsDialogOpenAtom);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const error = useAtomValue(errorAtom);
 
   const handleClose = () => {
     setDialogOpen(false);
@@ -38,21 +39,11 @@ const OrderOptionsDialog: React.FC = () => {
     if (!selectedOrder) return;
 
     try {
-      const result = await acceptOrder(selectedOrder.orderNo);
-      if (!result.success) {
-        setErrorMessage(result.error ?? 'Failed to confirm order');
-        return;
-      }
-
-      // Move order from "New" to "Preparing"
-      updateOrderStatus({
-        orderNo: selectedOrder.orderNo,
-        newStatus: OrderItemStatus.Preparing,
-      });
+      updateOrderStatus(selectedOrder.Id, OrderStatus.PREPARING);
 
       handleClose();
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : String(error));
+    } catch {
+      setErrorMessage(error ?? 'Failed to update order status');
     }
   };
 
@@ -60,21 +51,10 @@ const OrderOptionsDialog: React.FC = () => {
     if (!selectedOrder) return;
 
     try {
-      const result = await markOrderReady(selectedOrder.orderNo);
-      if (!result.success) {
-        setErrorMessage(result.error ?? 'Failed to mark order ready');
-        return;
-      }
-
-      // Move order from "Preparing" to "Ready" (removes from list)
-      updateOrderStatus({
-        orderNo: selectedOrder.orderNo,
-        newStatus: OrderItemStatus.Ready,
-      });
-
+      updateOrderStatus(selectedOrder.Id, OrderStatus.COMPLETED);
       handleClose();
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : String(error));
+    } catch {
+      setErrorMessage(error ?? 'Failed to update order status');
     }
   };
 
@@ -84,8 +64,8 @@ const OrderOptionsDialog: React.FC = () => {
 
   // Determine which action button to show based on status
   const renderActionButton = () => {
-    switch (selectedOrder.status) {
-      case OrderItemStatus.New:
+    switch (selectedOrder.OrderStatus) {
+      case OrderStatus.RECEIVED:
         return (
           <Button
             variant="contained"
@@ -102,7 +82,7 @@ const OrderOptionsDialog: React.FC = () => {
             {t('orderOptionsDialog.actions.confirm')}
           </Button>
         );
-      case OrderItemStatus.Preparing:
+      case OrderStatus.PREPARING:
         return (
           <Button
             variant="contained"
@@ -158,7 +138,7 @@ const OrderOptionsDialog: React.FC = () => {
             color="text.secondary"
             sx={{ mt: 0.5 }}
           >
-            {t('orderOptionsDialog.orderNumber', { number: selectedOrder.orderNo })} • {t('orderOptionsDialog.table', { number: selectedOrder.tableNumber })}
+            {t('orderOptionsDialog.orderNumber', { number: selectedOrder.Id })} • {t('orderOptionsDialog.table', { number: selectedOrder.TableNumber })}
           </Typography>
         </Box>
         <IconButton
@@ -176,7 +156,7 @@ const OrderOptionsDialog: React.FC = () => {
 
       {/* Order Products */}
       <DialogContent sx={{ p: theme.spacing.lg }}>
-        {selectedOrder.products.length === 0 ? (
+        {selectedOrder.OrderProducts.length === 0 ? (
           <Box
             sx={{
               display: 'flex',
@@ -194,12 +174,10 @@ const OrderOptionsDialog: React.FC = () => {
           </Box>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-            {selectedOrder.products.map((product) => {
-              const itemTotalPrice = product.price * product.quantity;
-
+            {selectedOrder.OrderProducts.map((product) => {
               return (
                 <Box
-                  key={product.id}
+                  key={product.Id}
                   sx={{
                     display: 'flex',
                     alignItems: 'flex-start',
@@ -212,8 +190,8 @@ const OrderOptionsDialog: React.FC = () => {
                   }}
                 >
                   <Avatar
-                    src={product.image}
-                    alt={product.name}
+                    src={product.ImgUrl}
+                    alt={getTranslation(product.Name, i18n.language)}
                     variant="rounded"
                     sx={{
                       width: 56,
@@ -232,23 +210,24 @@ const OrderOptionsDialog: React.FC = () => {
                         fontWeight={theme.typography.fontWeights.semibold}
                         sx={{ color: theme.colors.text }}
                       >
-                        {product.name}
+                        {getTranslation(product.Name, i18n.language)}
                       </Typography>
                       <Typography
                         variant="body1"
                         fontWeight={theme.typography.fontWeights.bold}
                         sx={{ color: theme.colors.primary }}
                       >
-                        ${itemTotalPrice.toFixed(2)}
+                        {product.Price}€
                       </Typography>
                     </Box>
-                    <Typography
+                    {/* TODO: quantity and comments */}
+                    {/* <Typography
                       variant="body2"
                       sx={{ color: theme.colors.text, opacity: 0.6, mt: 0.5 }}
                     >
-                      {t('orderOptionsDialog.quantity')}: {product.quantity} × ${product.price.toFixed(2)}
-                    </Typography>
-                    {product.notes && (
+                      {product.price.toFixed(2)}
+                    </Typography> */}
+                    {/* {product.notes && (
                       <Typography
                         variant="caption"
                         sx={{ 
@@ -261,7 +240,7 @@ const OrderOptionsDialog: React.FC = () => {
                       >
                         {t('orderOptionsDialog.notes')}: {product.notes}
                       </Typography>
-                    )}
+                    )} */}
                   </Box>
                 </Box>
               );
@@ -270,7 +249,7 @@ const OrderOptionsDialog: React.FC = () => {
         )}
 
         {/* Total */}
-        {selectedOrder.products.length > 0 && (
+        {selectedOrder.OrderProducts.length > 0 && (
           <Box
             sx={{
               mt: theme.spacing.lg,
@@ -293,7 +272,7 @@ const OrderOptionsDialog: React.FC = () => {
               fontWeight={theme.typography.fontWeights.bold}
               sx={{ color: theme.colors.primary }}
             >
-              ${selectedOrder.total.toFixed(2)}
+              {selectedOrder.TotalPrice}€
             </Typography>
           </Box>
         )}
@@ -319,7 +298,7 @@ const OrderOptionsDialog: React.FC = () => {
         {renderActionButton()}
       </DialogActions>
     </Dialog>
-    <ErrorReportDialog
+    <ErrorDialog
       open={Boolean(errorMessage)}
       errorMessage={errorMessage ?? ''}
       onClose={() => setErrorMessage(null)}

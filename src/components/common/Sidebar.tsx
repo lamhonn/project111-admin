@@ -13,12 +13,13 @@ import {
   Divider,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import { useAtomValue, useSetAtom } from 'jotai';
-import { selectedMenuAtom } from '../../context/dashboardStore';
+import { NavLink } from 'react-router-dom';
 import { theme } from '../../theme/theme';
 
 export interface MenuItem {
+  id: 'dashboard' | 'tables' | 'history' | 'products' | 'menus' | 'devices' | 'settings';
   text: string;
+  path: string;
   icon: React.ReactNode;
   badge?: string;
   badgeColor?: 'error' | 'warning' | 'success' | 'info';
@@ -33,33 +34,29 @@ interface DashboardSidebarProps {
   menuSections: MenuSection[];
 }
 
-const COLLAPSED_WIDTH = 72; // Icon + padding
+const COLLAPSED_WIDTH = 72;
 const EXPANDED_WIDTH = 240;
 
 const Sidebar: React.FC<DashboardSidebarProps> = ({ menuSections }) => {
-  const selectedMenu = useAtomValue(selectedMenuAtom);
-  const setSelectedMenu = useSetAtom(selectedMenuAtom);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleToggle = () => {
-    setIsExpanded(!isExpanded);
+    setIsExpanded((prev) => !prev);
   };
 
-  const handleMenuItemClick = (text: string) => {
-    setSelectedMenu(text);
-    setIsExpanded(false); // Close sidebar after selection
+  const handleMenuItemClick = () => {
+    setIsExpanded(false);
   };
 
   return (
     <>
-      {/* Backdrop overlay when expanded */}
       <Backdrop
         open={isExpanded}
         onClick={() => setIsExpanded(false)}
         sx={{ zIndex: 1200 }}
       />
 
-      {/* Permanent collapsed drawer */}
+      {/* Collapsed Sidebar */}
       <Drawer
         variant="permanent"
         sx={{
@@ -75,58 +72,69 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({ menuSections }) => {
           },
         }}
       >
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          height: 64,
-        }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: 64,
+          }}
+        >
           <IconButton
             onClick={handleToggle}
-            sx={{ 
+            sx={{
               color: theme.colors.brandWhite,
             }}
           >
             <MenuIcon />
           </IconButton>
         </Box>
+
         <List>
           {menuSections.map((section, sectionIndex) => (
             <React.Fragment key={sectionIndex}>
               {sectionIndex > 0 && (
-                <Divider 
-                  sx={{ 
-                    my: 1, 
+                <Divider
+                  sx={{
+                    my: 1,
                     mx: 1.5,
-                    borderColor: 'rgba(255, 255, 255, 0.12)',
-                  }} 
+                    borderColor: 'rgba(255,255,255,0.12)',
+                  }}
                 />
               )}
+
               {section.items.map((item) => (
                 <ListItemButton
-                  key={item.text}
-                  selected={selectedMenu === item.text}
-                  onClick={() => handleMenuItemClick(item.text)}
+                  key={item.path}
+                  component={NavLink}
+                  to={item.path}
+                  end
+                  onClick={handleMenuItemClick}
                   sx={{
                     mx: 1,
-                    borderRadius: theme.borderRadius.medium,
                     mb: 0.5,
-                    justifyContent: 'center',
                     minHeight: 48,
-                    '&.Mui-selected': {
+                    justifyContent: 'center',
+                    borderRadius: theme.borderRadius.medium,
+                    color: 'inherit',
+
+                    '&.active': {
                       bgcolor: '#1a1f45',
                       color: theme.colors.primary,
                     },
+
                     '&:hover': {
                       bgcolor: '#1a1f45',
                     },
                   }}
                 >
-                  <ListItemIcon sx={{ 
-                    color: 'inherit', 
-                    minWidth: 'unset',
-                    justifyContent: 'center',
-                  }}>
+                  <ListItemIcon
+                    sx={{
+                      color: 'inherit',
+                      minWidth: 'unset',
+                      justifyContent: 'center',
+                    }}
+                  >
                     {item.icon}
                   </ListItemIcon>
                 </ListItemButton>
@@ -136,7 +144,7 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({ menuSections }) => {
         </List>
       </Drawer>
 
-      {/* Expanded overlay drawer */}
+      {/* Expanded Sidebar */}
       <Drawer
         variant="temporary"
         open={isExpanded}
@@ -153,29 +161,33 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({ menuSections }) => {
           },
         }}
       >
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          p: 3,
-          gap: 2,
-        }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            p: 3,
+            gap: 2,
+          }}
+        >
           <IconButton
             onClick={handleToggle}
-            sx={{ 
+            sx={{
               color: theme.colors.brandWhite,
             }}
           >
             <MenuIcon />
           </IconButton>
-          <Typography 
-            variant="h5" 
-            sx={{ 
+
+          <Typography
+            variant="h5"
+            sx={{
               fontWeight: theme.typography.fontWeights.bold,
             }}
           >
             soljuu.
           </Typography>
         </Box>
+
         <List>
           {menuSections.map((section, sectionIndex) => (
             <Box key={sectionIndex}>
@@ -196,37 +208,55 @@ const Sidebar: React.FC<DashboardSidebarProps> = ({ menuSections }) => {
                   {section.title}
                 </Typography>
               )}
+
               {section.items.map((item) => (
                 <ListItemButton
-                  key={item.text}
-                  selected={selectedMenu === item.text}
-                  onClick={() => handleMenuItemClick(item.text)}
+                  key={item.path}
+                  component={NavLink}
+                  to={item.path}
+                  end
+                  onClick={handleMenuItemClick}
                   sx={{
                     mx: 1,
-                    borderRadius: theme.borderRadius.medium,
                     mb: 0.5,
-                    '&.Mui-selected': {
+                    borderRadius: theme.borderRadius.medium,
+                    color: 'inherit',
+
+                    '&.active': {
                       bgcolor: '#1a1f45',
                       color: theme.colors.primary,
                     },
+
                     '&:hover': {
                       bgcolor: '#1a1f45',
                     },
                   }}
                 >
-                  <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                  <ListItemIcon
+                    sx={{
+                      color: 'inherit',
+                      minWidth: 40,
+                    }}
+                  >
                     {item.icon}
                   </ListItemIcon>
-                  <ListItemText 
-                    primary={item.text} 
-                    primaryTypographyProps={{ fontSize: '0.9rem' }} 
+
+                  <ListItemText
+                    primary={item.text}
+                    primaryTypographyProps={{
+                      fontSize: '0.9rem',
+                    }}
                   />
+
                   {item.badge && (
                     <Chip
                       label={item.badge}
                       size="small"
                       color={item.badgeColor || 'default'}
-                      sx={{ height: 20, fontSize: '0.65rem' }}
+                      sx={{
+                        height: 20,
+                        fontSize: '0.65rem',
+                      }}
                     />
                   )}
                 </ListItemButton>

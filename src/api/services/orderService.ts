@@ -1,3 +1,4 @@
+import { OrderDto } from "../../types/dtos/orderDto";
 import { Order } from "../../types/models";
 import { api } from "../axios";
 
@@ -16,6 +17,11 @@ export const OrderService = {
 
     getByOrganizationId: async (organizationId: string) => {
         const { data } = await api.get<Order[]>(`${baseUrl}/organization/${organizationId}`);
+        return data;
+    },
+
+    updateStatus: async (orderDto: OrderDto) => {
+        const { data } = await api.patch<OrderDto>(baseUrl, orderDto);
         return data;
     }
 }

@@ -7,9 +7,8 @@ export interface Order {
     OrganizationId: string,
     SessionId: string,
     UserId: string,
-    User: User | null,
     TabletId: string,
-    Tablet: Tablet | null,
+    TableNumber: number,
     TotalPrice: number,
     OrderProducts: OrderProduct[],
     Created: Date

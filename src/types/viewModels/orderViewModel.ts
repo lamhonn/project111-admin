@@ -7,7 +7,9 @@ export interface OrderViewModel {
     SessionId: string,
     UserId: string,
     TabletId: string,
+    TableNumber: number,
     TotalPrice: number,
     OrderStatus: OrderStatus,
     OrderProducts: OrderProductViewModel[],
+    Created: Date
 }

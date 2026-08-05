@@ -3,42 +3,34 @@ import { Close as CloseIcon } from '@mui/icons-material';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme';
-import type { Device } from './DeviceList';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { deleteTabletAtom, editTabletAtom, selectedTabletAtom } from '../../state/tabletStore';
+import { TabletViewModel } from '../../types/viewModels/tabletViewModel';
 
 interface DeviceDialogProps {
-  open: boolean;
-  device: Device | null;
+  isOpen: boolean;
   onClose: () => void;
-  onEdit: (device: Device) => void | Promise<void>;
-  onForgetDevice: (device: Device) => void | Promise<void>;
 }
 
 export default function DeviceDialog({
-  open,
-  device,
+  isOpen,
   onClose,
-  onEdit,
-  onForgetDevice,
 }: DeviceDialogProps) {
   const { t } = useTranslation();
   const [editMode, setEditMode] = useState(false);
-  const [editedData, setEditedData] = useState<Partial<Device>>({});
-
-  if (!device) return null;
+  const [editedData, setEditedData] = useState<TabletViewModel>();
+  const tablet = useAtomValue(selectedTabletAtom);
+  const updateTablet = useSetAtom(editTabletAtom);
+  const deleteTablet = useSetAtom(deleteTabletAtom);
 
   const handleEditClick = () => {
     setEditMode(true);
-    setEditedData({
-      deviceId: device.deviceId,
-      tableNumber: device.tableNumber,
-      status: device.status,
-      lastSeen: device.lastSeen,
-    });
+    setEditedData(tablet);
   };
 
   const handleCancel = () => {
     setEditMode(false);
-    setEditedData({});
+    setEditedData(undefined);
   };
 
   const handleClose = () => {
@@ -47,30 +39,30 @@ export default function DeviceDialog({
   }
 
   const handleSave = async () => {
-    const updatedDevice = {
-      ...device,
-      ...editedData,
-    };
-    await onEdit(updatedDevice);
+    if (!editedData) return;
+    updateTablet(editedData);
     setEditMode(false);
-    setEditedData({});
+    setEditedData(undefined);
   };
 
   const handleForgetClick = async () => {
-    await onForgetDevice(device);
+    deleteTablet();
     onClose();
   };
 
-  const handleFieldChange = (field: keyof Device, value: string) => {
-    setEditedData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const handleFieldChange = (field: keyof TabletViewModel, value: string) => {
+    setEditedData(prev => {
+      if (!prev) return;
+      return {
+        ...prev,
+        [field]: value
+      }
+    });
   };
 
   return (
     <Dialog
-      open={open}
+      open={isOpen}
       onClose={onClose}
       maxWidth="sm"
       fullWidth
@@ -124,8 +116,8 @@ export default function DeviceDialog({
                 fullWidth
                 size="small"
                 disabled
-                value={editedData.deviceId || ''}
-                onChange={(e) => handleFieldChange('deviceId', e.target.value)}
+                value={editedData?.Id || ''}
+                onChange={(e) => handleFieldChange('Id', e.target.value)}
                 sx={{
                   mt: 0.5,
                   '& .MuiOutlinedInput-root': {
@@ -144,7 +136,7 @@ export default function DeviceDialog({
                   mt: 0.5,
                 }}
               >
-                {device.deviceId}
+                {tablet?.Id ?? t(`common.error`)}
               </Typography>
             )}
           </Box>
@@ -167,8 +159,8 @@ export default function DeviceDialog({
               <TextField
                 fullWidth
                 size="small"
-                value={editedData.tableNumber || ''}
-                onChange={(e) => handleFieldChange('tableNumber', e.target.value)}
+                value={editedData?.TableNumber || ''}
+                onChange={(e) => handleFieldChange('TableNumber', e.target.value)}
                 sx={{
                   mt: 0.5,
                   '& .MuiOutlinedInput-root': {
@@ -187,7 +179,7 @@ export default function DeviceDialog({
                   mt: 0.5,
                 }}
               >
-                {device.tableNumber}
+                {tablet?.TableNumber ?? t(`common.error`)}
               </Typography>
             )}
           </Box>
@@ -207,7 +199,7 @@ export default function DeviceDialog({
                     fontWeight: theme.typography.fontWeights.semibold,
                   }}
                 >
-                  {t('deviceManagement.lastSeen')}
+                  {t('deviceManagement.created')}
                 </Typography>
                 <Typography
                   variant="body2"
@@ -216,7 +208,7 @@ export default function DeviceDialog({
                     mt: 0.5,
                   }}
                 >
-                  {device.lastSeen}
+                  {tablet?.Created.toLocaleDateString() ?? t(`common.error`)}
                 </Typography>
               </>
             )}

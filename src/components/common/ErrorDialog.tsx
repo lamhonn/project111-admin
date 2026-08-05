@@ -31,7 +31,8 @@ const toShortLogWindow = (value: string): string => {
   return `${joined.slice(0, MAX_LOG_CHARS)}...`;
 };
 
-const ErrorReportDialog: React.FC<ErrorReportDialogProps> = ({ open, errorMessage, onClose }) => {
+const ErrorDialog: React.FC<ErrorReportDialogProps> = ({ open, errorMessage, onClose }) => {
+  // TODO: translations
   const [copySuccess, setCopySuccess] = useState(false);
 
   const shortLog = useMemo(() => toShortLogWindow(errorMessage), [errorMessage]);
@@ -60,11 +61,11 @@ const ErrorReportDialog: React.FC<ErrorReportDialogProps> = ({ open, errorMessag
     >
       <DialogContent sx={{ pt: theme.spacing.lg }}>
         <Typography variant="h6" fontWeight={theme.typography.fontWeights.bold} sx={{ mb: theme.spacing.sm }}>
-          Something went wrong
+          Jotain meni vikaan
         </Typography>
 
         <Typography variant="body2" sx={{ mb: theme.spacing.md, color: theme.colors.text }}>
-          Contact the admin and send the error message below.
+          Ota yhteyttä toimittajaan ja kopioi oheinen virheilmoitus.
         </Typography>
 
         <Box
@@ -97,4 +98,4 @@ const ErrorReportDialog: React.FC<ErrorReportDialogProps> = ({ open, errorMessag
   );
 };
 
-export default ErrorReportDialog;
+export default ErrorDialog;

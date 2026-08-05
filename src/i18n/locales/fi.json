@@ -7,7 +7,9 @@
     "bill": "Lasku",
     "total": "Loppusumma",
     "table": "Pöytä",
-    "campaigns": "Kampanjat"  },
+    "campaigns": "Kampanjat",
+    "error": "Virhe" 
+  },
   "dashboard": {
     "title": "Hallintapaneeli",
     "welcome": "Hei {{name}}, Tervetuloa Spooniin!",
