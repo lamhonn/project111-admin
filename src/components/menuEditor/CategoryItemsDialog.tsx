@@ -14,33 +14,35 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
-import type { ProductOption } from './types';
+import { MenuProduct } from '../../types/models';
+import { getTranslation } from '../../utils/multilingualNameUtils';
 
 interface CategoryItemsDialogProps {
   open: boolean;
-  productOptions: ProductOption[];
+  menuProducts: MenuProduct[];
   itemSearchQuery: string;
-  selectedProductIds: string[];
+  selectedProducts: MenuProduct[];
   onSearchChange: (value: string) => void;
-  onToggleProductSelection: (productId: string) => void;
+  onToggleProductSelection: (product: MenuProduct) => void;
   onClose: () => void;
   onSave: () => void;
 }
 
 const CategoryItemsDialog: React.FC<CategoryItemsDialogProps> = ({
   open,
-  productOptions,
+  menuProducts,
   itemSearchQuery,
-  selectedProductIds,
+  selectedProducts,
   onSearchChange,
   onToggleProductSelection,
   onClose,
   onSave,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
-  const filteredProductOptions = productOptions.filter((product) =>
-    product.name.toLowerCase().includes(itemSearchQuery.toLowerCase())
+  const filteredProductOptions = menuProducts.filter((product) =>
+    // Works with other languages too, but might also take brackets into account 
+    product.Name.toLowerCase().includes(itemSearchQuery.toLowerCase())
   );
 
   return (
@@ -73,7 +75,7 @@ const CategoryItemsDialog: React.FC<CategoryItemsDialogProps> = ({
           >
             {filteredProductOptions.map((product) => (
               <ListItem
-                key={product.id}
+                key={product.Id}
                 sx={{
                   borderBottom: `1px solid ${theme.colors.border}`,
                   '&:last-child': { borderBottom: 'none' },
@@ -81,12 +83,12 @@ const CategoryItemsDialog: React.FC<CategoryItemsDialogProps> = ({
                 secondaryAction={
                   <Checkbox
                     edge="end"
-                    checked={selectedProductIds.includes(product.id)}
-                    onChange={() => onToggleProductSelection(product.id)}
+                    checked={selectedProducts.includes(product)}
+                    onChange={() => onToggleProductSelection(product)}
                   />
                 }
               >
-                <ListItemText primary={product.name} />
+                <ListItemText primary={getTranslation(product.Name, i18n.language)} />
               </ListItem>
             ))}
 

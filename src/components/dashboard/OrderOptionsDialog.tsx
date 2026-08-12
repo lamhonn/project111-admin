@@ -19,7 +19,6 @@ import { orderOptionsDialogOpenAtom } from '../../state/orderStore';
 import { OrderStatus } from '../../types/enums/orderStatus';
 import { OrderDto } from '../../types/dtos/orderDto';
 import { getTranslation } from '../../utils/multilingualNameUtils';
-import ErrorDialog from '../common/ErrorDialog';
 
 
 const OrderOptionsDialog: React.FC = () => {
@@ -298,11 +297,6 @@ const OrderOptionsDialog: React.FC = () => {
         {renderActionButton()}
       </DialogActions>
     </Dialog>
-    <ErrorDialog
-      open={Boolean(errorMessage)}
-      errorMessage={errorMessage ?? ''}
-      onClose={() => setErrorMessage(null)}
-    />
     </>
   );
 };

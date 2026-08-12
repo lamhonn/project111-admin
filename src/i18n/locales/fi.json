@@ -175,6 +175,8 @@
         "searchProductsPlaceholder": "Etsi tuotteita...",
         "noProductsFound": "Tuotteita ei löytynyt",
         "noCategoryItems": "Tässä kategoriassa ei ole vielä tuotteita",
+        "noMenus": "Ei ruokalistoja",
+        "noCategories": "Ei kategorioita",
         "item": "Tuote",
         "showTopmost": "Näytä ylimpänä",
         "activePeriod": "Aktiivinen ajanjakso",
@@ -319,6 +321,9 @@
     "fillAllFields": "Täytä sekä käyttäjätunnus että salasana.",
     "loginFailed": "Kirjautuminen epäonnistui",
     "authorizationRequired": "Valtuutus vaaditaan"
+  },
+  "confirmDialog": {
+    "cantBeUndone": "Toimintoa ei voi peruuttaa!" 
   }
 }
 

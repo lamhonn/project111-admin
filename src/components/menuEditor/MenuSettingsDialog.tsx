@@ -12,21 +12,23 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
-import type { MenuData } from './types';
+import { MenuViewModel } from '../../types/viewModels/menuViewModel';
 
 interface MenuSettingsDialogProps {
   open: boolean;
-  formData: MenuData;
+  name: string;
+  enabled: boolean;
   weekdays: string[];
   onClose: () => void;
-  onInputChange: (field: keyof MenuData) => (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onSwitchChange: (field: keyof MenuData) => (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onInputChange: (field: keyof MenuViewModel) => (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onSwitchChange: (field: keyof MenuViewModel) => (event: React.ChangeEvent<HTMLInputElement>) => void;
   onToggleDay: (day: string) => void;
 }
 
 const MenuSettingsDialog: React.FC<MenuSettingsDialogProps> = ({
   open,
-  formData,
+  name,
+  enabled,
   weekdays,
   onClose,
   onInputChange,
@@ -51,32 +53,23 @@ const MenuSettingsDialog: React.FC<MenuSettingsDialogProps> = ({
             fullWidth
             label={t('admin.menuEditor.dialog.menuName')}
             placeholder={t('admin.menuEditor.dialog.menuNamePlaceholder')}
-            value={formData.menuName}
-            onChange={onInputChange('menuName')}
-          />
-
-          <TextField
-            fullWidth
-            label={t('admin.menuEditor.dialog.description')}
-            multiline
-            rows={3}
-            placeholder={t('admin.menuEditor.dialog.descriptionPlaceholder')}
-            value={formData.description}
-            onChange={onInputChange('description')}
+            value={name}
+            onChange={onInputChange('Name')}
           />
 
           <FormControlLabel
             control={
               <Switch
-                checked={Boolean(formData.isActive)}
-                onChange={onSwitchChange('isActive')}
+                checked={enabled}
+                onChange={onSwitchChange('Enabled')}
                 color="primary"
               />
             }
             label={t('admin.menuEditor.dialog.activeStatus')}
           />
 
-          <Box>
+{/* TODO: pattern endtime, start time, and active days */}
+          {/* <Box>
             <Typography variant="subtitle2" sx={{ color: theme.colors.text, mb: theme.spacing.xs }}>
               {t('admin.menuEditor.dialog.activePeriod')}
             </Typography>
@@ -85,21 +78,22 @@ const MenuSettingsDialog: React.FC<MenuSettingsDialogProps> = ({
                 fullWidth
                 type="date"
                 label={t('admin.menuEditor.dialog.activePeriodStart')}
-                value={formData.activePeriodStart || ''}
-                onChange={onInputChange('activePeriodStart')}
+                value={formData.EventStartTime || ''}
+                onChange={onInputChange('EventStartTime')}
                 InputLabelProps={{ shrink: true }}
               />
               <TextField
                 fullWidth
                 type="date"
                 label={t('admin.menuEditor.dialog.activePeriodEnd')}
-                value={formData.activePeriodEnd || ''}
-                onChange={onInputChange('activePeriodEnd')}
+                value={formData.EventEndTime || ''}
+                onChange={onInputChange('EventEndTime')}
                 InputLabelProps={{ shrink: true }}
               />
             </Box>
           </Box>
-
+           */}
+{/* 
           <Box>
             <Typography variant="subtitle2" sx={{ color: theme.colors.text, mb: theme.spacing.xs }}>
               {t('admin.menuEditor.dialog.automaticActiveDays')}
@@ -125,34 +119,31 @@ const MenuSettingsDialog: React.FC<MenuSettingsDialogProps> = ({
                 );
               })}
             </Box>
-          </Box>
+          </Box> */}
 
-          <Box sx={{ display: 'flex', gap: theme.spacing.md }}>
+          {/* <Box sx={{ display: 'flex', gap: theme.spacing.md }}>
             <TextField
               fullWidth
               type="time"
               label={t('admin.menuEditor.dialog.activeFrom')}
-              value={formData.activeFrom || '09:00'}
-              onChange={onInputChange('activeFrom')}
+              value={formData.PatternStartTime || '11:00'}
+              onChange={onInputChange('PatternStartTime')}
               InputLabelProps={{ shrink: true }}
             />
             <TextField
               fullWidth
               type="time"
               label={t('admin.menuEditor.dialog.activeTo')}
-              value={formData.activeTo || '17:00'}
-              onChange={onInputChange('activeTo')}
+              value={formData.PatternEndTime || '14:00'}
+              onChange={onInputChange('PatternEndTime')}
               InputLabelProps={{ shrink: true }}
             />
-          </Box>
+          </Box> */}
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: theme.spacing.lg, pb: theme.spacing.lg }}>
-        <Button onClick={onClose} sx={{ textTransform: 'none' }}>
-          {t('common.cancel')}
-        </Button>
         <Button variant="contained" onClick={onClose} sx={{ textTransform: 'none' }}>
-          {t('common.save')}
+          {t('common.close')}
         </Button>
       </DialogActions>
     </Dialog>

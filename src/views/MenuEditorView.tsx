@@ -1,33 +1,23 @@
+import { useState } from 'react';
 import { Box, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { theme } from '../theme';
-import { useMemo, useState } from 'react';
 import MenuEditorHeader from '../components/menuEditor/MenuEditorHeader';
 import MenuList from '../components/menuEditor/MenuList';
 import EditMenuDialog from '../components/menuEditor/EditMenuDialog';
-import type { MenuListItemViewModel } from '../viewModels';
-import { useGetMenus } from '../api/hooks/menu.hooks';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { menusAtom, selectedMenuIdAtom, updateMenuAtom } from '../state/menuStore';
+import { Menu } from '../types/models';
 
 export default function MenuEditorView() {
-  const { data: menus } = useGetMenus();
+  const { t, i18n } = useTranslation();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedMenu, setSelectedMenu] = useState<MenuListItemViewModel | null>(null);
+  const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null);
 
-  const filteredMenus = menus.filter((menu) =>
-    menu.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const initialMenuData = useMemo(
-    () =>
-      selectedMenu
-        ? {
-            menuName: selectedMenu.name,
-            description: selectedMenu.description,
-            isActive: selectedMenu.isActive,
-          }
-        : undefined,
-    [selectedMenu]
-  );
+  const menus = useAtomValue(menusAtom);
+  const setSelectedMenuId = useSetAtom(selectedMenuIdAtom);
 
   const handleAddMenu = () => {
     setSelectedMenu(null);
@@ -35,23 +25,8 @@ export default function MenuEditorView() {
   };
 
   const handleMenuClick = (id: string) => {
-    const menu = filteredMenus.find((item) => item.id === id);
-    if (menu) {
-      setSelectedMenu(menu);
-      setDialogOpen(true);
-    }
-  };
-
-  const handleSaveMenu = (data: any) => {
-    // TODO: Implement save menu functionality
-    console.log('Save menu:', data);
-  };
-
-  const handleDeleteMenu = () => {
-    if (selectedMenu) {
-      // TODO: Implement delete menu functionality
-      console.log('Delete menu:', selectedMenu.id);
-    }
+    setSelectedMenuId(id);
+    setDialogOpen(true);
   };
 
   return (
@@ -64,20 +39,17 @@ export default function MenuEditorView() {
 
       {menus.length === 0 ? (
         <Typography variant="body1" sx={{ color: theme.colors.text }}>
-          No menus configured
+          {t(`admin.menuEditor.dialog.noMenus`)}
         </Typography>
       ) : (
-        <MenuList menus={filteredMenus} onMenuClick={handleMenuClick} />
+        <MenuList onMenuClick={handleMenuClick} />
       )}
 
       {dialogOpen && (
         <EditMenuDialog
-          key={selectedMenu?.id ?? 'new-menu'}
+          key={selectedMenu?.Id ?? null}
           open={dialogOpen}
           onClose={() => setDialogOpen(false)}
-          onSave={handleSaveMenu}
-          onDelete={selectedMenu ? handleDeleteMenu : undefined}
-          initialData={initialMenuData}
         />
       )}
 {/* 

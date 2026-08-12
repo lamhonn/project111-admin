@@ -177,6 +177,8 @@
         "searchProductsPlaceholder": "Search products...",
         "noProductsFound": "No products found",
         "noCategoryItems": "No items in this category yet",
+        "noMenus": "No menus",
+        "noCategories": "No categories",
         "item": "Item",
         "showTopmost": "Show topmost",
         "activePeriod": "Active period",
@@ -322,5 +324,8 @@
     "fillAllFields": "Please fill in both login and password.",
     "loginFailed": "Login failed",
     "authorizationRequired": "Authorization required"
+  },
+  "confirmDialog": {
+    "cantBeUndone": "This action can't be undone!" 
   }
 }

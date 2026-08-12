@@ -24,6 +24,8 @@ import DeviceManagementView from './DeviceManagementView';
 import { useAtomValue } from 'jotai';
 import { roleAtom } from '../state/authStore';
 import { UserRole } from '../types/enums';
+import ConfirmDialog from '../components/common/ConfirmDialog';
+import ErrorDialog from '../components/common/ErrorDialog';
 
 const MainView = () => {
   const { t } = useTranslation();
@@ -164,6 +166,10 @@ const MainView = () => {
           {/* Unknown routes */}
           <Route path="*" element={<Navigate to={defaultRoute} replace />} />
         </Routes>
+
+        <ConfirmDialog />
+
+        <ErrorDialog />
       </Box>
     </Box>
   );

@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 interface MenuListItemProps {
   id: string;
   name: string;
-  description: string;
   isActive: boolean;
   onClick: (id: string) => void;
 }
@@ -13,7 +12,6 @@ interface MenuListItemProps {
 export default function MenuListItem({
   id,
   name,
-  description,
   isActive,
   onClick,
 }: MenuListItemProps) {
@@ -48,12 +46,6 @@ export default function MenuListItem({
           sx={{ mb: theme.spacing.xs }}
         >
           {name}
-        </Typography>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-        >
-          {description}
         </Typography>
       </Box>
       <Chip

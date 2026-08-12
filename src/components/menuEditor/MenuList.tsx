@@ -1,14 +1,19 @@
 import { Box } from '@mui/material';
 import { theme } from '../../theme';
 import MenuListItem from './MenuListItem';
-import type { MenuListItemViewModel } from '../../viewModels';
+import { Menu } from '../../types/models';
+import { getTranslation } from '../../utils/multilingualNameUtils';
+import { useTranslation } from 'react-i18next';
+import { menusAtom } from '../../state/menuStore';
+import { useAtomValue } from 'jotai';
 
 interface MenuListProps {
-  menus: MenuListItemViewModel[];
   onMenuClick: (id: string) => void;
 }
 
-export default function MenuList({ menus, onMenuClick }: MenuListProps) {
+export default function MenuList({ onMenuClick }: MenuListProps) {
+  const menus = useAtomValue(menusAtom);
+
   return (
     <Box
       sx={{
@@ -23,11 +28,10 @@ export default function MenuList({ menus, onMenuClick }: MenuListProps) {
     >
       {menus.map((menu) => (
         <MenuListItem
-          key={menu.id}
-          id={menu.id}
-          name={menu.name}
-          description={menu.description}
-          isActive={menu.isActive}
+          key={menu.Id}
+          id={menu.Id}
+          name={menu.Name}
+          isActive={menu.Enabled}
           onClick={onMenuClick}
         />
       ))}

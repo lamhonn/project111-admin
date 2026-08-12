@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -22,153 +22,130 @@ import { theme } from '../../theme/theme';
 import CategoryNameDialog from './CategoryNameDialog';
 import MenuSettingsDialog from './MenuSettingsDialog';
 import CategoryItemsDialog from './CategoryItemsDialog';
-import type { MenuCategory, MenuData, ProductOption } from './types';
+import { MenuViewModel } from '../../types/viewModels/menuViewModel';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { deleteMenuAtom, getSelectedMenuAtom, getSelectedMenuCategoriesAtom, updateMenuAtom } from '../../state/menuStore';
+import { MenuCategoryViewModel } from '../../types/viewModels/menuCategoryViewModel';
+import { openConfirmDialogAtom } from '../../state/confirmDialogStore';
+import { getTranslation } from '../../utils/multilingualNameUtils';
+import { MenuProduct } from '../../types/models';
 
 interface EditMenuDialogProps {
   open: boolean;
   onClose: () => void;
-  onSave: (data: MenuData) => void | Promise<void>;
-  onDelete?: () => void | Promise<void>;
-  initialData?: MenuData;
 }
-
-const defaultCategories: MenuCategory[] = [
-  {
-    id: '1',
-    name: 'New Orders',
-    showTopmost: false,
-    items: [
-      { id: '1', name: 'Classic Burger' },
-      { id: '2', name: 'Chicken Caesar Salad' },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Preparing',
-    showTopmost: false,
-    items: [
-      { id: '3', name: 'Margherita Pizza' },
-      { id: '4', name: 'Pasta Carbonara' },
-    ],
-  },
-  {
-    id: '3',
-    name: 'Bill Requests',
-    showTopmost: false,
-    items: [{ id: '5', name: 'Tiramisu' }],
-  },
-];
-
-const buildInitialFormData = (initialData?: MenuData): MenuData => ({
-  menuName: initialData?.menuName || '',
-  description: initialData?.description || '',
-  isActive: initialData?.isActive || false,
-  activePeriodStart: initialData?.activePeriodStart || '',
-  activePeriodEnd: initialData?.activePeriodEnd || '',
-  activeDays: initialData?.activeDays || [],
-  activeFrom: initialData?.activeFrom || '09:00',
-  activeTo: initialData?.activeTo || '17:00',
-  categories: initialData?.categories || defaultCategories,
-  ...(initialData || {}),
-});
 
 const EditMenuDialog: React.FC<EditMenuDialogProps> = ({ 
   open, 
   onClose, 
-  onSave, 
-  onDelete,
-  initialData
 }) => {
-  const { t } = useTranslation();
-  const [formData, setFormData] = useState<MenuData>(() => buildInitialFormData(initialData));
+  const { t, i18n } = useTranslation();
+  const [formData, setFormData] = useState<MenuViewModel>();
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [categoryNameInput, setCategoryNameInput] = useState('');
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [itemsDialogOpen, setItemsDialogOpen] = useState(false);
   const [itemSearchQuery, setItemSearchQuery] = useState('');
-  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<MenuProduct[]>([]);
+
+  const menu = useAtomValue(getSelectedMenuAtom);
+  const menuCategories = useAtomValue(getSelectedMenuCategoriesAtom); // TODO: add an ability to sort categories
+  const openConfirmDialog = useSetAtom(openConfirmDialogAtom);
+
+  const updateMenu = useSetAtom(updateMenuAtom);
+  const deleteMenu = useSetAtom(deleteMenuAtom);
 
   const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const productOptions: ProductOption[] = [
-    { id: '1', name: 'Product 1' },
-    { id: '2', name: 'Product 2' },
-    { id: '3', name: 'Product 3' },
-    { id: '4', name: 'Product 4' },
-    { id: '5', name: 'Product 5' },
-    { id: '6', name: 'Product 6' },
-  ];
 
-  const handleSettingsInputChange = (field: keyof MenuData) => (event: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    parseRawMenuData();
+  }, []);
+
+  const parseRawMenuData = () => {
+    if (!menu) return;
+
+    const menuViewModel: MenuViewModel = {
+      Id: menu.Id,
+      OrganizationId: menu.OrganizationId,
+      Enabled: menu.Enabled,
+      Name: menu.Name,
+      PatternStartTime: menu.PatternStartTime,
+      PatternEndTime: menu.PatternEndTime,
+      EventStartTime: menu.EventStartTime,
+      EventEndTime: menu.EventEndTime,
+      MenuCategories: menuCategories ?? [],
+      MenuProducts: menu.MenuProducts,
+      Created: menu.Created,
+    };
+
+    setFormData(menuViewModel);
+  }
+
+  const handleSettingsInputChange = (field: keyof MenuViewModel) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!formData) return;
     setFormData({
       ...formData,
       [field]: event.target.value,
     });
   };
 
-  const handleSettingsSwitchChange = (field: keyof MenuData) => (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSettingsSwitchChange = (field: keyof MenuViewModel) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!formData) return;
     setFormData({
       ...formData,
       [field]: event.target.checked,
     });
   };
 
+  // TODO: Pattern functionality
   const handleToggleDay = (day: string) => {
-    const currentDays = formData.activeDays || [];
-    const hasDay = currentDays.includes(day);
-    const nextDays = hasDay
-      ? currentDays.filter((currentDay) => currentDay !== day)
-      : [...currentDays, day];
+    // const currentDays = formData?.PatternEndTime || [];
+    // const hasDay = currentDays.includes(day);
+    // const nextDays = hasDay
+    //   ? currentDays.filter((currentDay) => currentDay !== day)
+    //   : [...currentDays, day];
 
-    setFormData({
-      ...formData,
-      activeDays: nextDays,
-    });
+    // setFormData({
+    //   ...formData,
+    //   activeDays: nextDays,
+    // });
   };
 
   const handleOpenItemsDialog = () => {
-    if (editingCategoryId === null) {
+    if (editingCategoryId === null || !formData) {
       return;
     }
 
-    const category = (formData.categories || []).find((item) => item.id === editingCategoryId);
-    const selectedIds = (category?.items || [])
-      .map((item) => {
-        const product = productOptions.find((option) => option.name === item.name);
-        return product?.id;
-      })
-      .filter((id): id is string => id !== undefined);
+    const category = formData.MenuCategories.find(category => category.Id === editingCategoryId);
+    if (!category) return;
 
-    setSelectedProductIds(selectedIds);
+    setSelectedProducts(category.Products);
     setItemSearchQuery('');
     setItemsDialogOpen(true);
   };
 
-  const handleToggleProductSelection = (productId: string) => {
-    setSelectedProductIds((currentSelectedIds) =>
-      currentSelectedIds.includes(productId)
-        ? currentSelectedIds.filter((id) => id !== productId)
-        : [...currentSelectedIds, productId]
+  const handleToggleProductSelection = (product: MenuProduct) => {
+    setSelectedProducts(prev =>
+      prev.includes(product)
+        ? prev.filter((selectedProduct) => selectedProduct !== product)
+        : [...prev, product]
     );
   };
 
   const handleSaveCategoryItems = () => {
-    if (editingCategoryId === null) {
-      return;
-    }
+    // const selectedItems = productOptions
+    //   .filter((product) => selectedProductIds.includes(product.id))
+    //   .map((product) => ({ id: product.id, name: product.name }));
 
-    const selectedItems = productOptions
-      .filter((product) => selectedProductIds.includes(product.id))
-      .map((product) => ({ id: product.id, name: product.name }));
+    // const updatedCategories = (formData.categories || []).map((category) =>
+    //   category.id === editingCategoryId ? { ...category, items: selectedItems } : category
+    // );
 
-    const updatedCategories = (formData.categories || []).map((category) =>
-      category.id === editingCategoryId ? { ...category, items: selectedItems } : category
-    );
-
-    setFormData({
-      ...formData,
-      categories: updatedCategories,
-    });
+    // setFormData({
+    //   ...formData,
+    //   categories: updatedCategories,
+    // });
     setItemsDialogOpen(false);
   };
 
@@ -178,9 +155,9 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
     setCategoryDialogOpen(true);
   };
 
-  const handleOpenEditCategory = (category: MenuCategory) => {
-    setEditingCategoryId(category.id);
-    setCategoryNameInput(category.name);
+  const handleOpenEditCategory = (category: MenuCategoryViewModel) => {
+    setEditingCategoryId(category.Id);
+    setCategoryNameInput(category.Name);
     setCategoryDialogOpen(true);
   };
 
@@ -190,58 +167,59 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
       return;
     }
 
-    const categories = (formData.categories || []).slice();
-
     if (editingCategoryId === null) {
-      const nextId =
-        categories.length > 0
-          ? Math.max(...categories.map((category) => Number(category.id))) + 1
-          : 1;
-      categories.push({
-        id: String(nextId),
-        name: trimmedName,
-        showTopmost: categoryShowTopmostInput,
-        items: [],
+      const newCategory: MenuCategoryViewModel = {
+        Id: crypto.randomUUID(),
+        Name: trimmedName,
+        MenuId: menu?.Id ?? '',
+        Products: [],
+      }
+      setFormData(prev => {
+        if (!prev) return;
+        return { ...prev, MenuCategories: [...prev.MenuCategories, newCategory]}
       });
     } else {
-      const updated = categories.map((category) =>
-        category.id === editingCategoryId
-          ? { ...category, name: trimmedName, showTopmost: categoryShowTopmostInput }
-          : category
-      );
-      setFormData({
-        ...formData,
-        categories: updated,
+      const editingCategory = formData?.MenuCategories.find(category => category.Id === editingCategoryId);
+      if (!editingCategory) return;
+
+      const updated: MenuCategoryViewModel = 
+      { 
+        ...editingCategory, 
+        Name: trimmedName,
+        Products: editingCategory.Products
+      }
+
+      setFormData(prev => {
+        if (!prev) return;
+        return { ...prev, MenuCategories: [...prev.MenuCategories, updated]}
       });
-      setCategoryDialogOpen(false);
-      setCategoryNameInput('');
-      setEditingCategoryId(null);
-      return;
     }
 
-    setFormData({
-      ...formData,
-      categories,
-    });
     setCategoryDialogOpen(false);
     setCategoryNameInput('');
     setEditingCategoryId(null);
   };
 
-  const sortedCategories = (formData.categories || [])
-    .slice()
-    .sort((firstCategory, secondCategory) => Number(Boolean(secondCategory.showTopmost)) - Number(Boolean(firstCategory.showTopmost)));
-
   const handleSave = () => {
-    onSave(formData);
+    if (!formData) return;
+    updateMenu(formData);
     onClose();
   };
 
   const handleDelete = async () => {
-    if (onDelete) {
-      onDelete();
-      onClose();
-    }
+        openConfirmDialog({
+        title: t('admin.menuEditor.dialog.delete'),
+        message: `${t('admin.menuEditor.dialog.delete')}? ${t('confirmDialog.cantBeUndone')}`,
+        cancelText: t('common.cancel'),
+        confirmText: t('common.confirm'),
+        onConfirm: async () => {
+          if (!menu) return;
+          deleteMenu(menu.Id);
+          onClose();
+        },
+    });
+
+    onClose();
   };
 
   const handleClose = () => {
@@ -326,80 +304,91 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
         >
           <Table>
             <TableBody>
-              {sortedCategories.map((category) => (
-                <React.Fragment key={category.id}>
-                  <TableRow>
-                    <TableCell
-                      colSpan={2}
-                      sx={{
-                        bgcolor: theme.colors.primaryLight,
-                        py: 1.5,
-                        borderBottom: `1px solid ${theme.colors.border}`,
-                      }}
-                    >
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Typography
-                          variant="subtitle2"
-                          fontWeight={theme.typography.fontWeights.semibold}
-                          sx={{ color: theme.colors.text }}
-                        >
-                          {category.name} ({category.items.length})
-                        </Typography>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleOpenEditCategory(category)}
-                          sx={{ color: theme.colors.text }}
-                        >
-                          <EditOutlinedIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-
-                  {category.items.map((item) => (
-                    <TableRow key={`${category.id}-${item.id}`} hover>
-                      <TableCell
-                        sx={{
-                          py: 1.5,
-                          borderBottom: `1px solid ${theme.colors.border}`,
-                        }}
-                      >
-                        <Typography
-                          variant="body2"
-                          fontWeight={theme.typography.fontWeights.medium}
-                          sx={{ color: theme.colors.text }}
-                        >
-                          {item.name}
-                        </Typography>
-                      </TableCell>
-                      <TableCell
-                        align="right"
-                        sx={{
-                          py: 1.5,
-                          borderBottom: `1px solid ${theme.colors.border}`,
-                        }}
-                      >
-                        <Typography
-                          variant="caption"
-                          sx={{ color: theme.colors.text, opacity: 0.65 }}
-                        >
-                          {t('admin.menuEditor.dialog.item')}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-
-                  {category.items.length === 0 && (
+              {menuCategories && menuCategories.length > 0 ? (
+                menuCategories.map((category) => (
+                  <React.Fragment key={category.Id}>
                     <TableRow>
-                      <TableCell colSpan={2} sx={{ py: 1.5 }}>
-                        <Typography variant="body2" sx={{ color: theme.colors.text, opacity: 0.65 }}>
-                          {t('admin.menuEditor.dialog.noCategoryItems')}
-                        </Typography>
+                      <TableCell
+                        colSpan={2}
+                        sx={{
+                          bgcolor: theme.colors.primaryLight,
+                          py: 1.5,
+                          borderBottom: `1px solid ${theme.colors.border}`,
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <Typography
+                            variant="subtitle2"
+                            fontWeight={theme.typography.fontWeights.semibold}
+                            sx={{ color: theme.colors.text }}
+                          >
+                            {getTranslation(category.Name, i18n.language)} ({category.Products.length})
+                          </Typography>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleOpenEditCategory(category)}
+                            sx={{ color: theme.colors.text }}
+                          >
+                            <EditOutlinedIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
                       </TableCell>
                     </TableRow>
-                  )}
-                </React.Fragment>
-              ))}
+
+                    {category.Products.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={2} sx={{ py: 1.5 }}>
+                          <Typography variant="body2" sx={{ color: theme.colors.text, opacity: 0.65 }}>
+                            {t('admin.menuEditor.dialog.noCategoryItems')}
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                      )
+                      :
+                      (category.Products.map((product) => (
+                        <TableRow key={`${category.Id}-${product.Id}`} hover>
+                          <TableCell
+                            sx={{
+                              py: 1.5,
+                              borderBottom: `1px solid ${theme.colors.border}`,
+                            }}
+                          >
+                            <Typography
+                              variant="body2"
+                              fontWeight={theme.typography.fontWeights.medium}
+                              sx={{ color: theme.colors.text }}
+                            >
+                              {getTranslation(product.Name, i18n.language)}
+                            </Typography>
+                          </TableCell>
+                          <TableCell
+                            align="right"
+                            sx={{
+                              py: 1.5,
+                              borderBottom: `1px solid ${theme.colors.border}`,
+                            }}
+                          >
+                            <Typography
+                              variant="caption"
+                              sx={{ color: theme.colors.text, opacity: 0.65 }}
+                            >
+                              {t('admin.menuEditor.dialog.item')}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </React.Fragment>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={2} sx={{ py: 1.5 }}>
+                    <Typography variant="body2" sx={{ color: theme.colors.text, opacity: 0.65 }}>
+                      {t('admin.menuEditor.dialog.noCategories')}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -416,7 +405,8 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
 
         <MenuSettingsDialog
           open={settingsDialogOpen}
-          formData={formData}
+          name={formData?.Name ?? ''}
+          enabled={formData?.Enabled ?? false}
           weekdays={weekdays}
           onClose={() => setSettingsDialogOpen(false)}
           onInputChange={handleSettingsInputChange}
@@ -426,9 +416,9 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
 
         <CategoryItemsDialog
           open={itemsDialogOpen}
-          productOptions={productOptions}
+          menuProducts={menu?.MenuProducts ?? []}
           itemSearchQuery={itemSearchQuery}
-          selectedProductIds={selectedProductIds}
+          selectedProducts={selectedProducts}
           onSearchChange={setItemSearchQuery}
           onToggleProductSelection={handleToggleProductSelection}
           onClose={() => setItemsDialogOpen(false)}
@@ -446,20 +436,18 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
         }}
       >
         <Box>
-          {onDelete && (
-            <Button
-              variant="outlined"
-              color="error"
-              startIcon={<DeleteIcon />}
-              onClick={handleDelete}
-              sx={{
-                borderRadius: theme.borderRadius.large,
-                textTransform: 'none',
-              }}
-            >
-              {t('admin.menuEditor.dialog.delete')}
-            </Button>
-          )}
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<DeleteIcon />}
+            onClick={handleDelete}
+            sx={{
+              borderRadius: theme.borderRadius.large,
+              textTransform: 'none',
+            }}
+          >
+            {t('admin.menuEditor.dialog.delete')}
+          </Button>
         </Box>
         <Box sx={{ display: 'flex', gap: theme.spacing.sm }}>
           <Button 

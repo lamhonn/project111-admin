@@ -4,7 +4,6 @@ import { Add as AddIcon } from '@mui/icons-material';
 import { theme } from '../theme';
 import { useTranslation } from 'react-i18next';
 import DeviceList from '../components/deviceManagement/DeviceList';
-import DeviceDialog from '../components/deviceManagement/DeviceDialog';
 import PairDeviceDialog from '../components/deviceManagement/PairDeviceDialog';
 import { errorAtom, loadingAtom } from '../state/tabletStore';
 import { useAtomValue } from 'jotai';

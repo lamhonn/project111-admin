@@ -4,9 +4,6 @@ import { useState } from 'react';
 import ProductEditorHeader from '../components/productEditor/ProductEditorHeader';
 import ProductGrid from '../components/productEditor/ProductGrid';
 import EditProductDialog from '../components/productEditor/EditProductDialog';
-import ErrorDialog from '../components/common/ErrorDialog';
-import type { ProductListItemViewModel } from '../viewModels';
-import { useGetProducts } from '../api/hooks/product.hooks';
 
 type ProductTranslations = {
   productName?: Record<'fi' | 'en' | 'sv', string>;
@@ -168,12 +165,6 @@ export default function ProductEditorView() {
           ageRestricted: selectedProduct.ageRestricted,
           price: selectedProduct.price,
         } : undefined}
-      />
-
-      <ErrorDialog
-        open={Boolean(errorMessage)}
-        errorMessage={errorMessage ?? ''}
-        onClose={() => setErrorMessage(null)}
       />
     </Box>
   );

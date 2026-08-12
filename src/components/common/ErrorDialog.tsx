@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   Box,
   Button,
@@ -9,12 +10,7 @@ import {
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { theme } from '../../theme/theme';
-
-interface ErrorReportDialogProps {
-  open: boolean;
-  errorMessage: string;
-  onClose: () => void;
-}
+import { closeErrorDialogAtom, errorDialogMessageAtom, errorDialogOpenAtom } from '../../state/errorDialogStore';
 
 const MAX_LOG_LINES = 12;
 const MAX_LOG_CHARS = 1200;
@@ -31,8 +27,12 @@ const toShortLogWindow = (value: string): string => {
   return `${joined.slice(0, MAX_LOG_CHARS)}...`;
 };
 
-const ErrorDialog: React.FC<ErrorReportDialogProps> = ({ open, errorMessage, onClose }) => {
+const ErrorDialog: React.FC = () => {
   // TODO: translations
+  const [open] = useAtom(errorDialogOpenAtom);
+  const errorMessage = useAtomValue(errorDialogMessageAtom);
+  const closeDialog = useSetAtom(closeErrorDialogAtom);
+
   const [copySuccess, setCopySuccess] = useState(false);
 
   const shortLog = useMemo(() => toShortLogWindow(errorMessage), [errorMessage]);
@@ -50,7 +50,7 @@ const ErrorDialog: React.FC<ErrorReportDialogProps> = ({ open, errorMessage, onC
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={closeDialog}
       maxWidth="sm"
       fullWidth
       PaperProps={{
@@ -90,7 +90,7 @@ const ErrorDialog: React.FC<ErrorReportDialogProps> = ({ open, errorMessage, onC
         <Button onClick={handleCopy} startIcon={<ContentCopyIcon />} sx={{ textTransform: 'none' }}>
           {copySuccess ? 'Copied' : 'Copy to clipboard'}
         </Button>
-        <Button variant="contained" onClick={onClose} sx={{ textTransform: 'none' }}>
+        <Button variant="contained" onClick={closeDialog} sx={{ textTransform: 'none' }}>
           Close
         </Button>
       </DialogActions>

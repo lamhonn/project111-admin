@@ -1,20 +1,17 @@
 import { useState, useMemo } from 'react';
 import { Box } from '@mui/material';
 import { theme } from '../theme';
-import { useGetOrderHistory } from '../api/hooks/orderHistory.hooks';
 import OrderHistoryDialog from '../components/dashboard/OrderHistoryDialog';
 import OrderHistoryHeader from '../components/orderHistory/OrderHistoryHeader';
 import OrderHistoryFilters, { type FilterPreset } from '../components/orderHistory/OrderHistoryFilters';
 import OrderHistoryTable from '../components/orderHistory/OrderHistoryTable';
-import type { HistoryOrderViewModel } from '../viewModels';
+import { OrderViewModel } from '../types/viewModels/orderViewModel';
 
-export default function OrderHistoryView() {
-  const { data: allOrders } = useGetOrderHistory();
-  
+export default function OrderHistoryView() {  
   const [filterPreset, setFilterPreset] = useState<FilterPreset>('week');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
-  const [selectedOrder, setSelectedOrder] = useState<HistoryOrderViewModel | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<OrderViewModel | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // Filter orders based on selected preset or custom date range

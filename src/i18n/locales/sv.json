@@ -177,6 +177,8 @@
         "searchProductsPlaceholder": "Sök produkter...",
         "noProductsFound": "Inga produkter hittades",
         "noCategoryItems": "Inga artiklar i denna kategori ännu",
+        "noMenus": "Inga menyer",
+        "noCategories": "Ingen kategorier hittades",
         "item": "Artikel",
         "showTopmost": "Visa överst",
         "activePeriod": "Aktiv period",
@@ -321,5 +323,8 @@
     "fillAllFields": "Fyll i bade anvandarnamn och losenord.",
     "loginFailed": "Inloggning misslyckades",
     "authorizationRequired": "Auktorisering kravs"
+  },
+  "confirmDialog": {
+    "cantBeUndone": "Det går inte att återställa detta!"
   }
 }
