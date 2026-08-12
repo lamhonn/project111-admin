@@ -1,10 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Box } from '@mui/material';
 import { theme } from '../theme';
 import OrderHistoryDialog from '../components/dashboard/OrderHistoryDialog';
 import OrderHistoryHeader from '../components/orderHistory/OrderHistoryHeader';
 import OrderHistoryFilters, { type FilterPreset } from '../components/orderHistory/OrderHistoryFilters';
 import OrderHistoryTable from '../components/orderHistory/OrderHistoryTable';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { getOrdersAtom, loadingAtom, ordersAtom } from '../state/orderStore';
 import { OrderViewModel } from '../types/viewModels/orderViewModel';
 
 export default function OrderHistoryView() {  
@@ -13,6 +15,16 @@ export default function OrderHistoryView() {
   const [endDate, setEndDate] = useState<string>('');
   const [selectedOrder, setSelectedOrder] = useState<OrderViewModel | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  const loading = useAtomValue(loadingAtom);
+  
+  const allOrders = useAtomValue(ordersAtom);
+  const getOrders = useSetAtom(getOrdersAtom);
+
+  useEffect(() => {
+    // TODO: some sort of security measure to prevent spamming
+    getOrders();
+  }, []);
 
   // Filter orders based on selected preset or custom date range
   const filteredOrders = useMemo(() => {
@@ -27,7 +39,7 @@ export default function OrderHistoryView() {
       end.setHours(23, 59, 59, 999); // Include the entire end date
       
       return allOrders.filter(order => {
-        const orderDate = new Date(order.date);
+        const orderDate = new Date(order.Created);
         return orderDate >= start && orderDate <= end;
       });
     }
@@ -58,7 +70,7 @@ export default function OrderHistoryView() {
     }
 
     return allOrders.filter(order => {
-      const orderDate = new Date(order.date);
+      const orderDate = new Date(order.Created);
       return orderDate >= filterStartDate;
     });
   }, [allOrders, filterPreset, startDate, endDate]);
@@ -72,7 +84,7 @@ export default function OrderHistoryView() {
     }
   };
 
-  const handleRowClick = (order: HistoryOrderViewModel) => {
+  const handleRowClick = (order: OrderViewModel) => {
     setSelectedOrder(order);
     setDialogOpen(true);
   };
@@ -100,7 +112,8 @@ export default function OrderHistoryView() {
       </Box>
 
       {/* Order History Table */}
-      <OrderHistoryTable
+      <OrderHistoryTable 
+        loading={loading}
         orders={filteredOrders}
         onRowClick={handleRowClick}
       />

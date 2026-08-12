@@ -17,7 +17,6 @@ import { theme } from '../../theme/theme';
 import { errorAtom, selectedOrderAtom, updateOrderStatusAtom } from '../../state/orderStore';
 import { orderOptionsDialogOpenAtom } from '../../state/orderStore';
 import { OrderStatus } from '../../types/enums/orderStatus';
-import { OrderDto } from '../../types/dtos/orderDto';
 import { getTranslation } from '../../utils/multilingualNameUtils';
 
 

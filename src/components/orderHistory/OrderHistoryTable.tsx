@@ -1,14 +1,15 @@
-import { Box, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Box, CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme';
-import type { HistoryOrderViewModel } from '../../viewModels';
+import { OrderViewModel } from '../../types/viewModels/orderViewModel';
 
 interface OrderHistoryTableProps {
-  orders: HistoryOrderViewModel[];
-  onRowClick: (order: HistoryOrderViewModel) => void;
+  loading: boolean;
+  orders: OrderViewModel[];
+  onRowClick: (order: OrderViewModel) => void;
 }
 
-export default function OrderHistoryTable({ orders, onRowClick }: OrderHistoryTableProps) {
+export default function OrderHistoryTable({ loading, orders, onRowClick }: OrderHistoryTableProps) {
   const { t } = useTranslation();
 
   return (
@@ -55,48 +56,52 @@ export default function OrderHistoryTable({ orders, onRowClick }: OrderHistoryTa
             </TableRow>
           </TableHead>
           <TableBody>
-            {orders.map((order) => (
-              <TableRow
-                key={order.id}
-                hover
-                onClick={() => onRowClick(order)}
-                sx={{ 
-                  '&:last-child td, &:last-child th': { border: 0 },
-                  transition: theme.transitions.fast,
-                  cursor: 'pointer',
-                  '&:hover': {
-                    bgcolor: theme.colors.primaryLight,
-                  }
-                }}
-              >
-                <TableCell>
-                  <Typography 
-                    variant="body2" 
-                    fontWeight={theme.typography.fontWeights.semibold}
-                    sx={{ color: theme.colors.text }}
-                  >
-                    {order.orderNumber}
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography 
-                    variant="body2" 
-                    sx={{ color: theme.colors.text }}
-                  >
-                    {order.date}
-                  </Typography>
-                </TableCell>
-                <TableCell align="right">
-                  <Typography 
-                    variant="body2" 
-                    fontWeight={theme.typography.fontWeights.semibold}
-                    sx={{ color: theme.colors.text }}
-                  >
-                    €{order.total.toFixed(2)}
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            ))}
+            {loading ? 
+              <CircularProgress size={16} sx={{ color: 'white' }} />
+              :
+              (orders.map((order) => (
+                <TableRow
+                  key={order.Id}
+                  hover
+                  onClick={() => onRowClick(order)}
+                  sx={{ 
+                    '&:last-child td, &:last-child th': { border: 0 },
+                    transition: theme.transitions.fast,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      bgcolor: theme.colors.primaryLight,
+                    }
+                  }}
+                >
+                  <TableCell>
+                    <Typography 
+                      variant="body2" 
+                      fontWeight={theme.typography.fontWeights.semibold}
+                      sx={{ color: theme.colors.text }}
+                    >
+                      {order.Id}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ color: theme.colors.text }}
+                    >
+                      {order.Created.toLocaleDateString()}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Typography 
+                      variant="body2" 
+                      fontWeight={theme.typography.fontWeights.semibold}
+                      sx={{ color: theme.colors.text }}
+                    >
+                      {order.TotalPrice}€
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
