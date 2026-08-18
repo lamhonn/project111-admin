@@ -24,11 +24,12 @@ import MenuSettingsDialog from './MenuSettingsDialog';
 import CategoryItemsDialog from './CategoryItemsDialog';
 import { MenuViewModel } from '../../types/viewModels/menuViewModel';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { deleteMenuAtom, getSelectedMenuAtom, getSelectedMenuCategoriesAtom, updateMenuAtom } from '../../state/menuStore';
+import { createMenuAtom, deleteMenuAtom, getSelectedMenuAtom, getSelectedMenuCategoriesAtom, selectedMenuIdAtom, updateMenuAtom } from '../../state/menuStore';
 import { MenuCategoryViewModel } from '../../types/viewModels/menuCategoryViewModel';
 import { openConfirmDialogAtom } from '../../state/confirmDialogStore';
 import { getTranslation } from '../../utils/multilingualNameUtils';
 import { MenuProduct } from '../../types/models';
+import { organizationIdAtom } from '../../state/authStore';
 
 interface EditMenuDialogProps {
   open: boolean;
@@ -40,7 +41,6 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
   onClose, 
 }) => {
   const { t, i18n } = useTranslation();
-  const [formData, setFormData] = useState<MenuViewModel>();
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [categoryNameInput, setCategoryNameInput] = useState('');
@@ -53,8 +53,25 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
   const menuCategories = useAtomValue(getSelectedMenuCategoriesAtom); // TODO: add an ability to sort categories
   const openConfirmDialog = useSetAtom(openConfirmDialogAtom);
 
+  const organizationId = useAtomValue(organizationIdAtom);
+
+  const createMenu = useSetAtom(createMenuAtom);
   const updateMenu = useSetAtom(updateMenuAtom);
   const deleteMenu = useSetAtom(deleteMenuAtom);
+
+  const [formData, setFormData] = useState<MenuViewModel>({
+    Id: crypto.randomUUID(),
+    OrganizationId: organizationId ?? '',
+    Enabled: false,
+    Name: '',
+    PatternStartTime: null,
+    PatternEndTime: null,
+    EventStartTime: null,
+    EventEndTime: null,
+    MenuCategories: [],
+    MenuProducts: [],
+    Created: new Date(),
+  });
 
   const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -146,6 +163,7 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
     //   ...formData,
     //   categories: updatedCategories,
     // });
+    // TODO: implement save category items logic
     setItemsDialogOpen(false);
   };
 
@@ -175,7 +193,6 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
         Products: [],
       }
       setFormData(prev => {
-        if (!prev) return;
         return { ...prev, MenuCategories: [...prev.MenuCategories, newCategory]}
       });
     } else {
@@ -190,7 +207,6 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
       }
 
       setFormData(prev => {
-        if (!prev) return;
         return { ...prev, MenuCategories: [...prev.MenuCategories, updated]}
       });
     }
@@ -201,8 +217,11 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
   };
 
   const handleSave = () => {
-    if (!formData) return;
-    updateMenu(formData);
+    if (selectedMenuIdAtom)
+      updateMenu(formData);
+    else 
+      createMenu(formData);
+
     onClose();
   };
 

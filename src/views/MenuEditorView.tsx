@@ -5,22 +5,20 @@ import { theme } from '../theme';
 import MenuEditorHeader from '../components/menuEditor/MenuEditorHeader';
 import MenuList from '../components/menuEditor/MenuList';
 import EditMenuDialog from '../components/menuEditor/EditMenuDialog';
-import { useAtomValue, useSetAtom } from 'jotai';
-import { menusAtom, selectedMenuIdAtom, updateMenuAtom } from '../state/menuStore';
-import { Menu } from '../types/models';
+import { useAtom, useAtomValue } from 'jotai';
+import { menusAtom, selectedMenuIdAtom } from '../state/menuStore';
 
 export default function MenuEditorView() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null);
 
   const menus = useAtomValue(menusAtom);
-  const setSelectedMenuId = useSetAtom(selectedMenuIdAtom);
+  const [selectedMenuId, setSelectedMenuId] = useAtom(selectedMenuIdAtom);
 
   const handleAddMenu = () => {
-    setSelectedMenu(null);
+    setSelectedMenuId(null);
     setDialogOpen(true);
   };
 
@@ -47,17 +45,11 @@ export default function MenuEditorView() {
 
       {dialogOpen && (
         <EditMenuDialog
-          key={selectedMenu?.Id ?? null}
+          key={selectedMenuId ?? null}
           open={dialogOpen}
           onClose={() => setDialogOpen(false)}
         />
       )}
-{/* 
-      <ErrorReportDialog
-        open={Boolean(errorMessage)}
-        errorMessage={errorMessage ?? ''}
-        onClose={() => setErrorMessage(null)}
-      /> */}
     </Box>
   );
 }

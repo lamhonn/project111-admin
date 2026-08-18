@@ -51,6 +51,39 @@ export const getSelectedMenuAtom = atom(
     }
 );
 
+export const createMenuAtom = atom(
+    null,
+    async (get, set, data: MenuViewModel) => {
+        set(loadingAtom, true);
+        set(errorAtom, null);
+
+        try {
+            // NOTE: consider type safety; convert Menu to MenuViewModel upon getMenusAtom altogether?
+            const menuDto: MenuDto = {
+                ...data,
+                MenuCategories: data.MenuCategories.map(category => <MenuCategoryDto>{ ...category }),
+            }
+            await MenuService.create(menuDto);
+            
+            const menus = get(menusAtom);
+
+            set(menusAtom, [...menus, 
+                { 
+                    ...data,
+                    MenuCategories: data.MenuCategories.map(category => <MenuCategory>{ ...category, Created: data.Created }),
+                    Created: data.Created 
+                }
+            ]);
+        }
+        catch {
+            set(errorAtom, "Failed to create menu");
+        } 
+        finally {
+            set(loadingAtom, false);
+        }
+    }
+);
+
 export const updateMenuAtom = atom(
     null,
     async (get, set, updatedMenu: MenuViewModel) => {
@@ -67,20 +100,19 @@ export const updateMenuAtom = atom(
             
             const menus = get(menusAtom);
 
-            // const updatedMenu = 
             const updatedMenus: Menu[] = menus.map(menu =>
                 menu.Id === updatedMenu.Id
                 ? { 
                     ...updatedMenu,
-                    MenuCategories: updatedMenu.MenuCategories.map(category => <MenuCategory>{ ...category, Created: menu.Created }),
-                    Created: menu.Created 
+                    MenuCategories: updatedMenu.MenuCategories.map(category => <MenuCategory>{ ...category, Created: updatedMenu.Created }),
+                    Created: updatedMenu.Created 
                 }
                 : menu
             );
             set(menusAtom, updatedMenus);
         }
         catch {
-            set(errorAtom, "Failed to delete menu");
+            set(errorAtom, "Failed to update menu");
         } 
         finally {
             set(loadingAtom, false);
