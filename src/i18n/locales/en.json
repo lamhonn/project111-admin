@@ -135,13 +135,13 @@
         "removeExcludable": "Remove excludable",
         "ingredients": "Ingredient Information",
         "ingredientsPlaceholder": "List ingredients...",
-        "editAllergens": "Edit Allergens",
+        "editDietaries": "Edit Dietaries",
         "languages": {
           "finnish": "Finnish",
           "english": "English",
           "swedish": "Swedish"
         },
-        "allergens": {
+        "dietaries": {
           "glutenFree": "Gluten free",
           "lactoseFree": "Lactose free",
           "lowLactose": "Low lactose",

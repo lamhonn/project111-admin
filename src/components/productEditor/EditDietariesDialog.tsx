@@ -14,54 +14,37 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
-
-export const AllergenCode = {
-  GlutenFree: 'G',
-  LactoseFree: 'L',
-  LowLactose: 'VL',
-  Vegetarian: 'V',
-  Vegan: 'VEG',
-} as const;
-
-export type AllergenCode = (typeof AllergenCode)[keyof typeof AllergenCode];
+import { Dietary, DietaryCode, DietaryName } from '../../types/enums';
 
 interface EditAllergensDialogProps {
   open: boolean;
   onClose: () => void;
-  selectedAllergens: AllergenCode[];
-  onSave: (allergens: AllergenCode[]) => void;
+  selectedDietaries: Dietary[];
+  onSave: (dietaries: Dietary[]) => void;
 }
 
-const ALLERGEN_OPTIONS: Array<{ code: AllergenCode; labelKey: string }> = [
-  { code: AllergenCode.GlutenFree, labelKey: 'admin.productEditor.dialog.allergens.glutenFree' },
-  { code: AllergenCode.LactoseFree, labelKey: 'admin.productEditor.dialog.allergens.lactoseFree' },
-  { code: AllergenCode.LowLactose, labelKey: 'admin.productEditor.dialog.allergens.lowLactose' },
-  { code: AllergenCode.Vegetarian, labelKey: 'admin.productEditor.dialog.allergens.vegetarian' },
-  { code: AllergenCode.Vegan, labelKey: 'admin.productEditor.dialog.allergens.vegan' },
-];
-
-const EditAllergensDialog: React.FC<EditAllergensDialogProps> = ({
+const EditDietariesDialog: React.FC<EditAllergensDialogProps> = ({
   open,
   onClose,
-  selectedAllergens,
+  selectedDietaries,
   onSave,
 }) => {
   const { t } = useTranslation();
-  const [localSelection, setLocalSelection] = useState<AllergenCode[]>(selectedAllergens);
+  const [localSelection, setLocalSelection] = useState<Dietary[]>(selectedDietaries);
 
   useEffect(() => {
     if (open) {
-      setLocalSelection(selectedAllergens);
+      setLocalSelection(selectedDietaries);
     }
-  }, [open, selectedAllergens]);
+  }, [open, selectedDietaries]);
 
-  const toggleAllergen = (code: AllergenCode) => {
+  const toggleDietary = (code: Dietary) => {
     setLocalSelection((previous) =>
       previous.includes(code)
         ? previous.filter((value) => value !== code)
         : [...previous, code],
     );
-  };
+  }; 
 
   const handleSave = () => {
     onSave(localSelection);
@@ -94,12 +77,12 @@ const EditAllergensDialog: React.FC<EditAllergensDialogProps> = ({
 
       <DialogContent sx={{ p: theme.spacing.lg }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-          {ALLERGEN_OPTIONS.map((option) => {
-            const isChecked = localSelection.includes(option.code);
+          {(Object.values(Dietary) as Array<Dietary>).map((option) => {
+            const isChecked = localSelection.includes(option);
 
             return (
               <Paper
-                key={option.code}
+                key={option}
                 variant="outlined"
                 sx={{
                   px: theme.spacing.md,
@@ -113,17 +96,17 @@ const EditAllergensDialog: React.FC<EditAllergensDialogProps> = ({
                     bgcolor: 'action.hover',
                   },
                 }}
-                onClick={() => toggleAllergen(option.code)}
+                onClick={() => toggleDietary(option)}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Typography variant="body2">{t(option.labelKey)}</Typography>
+                  <Typography variant="body2">{t(`admin.productEditor.dialog.dietaries.${DietaryName[option]}`)}</Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: theme.spacing.sm }}>
-                    <Chip label={option.code} size="small" variant="outlined" />
+                    <Chip label={DietaryCode[option]} size="small" variant="outlined" />
                     <Checkbox
                       checked={isChecked}
-                      onChange={() => toggleAllergen(option.code)}
+                      onChange={() => toggleDietary(option)}
                       onClick={(event) => event.stopPropagation()}
-                      inputProps={{ 'aria-label': option.code }}
+                      inputProps={{ 'aria-label': DietaryCode[option] }}
                     />
                   </Box>
                 </Box>
@@ -176,4 +159,4 @@ const EditAllergensDialog: React.FC<EditAllergensDialogProps> = ({
   );
 };
 
-export default EditAllergensDialog;
+export default EditDietariesDialog;

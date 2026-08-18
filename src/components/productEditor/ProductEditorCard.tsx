@@ -1,25 +1,32 @@
 import { Box, Typography, Paper } from '@mui/material';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { theme } from '../../theme';
+import { Product } from '../../types/models';
+import { languageAtom } from '../../state/uiStore';
+import { getTranslation } from '../../utils/multilingualNameUtils';
+import { editProductDialogOpenAtom, selectedProductIdAtom } from '../../state/productStore';
 
 interface ProductEditorCardProps {
-  id: string;
-  name: string;
-  description: string;
-  imgUrl?: string;
-  onClick: (id: string) => void;
+  product: Product;
 }
 
 export default function ProductEditorCard({
-  id,
-  name,
-  description,
-  imgUrl,
-  onClick,
+  product,
 }: ProductEditorCardProps) {
+  const { Id, Name, Description, ImgUrl } = product;
+
+  const language = useAtomValue(languageAtom);
+  const setSelectedProductId = useSetAtom(selectedProductIdAtom);
+  const setDialogOpen = useSetAtom(editProductDialogOpenAtom);
+
+  const handleClickProduct = () => {
+    setSelectedProductId(Id);
+    setDialogOpen(true);
+  }
 
   return (
     <Paper
-      onClick={() => onClick(id)}
+      onClick={handleClickProduct}
       sx={{
         p: theme.spacing.md,
         borderRadius: theme.borderRadius.small,
@@ -52,8 +59,8 @@ export default function ProductEditorCard({
         >
           <Box
             component="img"
-            src={imgUrl || ''}
-            alt={name}
+            src={ImgUrl || ''}
+            alt={getTranslation(Name, language)}
             sx={{
               width: '100%',
               height: '100%',
@@ -70,7 +77,7 @@ export default function ProductEditorCard({
             fontWeight={theme.typography.fontWeights.semibold}
             sx={{ mb: theme.spacing.sm }}
           >
-            {name}
+            {getTranslation(Name, language)}
           </Typography>
           <Typography
             variant="body2"
@@ -84,7 +91,7 @@ export default function ProductEditorCard({
               WebkitBoxOrient: 'vertical',
             }}
           >
-            {description}
+            {Description ? getTranslation(Description, language) : ''}
           </Typography>
         </Box>
       </Box>

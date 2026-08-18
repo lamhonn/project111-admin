@@ -57,7 +57,7 @@ export default function OrderHistoryTable({ loading, orders, onRowClick }: Order
           </TableHead>
           <TableBody>
             {loading ? 
-              <CircularProgress size={16} sx={{ color: 'white' }} />
+              <CircularProgress />
               :
               (orders.map((order) => (
                 <TableRow

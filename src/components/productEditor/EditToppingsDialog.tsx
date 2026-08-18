@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -8,25 +9,29 @@ import {
   IconButton,
   TextField,
   Divider,
+  DialogActions,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useTranslation } from 'react-i18next';
+import TranslateIcon from '@mui/icons-material/Translate';
+
 import { theme } from '../../theme/theme';
+import { languageAtom } from '../../state/uiStore';
+import { useAtomValue } from 'jotai';
+import { ProductTopping } from '../../types/models';
+import { parsePriceValue } from '../../utils/productUtils';
+import { selectedProductIdAtom } from '../../state/productStore';
+import { getTranslation } from '../../utils/multilingualNameUtils';
+import TranslationDialog from './TranslationDialog';
+import { TranslationViewModel } from '../../types/viewModels/translationViewModel';
 
 interface EditToppingsDialogProps {
   open: boolean;
   onClose: () => void;
-  toppings: ToppingRow[];
-  onChange: (toppings: ToppingRow[]) => void;
+  toppings: ProductTopping[];
+  onChange: (toppings: ProductTopping[]) => void;
   freeToppings: number;
-  maxToppings: number;
-  onSettingsChange: (settings: { freeToppings: number; maxToppings: number }) => void;
-}
-
-export interface ToppingRow {
-  name: string;
-  priceIncrement: number;
+  onSettingsChange: (freeToppings: number) => void;
 }
 
 const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
@@ -35,70 +40,97 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
   toppings,
   onChange,
   freeToppings,
-  maxToppings,
   onSettingsChange,
 }) => {
   const { t } = useTranslation();
+  const [localToppings, setLocalToppings] = useState<ProductTopping[]>(toppings);
+  const [isTranslationDialogOpen, setIsTranslationDialogOpen] = useState(false);
+  const [translations, setTranslations] = useState<TranslationViewModel>({ en: '', fi: '', sv: ''});
 
-  const handleToppingChange = (index: number, value: string) => {
-    const nextToppings = [...toppings];
-    nextToppings[index] = {
-      ...nextToppings[index],
-      name: value,
-    };
-    onChange(nextToppings);
+  const language = useAtomValue(languageAtom);
+  const selectedProductId = useAtomValue(selectedProductIdAtom)
+
+  const handleToppingChange = (id: string, value: string) => {
+    const next = localToppings.find(topping => topping.Id === id);
+    if (!next) return;
+
+    const jsonObject = JSON.parse(next.Name);
+    jsonObject[language] = value;
+
+    const updatedToppings: ProductTopping[] = localToppings.map(prev => 
+      prev.Id === id
+      ?
+      {
+        ...next, 
+        Name: JSON.stringify(jsonObject)
+      } 
+      : prev
+    );
+
+    setLocalToppings(updatedToppings);
   };
 
-  const handlePriceIncrementChange = (index: number, value: string) => {
-    const parsedValue = Number.parseFloat(value);
-    const nextToppings = [...toppings];
-    nextToppings[index] = {
-      ...nextToppings[index],
-      priceIncrement: Number.isNaN(parsedValue)
-        ? 0
-        : Math.max(0, Math.round(parsedValue * 100) / 100),
-    };
-    onChange(nextToppings);
+  const handlePriceIncrementChange = (id: string, value: string) => {
+    const next = localToppings.find(topping => topping.Id === id);
+    if (!next) return;
+
+    const parsedValue = parsePriceValue(value);
+
+    const updatedToppings: ProductTopping[] = localToppings.map(prev => 
+      prev.Id === id
+      ?
+      {
+        ...next, 
+        Price: parsedValue
+      } 
+      : prev
+    );
+
+    setLocalToppings(updatedToppings)
   };
 
-  const handleRemoveRow = (index: number) => {
-    if (toppings.length === 1) {
-      onChange([
-        {
-          ...toppings[0],
-          name: '',
-        },
-      ]);
-      return;
-    }
+  const handleRemoveRow = (id: string) => {
+    const next = localToppings.find(topping => topping.Id === id);
+    if (!next) return;
 
-    onChange(toppings.filter((_, rowIndex) => rowIndex !== index));
+    const updatedToppings: ProductTopping[] = localToppings.filter(prev => prev.Id !== id);
+    
+    setLocalToppings(updatedToppings);
   };
 
   const handleAddRow = () => {
-    onChange([
-      ...toppings,
-      {
-        name: '',
-        priceIncrement: 0,
-      },
-    ]);
+    const newTopping: ProductTopping = {
+      Id: crypto.randomUUID(),
+      Name: JSON.stringify({ en: '', fi: '', sv: '' }),
+      ProductId: selectedProductId,
+      Price: 0,
+      Created: new Date(), // Will be updated in backend anyways
+    }
+    setLocalToppings([...localToppings, newTopping]);
   };
 
   const handleFreeToppingsChange = (value: string) => {
-    const parsedValue = Number.parseInt(value, 10);
-    onSettingsChange({
-      freeToppings: Number.isNaN(parsedValue) ? 0 : Math.max(0, parsedValue),
-      maxToppings,
-    });
+    const parsedValue = parsePriceValue(value);
+    onSettingsChange(Number.isNaN(parsedValue) ? 0 : parsedValue);
   };
 
-  const handleMaxToppingsChange = (value: string) => {
-    const parsedValue = Number.parseInt(value, 10);
-    onSettingsChange({
-      freeToppings,
-      maxToppings: Number.isNaN(parsedValue) ? 0 : Math.max(0, parsedValue),
-    });
+  // TODO: add when maxToppings are added
+  // const handleMaxToppingsChange = (value: string) => {
+  //   const parsedValue = Number.parseInt(value, 10);
+  //   onSettingsChange({
+  //     freeToppings,
+  //     maxToppings: Number.isNaN(parsedValue) ? 0 : Math.max(0, parsedValue),
+  //   });
+  // };
+
+  const handleOpenTranslationDialog = (jsonString: string) => {
+    const translations = JSON.parse(jsonString);
+    setTranslations(translations);
+    setIsTranslationDialogOpen(true);
+  };
+
+  const handleSave = () => {
+    onChange(localToppings);
   };
 
   return (
@@ -136,14 +168,15 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
               inputProps={{ min: 0, step: 1 }}
               fullWidth
             />
-            <TextField
+            {/* TODO: uncomment when maxToppings has been added as a feature */}
+            {/* <TextField
               type="number"
               label={t('admin.productEditor.dialog.maxToppings')}
               value={maxToppings}
-              onChange={(event) => handleMaxToppingsChange(event.target.value)}
+              onChange={(e) => handleMaxToppingsChange(e.target.value)}
               inputProps={{ min: 0, step: 1 }}
               fullWidth
-            />
+            /> */}
           </Box>
 
           <Divider sx={{ my: theme.spacing.sm }} />
@@ -177,14 +210,29 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
             >
               <TextField
                 fullWidth
-                value={topping.name}
-                onChange={(event) => handleToppingChange(index, event.target.value)}
+                value={getTranslation(topping.Name, language)}
+                onChange={(e) => handleToppingChange(topping.Id, e.target.value)}
                 placeholder={t('admin.productEditor.dialog.addToppingPlaceholder')}
+                InputProps={{
+                  endAdornment: (
+                    <IconButton
+                      sx={{
+                        position: 'absolute',
+                        right: 0,
+                        top: '50%',
+                        transform: 'translateY(-50%)'
+                      }}
+                      onClick={() => handleOpenTranslationDialog(topping.Name)}
+                    >
+                      <TranslateIcon />
+                    </IconButton>
+                  ),
+                }}
               />
               <TextField
                 type="number"
-                value={topping.priceIncrement}
-                onChange={(event) => handlePriceIncrementChange(index, event.target.value)}
+                value={topping.Price}
+                onChange={(e) => handlePriceIncrementChange(topping.Id, e.target.value)}
                 placeholder={t('admin.productEditor.dialog.priceIncrement')}
                 inputProps={{ min: 0, step: 0.01 }}
                 sx={{
@@ -201,7 +249,7 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
               />
               <IconButton
                 aria-label={t('admin.productEditor.dialog.removeTopping')}
-                onClick={() => handleRemoveRow(index)}
+                onClick={() => handleRemoveRow(topping.Id)}
                 sx={{
                   width: 40,
                   height: 40,
@@ -233,6 +281,55 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
           </Box>
         </Box>
       </DialogContent>
+
+      <DialogActions
+        sx={{
+          px: theme.spacing.lg,
+          py: theme.spacing.md,
+          borderTop: '1px solid',
+          borderColor: theme.colors.border,
+          gap: theme.spacing.sm,
+        }}
+      >
+        <Button
+          onClick={onClose}
+          variant="outlined"
+          sx={{
+            textTransform: 'none',
+            px: theme.spacing.lg,
+            borderRadius: theme.borderRadius.medium,
+            borderColor: theme.colors.border,
+            fontWeight: theme.typography.fontWeights.medium,
+          }}
+        >
+          {t('common.cancel')}
+        </Button>
+        <Button
+          onClick={handleSave}
+          variant="contained"
+          sx={{
+            textTransform: 'none',
+            px: theme.spacing.lg,
+            borderRadius: theme.borderRadius.medium,
+            bgcolor: theme.colors.primary,
+            fontWeight: theme.typography.fontWeights.semibold,
+            '&:hover': {
+              bgcolor: theme.colors.primaryHover,
+            },
+          }}
+        >
+          {t('common.save')}
+        </Button>
+      </DialogActions>
+
+      <TranslationDialog 
+        open={isTranslationDialogOpen}
+        translations={translations}
+        setTranslations={setTranslations}
+        onClose={() => {
+          setIsTranslationDialogOpen(false)
+        }}
+      />
     </Dialog>
   );
 };

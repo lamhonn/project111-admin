@@ -1,16 +1,14 @@
 import { Box } from '@mui/material';
 import { theme } from '../../theme';
 import ProductEditorCard from './ProductEditorCard';
-import type { ProductListItemViewModel } from '../../viewModels';
+import { Product } from '../../types/models';
 
 interface ProductGridProps {
-  products: ProductListItemViewModel[];
-  onProductClick: (id: string) => void;
+  products: Product[];
 }
 
 export default function ProductGrid({
-  products,
-  onProductClick,
+  products
 }: ProductGridProps) {
   return (
     <Box
@@ -26,12 +24,8 @@ export default function ProductGrid({
     >
       {products.map((product) => (
         <ProductEditorCard
-          key={product.id}
-          id={product.id}
-          name={product.name}
-          description={product.description}
-          imgUrl={product.imgUrl}
-          onClick={onProductClick}
+          key={product.Id}
+          product={product}
         />
       ))}
     </Box>

@@ -19,4 +19,14 @@ export const ProductService = {
         const { data } = await api.get<Product[]>(`${baseUrl}/organization/${organizationId}`);
         return data;
     },
+
+    update: async (productDto: ProductDto) => {
+        const { data } = await api.put<ProductDto>(baseUrl, productDto);
+        return data;
+    },
+
+    delete: async (id: string) => {
+        const { data } = await api.delete<Product>(`${baseUrl}/${id}`);
+        return data;
+    }
 }

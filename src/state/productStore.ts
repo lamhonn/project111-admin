@@ -1,6 +1,8 @@
 import { atom } from 'jotai';
 import { Product } from '../types/models';
 import { ProductService } from '../api/services/productService';
+import { ProductDto } from '../types/dtos/productDto';
+import { organizationIdAtom } from './authStore';
 
 export const productsAtom = atom<Product[]>([]);
 
@@ -12,7 +14,7 @@ export const selectedProductAtom = atom<Product | null>(null);
 
 export const errorAtom = atom<string | null>(null);
 
-export const getProductById = atom(
+export const getProductByIdAtom = atom(
     (get) => {
         const productId = get(selectedProductIdAtom);
         if (!productId) return null;
@@ -48,3 +50,97 @@ export const getProductById = atom(
         }
     }
 );
+
+export const getProductsByOrganizationIdAtom = atom(
+    (get) => get(productsAtom),
+    async (get, set) => {
+        set(loadingAtom, true);
+        set(errorAtom, null);
+
+        try {
+            const organizationId = get(organizationIdAtom);
+            
+            if (!organizationId) return;
+
+            const products = await ProductService.getByOrganization(organizationId);
+
+            set(productsAtom, products);
+        }
+        catch {
+            set(errorAtom, "Error getting products");
+        }
+        finally {
+            set(loadingAtom, false);
+        }
+    }
+);
+
+export const createProductAtom = atom(
+    null,
+    async (get, set, data: ProductDto) => {
+        set(loadingAtom, true);
+        set(errorAtom, null);
+        
+        try {
+            await ProductService.create(data);
+
+            const products = get(productsAtom);
+
+            set(productsAtom, [...products, { ...data, Created: new Date() }])
+        }
+        catch {
+            set(errorAtom, "Error creating product");
+        }
+        finally {
+            set(loadingAtom, false);
+        }
+    }
+);
+
+export const updateProductAtom = atom(
+    null,
+    async (get, set, data: ProductDto) => {
+        set(loadingAtom, true);
+        set(errorAtom, null);
+        
+        try {
+            await ProductService.update(data);
+
+            const products = get(productsAtom);
+
+            const updatedProducts: Product[] = products.map(product =>
+                product.Id === data.Id ? { ...product, ...data } : product
+            );
+            set(productsAtom, updatedProducts)
+        }
+        catch {
+            set(errorAtom, "Error creating product");
+        }
+        finally {
+            set(loadingAtom, false);
+        }
+    }
+);
+
+export const deleteProductAtom = atom(
+    null,
+    async (get, set, id: string) => {
+        set(loadingAtom, true);
+        set(errorAtom, null);
+
+        try {
+            await ProductService.delete(id);
+            
+            const products = get(productsAtom);
+            set(productsAtom, products.filter(product => product.Id !== id));
+        }
+        catch {
+            set(errorAtom, "Error deleting product")
+        }
+        finally {
+            set(loadingAtom, false);
+        }
+    }
+);
+
+export const editProductDialogOpenAtom = atom<boolean>(false);

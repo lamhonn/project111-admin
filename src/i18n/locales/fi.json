@@ -121,7 +121,7 @@
         "addToppingPlaceholder": "lisää täyte",
         "addToppingButton": "Lisää täyte",
         "removeTopping": "Poista täyte",
-        "priceIncrement": "Hintalisä",
+        "priceIncrement": "Lisähinta",
         "freeToppings": "Ilmaiset täytteet",
         "maxToppings": "Täytteitä enintään",
         "toppingNameHeader": "Nimi",
@@ -133,13 +133,13 @@
         "removeExcludable": "Poista poistettava",
         "ingredients": "Ainesosatiedot",
         "ingredientsPlaceholder": "Luettele ainesosat...",
-        "editAllergens": "Muokkaa allergeeneja",
+        "editDietaries": "Muokkaa erityisruokavalioita",
         "languages": {
           "finnish": "Suomi",
           "english": "Englanti",
           "swedish": "Ruotsi"
         },
-        "allergens": {
+        "dietaries": {
           "glutenFree": "Gluteeniton",
           "lactoseFree": "Laktoositon",
           "lowLactose": "Vähälaktoosinen",
