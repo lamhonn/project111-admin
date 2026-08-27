@@ -1,38 +1,37 @@
 import { Box, Typography, Paper, Button, Divider } from '@mui/material';
 import { Save as SaveIcon, Logout as LogoutIcon } from '@mui/icons-material';
-import { theme } from '../../theme';
 import { useTranslation } from 'react-i18next';
-import { useAtom, useSetAtom } from 'jotai';
-import { useAuthorization } from '../../api/hooks/auth.hooks';
-import {
-  settingsAtom,
-  resetSettingsAtom,
-  applySettingsAtom,
-} from '../../context/settingsStore';
+import { theme } from '../../theme';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import OrganizationSettingsInputs from './OrganizationSettingsInputs';
 import ColorSettingsInputs from './ColorSettingsInputs';
 import CredentialsSettingsInputs from './CredentialsSettingsInputs';
 import SystemSettingsInputs from './SystemSettingsInputs';
+import { logoutAtom } from '../../state/authStore';
+import { useState } from 'react';
+import { settingsAtom, updateSettingsAtom } from '../../state/uiStore';
+import { SettingsViewModel } from '../../types/viewModels/settingsViewModel';
 
 export default function SettingsForm() {
   const { t } = useTranslation();
-  const { logout } = useAuthorization();
-  const [settings, setSettings] = useAtom(settingsAtom);
-  const resetSettings = useSetAtom(resetSettingsAtom);
-  const applySettings = useSetAtom(applySettingsAtom);
+
+  const settings = useAtomValue(settingsAtom);
+  const updateSettings = useSetAtom(updateSettingsAtom);
+
+  const [settingsInput, setSettingsInput] = useState<SettingsViewModel>(settings);
+
+  const logout = useSetAtom(logoutAtom);
 
   const handlePasswordChangeWip = () => {
     console.log('WIP: password change flow not implemented yet');
   };
 
   const handleSave = () => {
-    // Apply settings at atom level (including language change)
-    applySettings();
+    updateSettings(settingsInput);
   };
 
   const handleCancel = () => {
-    // Reset all settings to defaults
-    resetSettings();
+    setSettingsInput(settings);
   };
 
   const handleLogout = () => {
@@ -70,15 +69,16 @@ export default function SettingsForm() {
       </Typography>
       <Box sx={{ mb: theme.spacing.lg }}>
         <OrganizationSettingsInputs
-          restaurantName={settings.restaurantName}
+          restaurantName={settings.OrganizationName}
           onRestaurantNameChange={(value) =>
-            setSettings((prev) => ({ ...prev, restaurantName: value }))
+            setSettingsInput((prev) => ({ ...prev, OrganizationName: value }))
           }
         />
       </Box>
 
+{/* TODO: uncomment color settings when it actually affects the UI */}
       {/* Color Settings Subsection */}
-      <Typography
+      {/* <Typography
         variant="subtitle1"
         component="div"
         fontWeight={theme.typography.fontWeights.medium}
@@ -109,12 +109,13 @@ export default function SettingsForm() {
             setSettings((prev) => ({ ...prev, actionBarColor: value }))
           }
         />
-      </Box>
+      </Box> */}
 
       <Divider sx={{ mb: theme.spacing.xl }} />
 
+{/* TODO: uncomment when we have proper login update lifecycle */}
       {/* Credentials Settings Section */}
-      <Typography
+      {/* <Typography
         variant="h6"
         component="div"
         fontWeight={theme.typography.fontWeights.semibold}
@@ -135,7 +136,7 @@ export default function SettingsForm() {
           }
           onPasswordChangeWip={handlePasswordChangeWip}
         />
-      </Box>
+      </Box> */}
 
       <Divider sx={{ mb: theme.spacing.xl }} />
 
@@ -151,9 +152,9 @@ export default function SettingsForm() {
 
       <Box sx={{ mb: theme.spacing.xl }}>
         <SystemSettingsInputs
-          selectedLanguage={settings.systemLanguage}
+          selectedLanguage={settings.Language}
           onLanguageChange={(value) =>
-            setSettings((prev) => ({ ...prev, systemLanguage: value }))
+            setSettingsInput((prev) => ({ ...prev, Language: value }))
           }
         />
       </Box>

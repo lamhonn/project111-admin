@@ -6,6 +6,7 @@ export interface Session {
     OrganizationId: string,
     UserId: string,
     User: User | null,
+    TabletId: string,
     StartTime: Date,
     EndTime: Date | null,
     Orders: Order[],

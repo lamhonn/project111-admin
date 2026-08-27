@@ -150,7 +150,8 @@
         },
         "noneSelected": "Inga valda",
         "deleteProduct": "Radera produkt",
-        "saveProduct": "Spara produkt"
+        "saveProduct": "Spara produkt",
+        "noProducts": "Inga produkter"
       }
     },
     "menuEditor": {
@@ -288,7 +289,11 @@
     "lockTable": "Lås bord",
     "unlockTable": "Lås upp bord",
     "discard": "Förkasta",
-    "finalize": "Slutför"
+    "finalize": "Slutför",
+    "loadingTables": "Laddar bordövervakning data...",
+    "error": "Fel att ladda bordövervakning data...",
+    "noTables": "Inga bord",
+    "refresh": "Uppdatera"
   },
   "settings": {
     "organizationAndBrand": "Organisation och Varumärke",

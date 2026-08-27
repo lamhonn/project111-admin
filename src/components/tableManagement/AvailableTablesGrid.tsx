@@ -1,10 +1,10 @@
 import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import AvailableTableCard from './AvailableTableCard';
-import type { Table } from './types';
+import type { Tablet } from '../../types/models';
 
 interface AvailableTablesGridProps {
-  tables: Table[];
+  tables: Tablet[];
 }
 
 export default function AvailableTablesGrid({ tables }: AvailableTablesGridProps) {
@@ -31,7 +31,7 @@ export default function AvailableTablesGrid({ tables }: AvailableTablesGridProps
       }}>
         {tables.map((table) => (
           <AvailableTableCard 
-            key={table.id} 
+            key={table.Id} 
             table={table}
           />
         ))}

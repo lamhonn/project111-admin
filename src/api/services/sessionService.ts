@@ -15,6 +15,11 @@ export const SessionService = {
         return data;
     },
 
+    getLatestByUserId: async (id: string) => {
+        const { data } = await api.get<Session[]>(`${baseUrl}/user/${id}/latest`);
+        return data;
+    },
+
     endSession: async (session: SessionDto) => {
         const { data } = await api.patch<SessionDto>(baseUrl, session);
         return data;        

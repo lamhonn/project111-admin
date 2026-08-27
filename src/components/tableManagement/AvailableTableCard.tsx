@@ -1,10 +1,10 @@
 import { Paper, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
-import type { Table } from './types';
+import { Tablet } from '../../types/models';
 
 interface AvailableTableCardProps {
-  table: Table;
+  table: Tablet;
 }
 
 export default function AvailableTableCard({ table }: AvailableTableCardProps) {
@@ -25,7 +25,7 @@ export default function AvailableTableCard({ table }: AvailableTableCardProps) {
     >
       {/* Table Number */}
       <Typography variant="body2" sx={{ textAlign: 'center', fontWeight: theme.typography.fontWeights.medium }}>
-        {t('common.table')} {table.number}
+        {t('common.table')} {table.TableNumber}
       </Typography>
     </Paper>
   );

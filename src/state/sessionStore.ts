@@ -1,49 +1,92 @@
 import { atom } from "jotai";
-import { SessionDto } from "../types/dtos";
+import { atomFamily } from 'jotai-family'
+
 import { SessionStatus } from "../types/enums/sessionStatus";
-import { OrderViewModel } from "../types/viewModels/orderViewModel";
-import { BillViewModel } from "../types/viewModels/billViewModel";
 import { SessionService } from "../api/services/sessionService";
-import { organizationIdAtom, tabletIdAtom, userIdAtom } from "./authStore";
+import { Session } from "../types/models";
+import { BillService } from "../api/services/billService";
+import { Bill } from "../types/models/bill";
+import { BillStatus } from "../types/enums/billStatus";
+import { BillDto } from "../types/dtos/billDto";
+import { OrderProductDto } from "../types/dtos/orderProductDto";
+import { productsAtom } from "./productStore";
+import { userIdAtom } from "./authStore";
 
-// TODO: persist in storage for session recovery?
-export const currentSessionAtom = atom<SessionDto | null>(null); 
 
-export const sessionStatusAtom = atom<SessionStatus>(SessionStatus.WELCOME);
+export const loadingAtom = atom(false); 
 
-export const sessionOrdersAtom = atom<OrderViewModel[]>([]); 
+export const errorAtom = atom<string | null>(null);
 
-export const setStartSessionAtom = atom(
-    null,
+export const sessionsAtom = atom<Session[]>([]);
+
+export const getAllSessionsAtom = atom(
+    (get) => get(sessionsAtom),
     async (get, set) => {
-        const organizationId = get(organizationIdAtom);
-        const tabletId = get(tabletIdAtom);
-        const userId = get(userIdAtom);
-    
-        if (!organizationId || !tabletId || !userId) return;
+        set(loadingAtom, true);
+        set(errorAtom, null);
+        
+        try {
+            const userId = get(userIdAtom);
+            if (!userId) return;
 
-        const newSession: SessionDto = {
-            Id: crypto.randomUUID(),
-            OrganizationId: organizationId, 
-            UserId: userId,
-            TabletId: tabletId
+            const sessions = await SessionService.getByUserId(userId);
+            set(sessionsAtom, sessions);
         }
-
-        set(currentSessionAtom, newSession)
-
-        await SessionService.create(newSession);
+        catch {
+            set(errorAtom, "Error fetching sessions");
+        }
+        finally {
+            set(loadingAtom, false);
+        }
     }
+);
+
+export const currentSessionsAtom = atom<Session[]>([]);
+
+export const getLatestSessionsAtom = atom(
+    (get) => get(currentSessionsAtom),
+    async (get, set) => {
+        set(loadingAtom, true);
+        set(errorAtom, null);
+
+        try {
+            const userId = get(userIdAtom);
+            if (!userId) return;
+
+            const sessions = await SessionService.getLatestByUserId(userId);
+            set(currentSessionsAtom, sessions);
+        }
+        catch {
+            set(errorAtom, "Error fetching sessions");
+        }
+        finally {
+            set(loadingAtom, false);
+        }
+    }
+);
+
+export const getTabletSessionAtom = atomFamily((tabletId: string) =>
+  atom((get) => {
+    const sessions = get(currentSessionsAtom);
+
+    return sessions.find(session => session.TabletId === tabletId)
+  })
 );
 
 export const setEndSessionAtom = atom(
     null,
-    async (get, set) => {
+    async (get, set, id: string) => {
         try {
-            const currentSession = get(currentSessionAtom);
+            const sessions = get(currentSessionsAtom);
+            const currentSession = sessions.find(session => session.Id === id);
     
             if (currentSession) {
-                set(currentSessionAtom, null);
-                set(sessionStatusAtom, SessionStatus.BILL_REQUESTED);
+                const updatedSessions = sessions.map(session => 
+                    session.Id === id ? 
+                    { ...session, EndSessionTime: new Date() }
+                    : session
+                );
+                set(currentSessionsAtom, updatedSessions);
                 await SessionService.endSession(currentSession);
             }
         }
@@ -53,35 +96,92 @@ export const setEndSessionAtom = atom(
     }
 );
 
-export const setSessionStateWelcomeAtom = atom(
-    null,
-    (get, set) => {
-        set(sessionStatusAtom, SessionStatus.WELCOME);
+export const billsAtom = atom<Bill[]>([]);
+
+// Not to be confused with getSessionBillsAtom
+export const getBillsBySessionIdAtom = atom(
+    (get) => get(billsAtom),
+        //  TODO: wait for websockets for updating?
+    async (get, set, billId: string) => {
+        set(loadingAtom, true);
+        set(errorAtom, null);
+
+        try {
+            const bills = await BillService.getNewBySessionId(billId);
+
+            const currentBills = get(billsAtom);
+
+            const updatedBills: Bill[] = bills.map(bill => {
+                if (currentBills.find(prev => bill.Id === prev.Id)) { 
+                    const currentBill = currentBills.find(prev => prev.Id === bill.Id);
+                    return { 
+                        ...currentBill,
+                        ...bill
+                    }
+                }
+                else {
+                    return bill;
+                }
+            });
+
+            set(billsAtom, updatedBills);
+        }
+        catch {
+            set(errorAtom, "Error fetching bills");
+        }
+        finally {
+            set(loadingAtom, false)
+        }
     }
 );
 
-export const billsAtom = atom<BillViewModel[]>([]);
-
-export const setBillsRequestedAtom = atom(
-    null,
-    (get, set, billIds: string[] ) => {
-        const bills = get(billsAtom);
-
-        const updatedBills = bills.map(bill =>
-            billIds.includes(bill.Id)
-            ? { ...bill, Billed: true }
-            : bill
-        );
-
-        set(billsAtom, updatedBills);
-
-        // TODO: request bills query
-    }
+export const getSessionBillsAtom = atomFamily((sessionId: string) => 
+    atom((get) => {
+        return get(billsAtom).filter(bill => bill.SessionId === sessionId);
+    })
 );
 
-export const saveBillsAtom = atom(
+export const confirmBillAtom = atom(
     null,
-    (get, set, bills: BillViewModel[]) => {
-        set(billsAtom, bills);
-    } 
+    async (get, set, billId: string) => {
+        set(loadingAtom, true);
+        set(errorAtom, null);
+
+        try {
+            const currentBills = get(billsAtom);
+            const selectedBill = currentBills.find(prev => prev.Id === billId);
+
+            if (!selectedBill) return;
+
+            const products = get(productsAtom);
+
+            const updatedBill: BillDto = { 
+                ...selectedBill, 
+                Status: BillStatus.COMPLETED,
+                OrderProducts: selectedBill.OrderProducts.map(orderProduct => {
+                    const product = products.find(product => product.Id === orderProduct.ProductId);
+
+                    return <OrderProductDto>{ 
+                        ...orderProduct,
+                        Name: product?.Name ?? '',
+                        Price: product?.Price ?? 0
+                    }
+                })
+            };
+
+            const updatedBills: Bill[] = currentBills.map(bill => 
+                bill.Id === billId ? { ...bill, Status: BillStatus.COMPLETED } : bill
+            );
+
+            set(billsAtom, updatedBills);
+
+            await BillService.updateBillStatus(updatedBill);
+        }
+        catch {
+            set(errorAtom, "Error updating bill status");
+        }
+        finally {
+            set(loadingAtom, false);
+        }
+    }
 );

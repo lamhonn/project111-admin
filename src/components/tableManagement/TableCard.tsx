@@ -1,15 +1,23 @@
 import { Box, Paper, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
-import type { Table } from './types';
+import type { Tablet } from '../../types/models';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { billsAtom, currentSessionsAtom, getBillsBySessionIdAtom, getSessionBillsAtom, getTabletSessionAtom } from '../../state/sessionStore';
+import { useEffect } from 'react';
+import { BillStatus } from '../../types/enums/billStatus';
 
 interface TableCardProps {
-  table: Table;
-  onClick: (table: Table) => void;
+  table: Tablet;
+  onClick: (table: Tablet) => void;
 }
 
 export default function TableCard({ table, onClick }: TableCardProps) {
   const { t } = useTranslation();
+
+  const session = useAtomValue(getTabletSessionAtom(table.Id));
+  const bills = useAtomValue(getSessionBillsAtom(session?.Id ?? ''));
+  const hasNewBills = bills.some(bill => bill.TabletId === table.Id && bill.Status === BillStatus.REQUESTED);
 
   return (
     <Paper
@@ -17,7 +25,8 @@ export default function TableCard({ table, onClick }: TableCardProps) {
       sx={{
         position: 'relative',
         p: 3,
-        bgcolor: table.locked ? 'grey.700' : theme.colors.primary,
+        // bgcolor: table.locked ? 'grey.700' : theme.colors.primary,
+        bgcolor: theme.colors.primary,
         color: 'white',
         borderRadius: theme.borderRadius.medium,
         cursor: 'pointer',
@@ -25,13 +34,14 @@ export default function TableCard({ table, onClick }: TableCardProps) {
         '&:hover': {
           transform: 'translateY(-4px)',
           boxShadow: theme.shadows.lg,
-          bgcolor: table.locked ? 'grey.800' : theme.colors.primaryHover,
+          // bgcolor: table.locked ? 'grey.800' : theme.colors.primaryHover,
+          bgcolor: theme.colors.primaryHover,
         },
         height: 175,
         alignContent: 'center',
       }}
     >
-      {table.billRequested && (
+      {hasNewBills && (
         <Box
           sx={{
             position: 'absolute',
@@ -52,7 +62,7 @@ export default function TableCard({ table, onClick }: TableCardProps) {
 
       {/* Table Number */}
       <Typography variant="h6" sx={{ textAlign: 'center', fontWeight: theme.typography.fontWeights.semibold }}>
-        {t('common.table')} {table.number}
+        {t('common.table')} {table.TableNumber}
       </Typography>
     </Paper>
   );

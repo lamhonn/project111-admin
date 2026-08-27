@@ -6,6 +6,7 @@ import ProductEditorHeader from '../components/productEditor/ProductEditorHeader
 import ProductGrid from '../components/productEditor/ProductGrid';
 import EditProductDialog from '../components/productEditor/EditProductDialog';
 import { editProductDialogOpenAtom, errorAtom, getProductsByOrganizationIdAtom, loadingAtom, productsAtom, selectedProductAtom, selectedProductIdAtom } from '../state/productStore';
+import { useTranslation } from 'react-i18next';
 
 const stringifyTranslations = (
   fallbackValue: string | undefined,
@@ -20,6 +21,8 @@ const stringifyTranslations = (
 };
 
 export default function ProductEditorView() {
+  const { t } = useTranslation();
+
   const [searchQuery, setSearchQuery] = useState('');
 
   const loading = useAtomValue(loadingAtom);
@@ -59,7 +62,7 @@ export default function ProductEditorView() {
   
           {products.length === 0 ? (
             <Typography variant="body1" sx={{ color: theme.colors.text }}>
-              No products configured
+              {t(`admin.productEditor.dialog.noProducts`)}
             </Typography>
           ) : (
             <ProductGrid

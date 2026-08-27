@@ -2,11 +2,11 @@ import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
 import TableCard from './TableCard';
-import type { Table } from './types';
+import { Tablet } from '../../types/models';
 
 interface ActiveTablesGridProps {
-  tables: Table[];
-  onTableClick: (table: Table) => void;
+  tables: Tablet[];
+  onTableClick: (table: Tablet) => void;
 }
 
 export default function ActiveTablesGrid({ tables, onTableClick }: ActiveTablesGridProps) {
@@ -33,7 +33,7 @@ export default function ActiveTablesGrid({ tables, onTableClick }: ActiveTablesG
       }}>
         {tables.map((table) => (
           <TableCard 
-            key={table.id} 
+            key={table.Id} 
             table={table} 
             onClick={onTableClick}
           />

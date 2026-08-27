@@ -33,3 +33,26 @@ export function getOrderStatusLabel(orderStatus: OrderStatus): string {
         return t('status.unknown');
     }
 };
+
+export function getOrderStatusColor(status: OrderStatus) {
+  switch (status) {
+    case OrderStatus.COMPLETED:
+      return {
+        backgroundColor: '#dcfce7',
+        color: '#22c55e',
+      };
+    case OrderStatus.RECEIVED:
+      return {
+        backgroundColor: '#e5e7eb',
+        color: '#92400e',
+      };
+    case OrderStatus.PENDING:
+    case OrderStatus.PREPARING:
+      return {
+        backgroundColor: '#fef3c7',
+        color: '#92400e',
+      };
+    default:
+      return;
+  }
+};

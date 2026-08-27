@@ -150,7 +150,8 @@
         },
         "noneSelected": "None selected",
         "deleteProduct": "Delete Product",
-        "saveProduct": "Save Product"
+        "saveProduct": "Save Product",
+        "noProducts": "No products"
       }
     },
     "menuEditor": {
@@ -289,7 +290,11 @@
     "lockTable": "Lock Table",
     "unlockTable": "Unlock Table",
     "discard": "Discard",
-    "finalize": "Finalize"
+    "finalize": "Finalize",
+    "loadingTables": "Loading tables...",
+    "error": "Failed to load table mointor data",
+    "noTables": "No tables configured",
+    "refresh": "Refresh"
   },
   "settings": {
     "organizationAndBrand": "Organization and Brand",

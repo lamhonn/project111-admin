@@ -148,7 +148,8 @@
         },
         "noneSelected": "Ei valittuja",
         "deleteProduct": "Poista tuote",
-        "saveProduct": "Tallenna tuote"
+        "saveProduct": "Tallenna tuote",
+        "noProducts": "Ei tuotteita"
       }
     },
     "menuEditor": {
@@ -286,7 +287,11 @@
     "lockTable": "Lukitse pöytä",
     "unlockTable": "Avaa pöytä",
     "discard": "Hylkää",
-    "finalize": "Viimeistele"
+    "finalize": "Viimeistele",
+    "loadingTables": "Ladataan pöytiä...",
+    "error": "Jokin meni vikaan ladatessa pöytätietoja",
+    "noTables": "Ei pöytiä",
+    "refresh": "Päivitä"
   },
   "settings": {
     "organizationAndBrand": "Organisaatio ja Brändi",

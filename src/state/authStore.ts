@@ -88,3 +88,15 @@ export const loginAtom = atom(
         }
     }
 );
+
+export const logoutAtom = atom(
+    null,
+    async (get, set) => {
+        try {
+            await AuthService.logout();
+        }
+        finally {
+            set(tokenAtom, null);
+        }
+    }
+);

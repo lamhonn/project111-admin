@@ -2,34 +2,29 @@ import { useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../theme/theme';
-import { ActiveTablesGrid, AvailableTablesGrid, TableDialog } from '../components/tableManagement';
-import type { Table } from '../components/tableManagement';
-import { useGetTableMonitor, useGetTableSessionOrders, useCloseTableSession } from '../api/hooks/table.hooks';
+import ActiveTablesGrid from '../components/tableManagement/ActiveTablesGrid';
+import TableDialog from '../components/tableManagement/TableDialog';
+import AvailableTablesGrid from '../components/tableManagement/AvailableTablesGrid';
+import { errorAtom, loadingAtom, tabletsAtom } from '../state/tabletStore';
+import { useAtomValue } from 'jotai';
+import { currentSessionsAtom } from '../state/sessionStore';
+import { TabletViewModel } from '../types/viewModels/tabletViewModel';
 
 export default function TableView() {
-  const { data: tableMonitor, loading, error } = useGetTableMonitor();
   const { t } = useTranslation();
-  const [selectedTable, setSelectedTable] = useState<Table | null>(null);
+  const [selectedTable, setSelectedTable] = useState<TabletViewModel | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [lockedTables, setLockedTables] = useState<Set<string>>(new Set());
-  const [finalizeErrorMessage, setFinalizeErrorMessage] = useState<string | null>(null);
-  const { closeSession, closing: finalizing } = useCloseTableSession();
-  const selectedSessionId = dialogOpen ? selectedTable?.sessionId : undefined;
-  const {
-    data: sessionOrders,
-    loading: sessionOrdersLoading,
-    error: sessionOrdersError,
-    refetch: refetchSessionOrders,
-  } = useGetTableSessionOrders(selectedSessionId, {
-    enabled: dialogOpen,
-  });
 
-  const activeTables = tableMonitor
-    .filter((table) => table.status === 'active')
-    .map((table) => ({ ...table, locked: lockedTables.has(table.id) }));
-  const inactiveTables = tableMonitor.filter((table) => table.status === 'inactive');
+  const loading = useAtomValue(loadingAtom);
+  const error = useAtomValue(errorAtom);
 
-  const handleTableClick = (table: Table) => {
+  const tables = useAtomValue(tabletsAtom);
+  const sessions = useAtomValue(currentSessionsAtom);
+
+  const activeTables = tables.filter(table => sessions.some(session => session.TabletId === table.Id));
+  const inactiveTables = tables.filter(table => !sessions.some(session => session.TabletId === table.Id));
+
+  const handleTableClick = (table: TabletViewModel) => {
     setSelectedTable(table);
     setDialogOpen(true);
   };
@@ -37,36 +32,6 @@ export default function TableView() {
   const handleDialogClose = () => {
     setDialogOpen(false);
     setSelectedTable(null);
-  };
-
-  const handleDiscard = () => {
-    // TODO: Implement discard logic
-    console.log('Discarding order for table:', selectedTable?.number);
-  };
-
-  const handleFinalize = async () => {
-    if (!selectedTable?.sessionId) return;
-    const result = await closeSession(selectedTable.sessionId);
-    if (result.success) {
-      handleDialogClose();
-    } else {
-      setFinalizeErrorMessage(result.message);
-    }
-  };
-
-  const handleToggleLock = () => {
-    if (!selectedTable) return;
-    setLockedTables(prev => {
-      const next = new Set(prev);
-      if (next.has(selectedTable.id)) {
-        next.delete(selectedTable.id);
-      } else {
-        next.add(selectedTable.id);
-      }
-      return next;
-    });
-    setSelectedTable(prev => prev ? { ...prev, locked: !prev.locked } : null);
-    handleDialogClose();
   };
 
   return (
@@ -77,15 +42,15 @@ export default function TableView() {
 
       {loading ? (
         <Typography variant="body1" sx={{ color: theme.colors.text }}>
-          Loading tables...
+          {t('tableDialog.loadingTables')}
         </Typography>
       ) : error ? (
         <Typography variant="body1" sx={{ color: 'error.main' }}>
-          Failed to load table monitor data
+          {t('tableDialog.error')}
         </Typography>
-      ) : tableMonitor.length === 0 ? (
+      ) : tables.length === 0 ? (
         <Typography variant="body1" sx={{ color: theme.colors.text }}>
-          No tables configured
+          {t('tableDialog.noTables')}
         </Typography>
       ) : (
         <>
@@ -104,19 +69,9 @@ export default function TableView() {
 
       {/* Table Dialog */}
       <TableDialog 
-        open={dialogOpen} 
+        isOpen={dialogOpen} 
         table={selectedTable} 
         onClose={handleDialogClose}
-        onDiscard={handleDiscard}
-        onFinalize={handleFinalize}
-        onToggleLock={handleToggleLock}
-        sessionOrders={sessionOrders}
-        sessionOrdersLoading={sessionOrdersLoading}
-        sessionOrdersError={sessionOrdersError?.message}
-        onRefreshSessionOrders={refetchSessionOrders}
-        finalizing={finalizing}
-        finalizeErrorMessage={finalizeErrorMessage}
-        onFinalizeErrorClose={() => setFinalizeErrorMessage(null)}
       />
     </Box>
   );
