@@ -3,8 +3,9 @@ import CssBaseline from '@mui/material/CssBaseline';
 import MainView from './views/MainView';
 import UnauthorizedView from './views/UnauthorizedView';
 import './i18n'; // Initialize i18n
-import { useAtomValue } from 'jotai';
+import { Provider, useAtomValue } from 'jotai';
 import { isAuthorizedAtom } from './state/authStore';
+import { store } from './state/store';
 // import './App.css';
 
 // Create a MUI theme with brand colors
@@ -57,10 +58,12 @@ function App() {
   const isAuthorized = useAtomValue(isAuthorizedAtom);
 
   return (
-    <ThemeProvider theme={muiTheme}>
-      <CssBaseline />
-      {isAuthorized ? <MainView /> : <UnauthorizedView />}
-    </ThemeProvider>
+    <Provider store={store}>
+      <ThemeProvider theme={muiTheme}>
+        <CssBaseline />
+        {isAuthorized ? <MainView /> : <UnauthorizedView />}
+      </ThemeProvider>
+    </Provider>
   );
 }
 
