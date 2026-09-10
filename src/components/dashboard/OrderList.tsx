@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -15,16 +15,28 @@ import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
 import OrderOptionsDialog from './OrderOptionsDialog';
-import { newOrdersAtom, preparingOrdersAtom, selectedOrderIdAtom } from '../../state/orderStore';
+import { getAllOrdersAtom, getNewOrdersAtom, preparingOrdersAtom, selectedOrderIdAtom } from '../../state/orderStore';
 import { orderOptionsDialogOpenAtom } from '../../state/orderStore';
-import { OrderViewModel } from '../../types/viewModels/orderViewModel';
+import { Order } from '../../types/models';
+import { OrderWebSocket } from '../../api/websocket/orderSocket';
+import { userIdAtom } from '../../state/authStore';
 
 const OrderList: React.FC = () => {
   const { t } = useTranslation();
   const setSelectedOrder = useSetAtom(selectedOrderIdAtom);
   const setDialogOpen = useSetAtom(orderOptionsDialogOpenAtom);
-  const newOrders = useAtomValue(newOrdersAtom);
+  const newOrders = useAtomValue(getNewOrdersAtom);
   const preparingOrders = useAtomValue(preparingOrdersAtom);
+  const getOrders = useSetAtom(getNewOrdersAtom);
+  const userId = useAtomValue(userIdAtom);
+
+  useEffect(() =>  {
+    if (!userId) return;
+
+    getOrders();
+    
+    return OrderWebSocket.subscribeToOrdersCreated(userId, getOrders);
+  }, [userId, getOrders])
 
   // Handle row click to open dialog
   const handleRowClick = (orderId: string) => {
@@ -32,7 +44,7 @@ const OrderList: React.FC = () => {
     setDialogOpen(true);
   };
 
-  const renderSection = (section: string, orders: OrderViewModel[]) => (
+  const renderSection = (section: string, orders: Order[]) => (
     <React.Fragment key={section}>  
       <TableRow>
         <TableCell 

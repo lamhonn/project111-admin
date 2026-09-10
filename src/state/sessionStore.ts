@@ -12,6 +12,7 @@ import { OrderProductDto } from "../types/dtos/orderProductDto";
 import { productsAtom } from "./productStore";
 import { userIdAtom } from "./authStore";
 
+// TODO: investigate atomFamily for independent resources (e.g. tabletSessions), so that we don't have to fetch every single session again
 
 export const loadingAtom = atom(false); 
 
@@ -53,7 +54,7 @@ export const getLatestSessionsAtom = atom(
             const userId = get(userIdAtom);
             if (!userId) return;
 
-            const sessions = await SessionService.getLatestByUserId(userId);
+            const sessions = await SessionService.getByUserId(userId, { GetLatest: true });
             set(currentSessionsAtom, sessions);
         }
         catch {

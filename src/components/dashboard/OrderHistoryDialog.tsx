@@ -12,12 +12,12 @@ import CloseIcon from '@mui/icons-material/Close';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
-import type { OrderViewModel } from '../../types/viewModels/orderViewModel'; 
 import { getTranslation } from '../../utils/multilingualNameUtils';
+import { Order } from '../../types/models';
 
 interface OrderHistoryDialogProps {
   open: boolean;
-  order: OrderViewModel | null;
+  order: Order | null;
   onClose: () => void;
 }
 
@@ -112,18 +112,6 @@ const OrderHistoryDialog: React.FC<OrderHistoryDialogProps> = ({ open, order, on
                     },
                   }}
                 >
-                  {product.ImgUrl && (
-                    <Avatar
-                      src={product.ImgUrl}
-                      alt={getTranslation(product.Name, i18n.language)}
-                      variant="rounded"
-                      sx={{
-                        width: 56,
-                        height: 56,
-                        borderRadius: theme.borderRadius.medium,
-                      }}
-                    />
-                  )}
                   <Box sx={{ flex: 1 }}>
                     <Box sx={{ 
                       display: 'flex', 
@@ -135,14 +123,14 @@ const OrderHistoryDialog: React.FC<OrderHistoryDialogProps> = ({ open, order, on
                         fontWeight={theme.typography.fontWeights.semibold}
                         sx={{ color: theme.colors.text }}
                       >
-                        {getTranslation(product.Name, i18n.language)}
+                        {getTranslation(product.ProductName, i18n.language)}
                       </Typography>
                       <Typography
                         variant="body1"
                         fontWeight={theme.typography.fontWeights.bold}
                         sx={{ color: theme.colors.primary }}
                       >
-                        {product.Price}€
+                        {product.ProductPrice}€
                       </Typography>
                     </Box>
                     {/* TODO: quantity */}

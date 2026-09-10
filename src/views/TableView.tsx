@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../theme/theme';
@@ -6,13 +6,15 @@ import ActiveTablesGrid from '../components/tableManagement/ActiveTablesGrid';
 import TableDialog from '../components/tableManagement/TableDialog';
 import AvailableTablesGrid from '../components/tableManagement/AvailableTablesGrid';
 import { errorAtom, loadingAtom, tabletsAtom } from '../state/tabletStore';
-import { useAtomValue } from 'jotai';
-import { currentSessionsAtom } from '../state/sessionStore';
-import { TabletViewModel } from '../types/viewModels/tabletViewModel';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { currentSessionsAtom, getLatestSessionsAtom } from '../state/sessionStore';
+import { Tablet } from '../types/models';
+import { userIdAtom } from '../state/authStore';
+import { SessionWebSocket } from '../api/websocket/sessionSocket';
 
 export default function TableView() {
   const { t } = useTranslation();
-  const [selectedTable, setSelectedTable] = useState<TabletViewModel | null>(null);
+  const [selectedTable, setSelectedTable] = useState<Tablet | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const loading = useAtomValue(loadingAtom);
@@ -20,11 +22,22 @@ export default function TableView() {
 
   const tables = useAtomValue(tabletsAtom);
   const sessions = useAtomValue(currentSessionsAtom);
+  const getSessions = useSetAtom(getLatestSessionsAtom);
 
   const activeTables = tables.filter(table => sessions.some(session => session.TabletId === table.Id));
   const inactiveTables = tables.filter(table => !sessions.some(session => session.TabletId === table.Id));
 
-  const handleTableClick = (table: TabletViewModel) => {
+  const userId = useAtomValue(userIdAtom);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    getSessions();
+
+    return SessionWebSocket.subscribeToSessionCreated(userId, getSessions);
+  }, [userId, getSessions])
+
+  const handleTableClick = (table: Tablet) => {
     setSelectedTable(table);
     setDialogOpen(true);
   };

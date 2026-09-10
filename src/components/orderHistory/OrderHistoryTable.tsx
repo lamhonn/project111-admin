@@ -1,12 +1,12 @@
 import { Box, CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme';
-import { OrderViewModel } from '../../types/viewModels/orderViewModel';
+import { Order } from '../../types/models';
 
 interface OrderHistoryTableProps {
   loading: boolean;
-  orders: OrderViewModel[];
-  onRowClick: (order: OrderViewModel) => void;
+  orders: Order[];
+  onRowClick: (order: Order) => void;
 }
 
 export default function OrderHistoryTable({ loading, orders, onRowClick }: OrderHistoryTableProps) {

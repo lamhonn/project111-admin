@@ -36,9 +36,9 @@ export const getProductByIdAtom = atom(
             if (!productExists) {
                 set(productsAtom, [...existingProducts, response]);
             }
-            else if (existingProducts.some(product => product.Id === response.Id && product !== response)) {
+            else if (existingProducts.some(product => product.Id === response.Id && !Object.is(product, response))) {
                 // update the array if some product has been modified
-                set(productsAtom, existingProducts.map(product => product.Id === response.Id && product === response ? response : product))
+                set(productsAtom, existingProducts.map(product => product.Id === response.Id && Object.is(product, response) ? response : product))
             }
             set(selectedProductAtom, response);   
         } 

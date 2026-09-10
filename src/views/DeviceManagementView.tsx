@@ -5,14 +5,27 @@ import { theme } from '../theme';
 import { useTranslation } from 'react-i18next';
 import DeviceList from '../components/deviceManagement/DeviceList';
 import PairDeviceDialog from '../components/deviceManagement/PairDeviceDialog';
-import { errorAtom, loadingAtom } from '../state/tabletStore';
-import { useAtomValue } from 'jotai';
+import { errorAtom, getTabletsAtom, loadingAtom } from '../state/tabletStore';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { userIdAtom } from '../state/authStore';
+import { TabletWebSocket } from '../api/websocket/tabletSocket';
 
 export default function DeviceManagementView() {
   const { t } = useTranslation();
   const [pairDialogOpen, setPairDialogOpen] = useState(false);
   const loading = useAtomValue(loadingAtom);
   const error = useAtomValue(errorAtom);
+
+  const getTablets = useSetAtom(getTabletsAtom);
+  const userId = useAtomValue(userIdAtom);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    getTablets();
+
+    return TabletWebSocket.subscribeToTabletCreated(userId, getTablets);
+  }, [userId, getTablets]);
 
   const handlePairDevice = () => {
     setPairDialogOpen(true);

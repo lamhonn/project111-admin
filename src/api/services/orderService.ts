@@ -1,4 +1,5 @@
 import { OrderDto } from "../../types/dtos/orderDto";
+import { OrderStatus } from "../../types/enums/orderStatus";
 import { Order } from "../../types/models";
 import { api } from "../axios";
 
@@ -10,8 +11,8 @@ export const OrderService = {
         return data;
     },
 
-    getByUserId: async (id: string) => {
-        const { data } = await api.get<Order[]>(`${baseUrl}/user/${id}`);
+    getByUserId: async (id: string, opts?: { Status?: OrderStatus }) => {
+        const { data } = await api.get<Order[]>(`${baseUrl}/user/${id}`, { params: opts });
         return data;
     },
 

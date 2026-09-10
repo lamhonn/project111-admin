@@ -1,13 +1,14 @@
 import { atom } from "jotai";
-import { TabletViewModel } from "../types/viewModels/tabletViewModel";
 import { TabletService } from "../api/services/tabletService";
 import { TabletDto } from "../types/dtos/tabletDto";
+import { Tablet } from "../types/models";
+import { userIdAtom } from "./authStore";
 
 export const errorAtom = atom<string | null>(null);
 
 export const loadingAtom = atom<boolean>(false);
 
-export const tabletsAtom = atom<TabletViewModel[]>([]);
+export const tabletsAtom = atom<Tablet[]>([]);
 
 export const getTabletsAtom = atom(
     (get) => get(tabletsAtom),
@@ -16,7 +17,13 @@ export const getTabletsAtom = atom(
         set(errorAtom, null);
 
         try {
-            // TODO: logic for fetching tablets
+            const userId = get(userIdAtom);
+
+            if (!userId) return;
+
+            const response = await TabletService.getByUserId(userId);
+            
+            set(tabletsAtom, response);
         }
         catch {
             set(errorAtom, "Failed to fetch tablets");
@@ -60,7 +67,7 @@ export const startTabletPairingAtom = atom(
 
 export const editTabletAtom = atom(
     null,
-    async (get, set, tablet: TabletViewModel) => {
+    async (get, set, tablet: Tablet) => {
         set(errorAtom, null);
 
         try {

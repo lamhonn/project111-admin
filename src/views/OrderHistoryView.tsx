@@ -6,20 +6,20 @@ import OrderHistoryHeader from '../components/orderHistory/OrderHistoryHeader';
 import OrderHistoryFilters, { type FilterPreset } from '../components/orderHistory/OrderHistoryFilters';
 import OrderHistoryTable from '../components/orderHistory/OrderHistoryTable';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { getOrdersAtom, loadingAtom, ordersAtom } from '../state/orderStore';
-import { OrderViewModel } from '../types/viewModels/orderViewModel';
+import { getAllOrdersAtom, loadingAtom, ordersAtom } from '../state/orderStore';
+import { Order } from '../types/models';
 
 export default function OrderHistoryView() {  
   const [filterPreset, setFilterPreset] = useState<FilterPreset>('week');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
-  const [selectedOrder, setSelectedOrder] = useState<OrderViewModel | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const loading = useAtomValue(loadingAtom);
   
   const allOrders = useAtomValue(ordersAtom);
-  const getOrders = useSetAtom(getOrdersAtom);
+  const getOrders = useSetAtom(getAllOrdersAtom);
 
   useEffect(() => {
     // TODO: some sort of security measure to prevent spamming
@@ -84,7 +84,7 @@ export default function OrderHistoryView() {
     }
   };
 
-  const handleRowClick = (order: OrderViewModel) => {
+  const handleRowClick = (order: Order) => {
     setSelectedOrder(order);
     setDialogOpen(true);
   };

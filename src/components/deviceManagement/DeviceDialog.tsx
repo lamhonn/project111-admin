@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { deleteTabletAtom, editTabletAtom, selectedTabletAtom } from '../../state/tabletStore';
-import { TabletViewModel } from '../../types/viewModels/tabletViewModel';
+import { Tablet } from '../../types/models';
 
 interface DeviceDialogProps {
   isOpen: boolean;
@@ -18,7 +18,7 @@ export default function DeviceDialog({
 }: DeviceDialogProps) {
   const { t } = useTranslation();
   const [editMode, setEditMode] = useState(false);
-  const [editedData, setEditedData] = useState<TabletViewModel>();
+  const [editedData, setEditedData] = useState<Tablet>();
   const tablet = useAtomValue(selectedTabletAtom);
   const updateTablet = useSetAtom(editTabletAtom);
   const deleteTablet = useSetAtom(deleteTabletAtom);
@@ -50,7 +50,7 @@ export default function DeviceDialog({
     onClose();
   };
 
-  const handleFieldChange = (field: keyof TabletViewModel, value: string) => {
+  const handleFieldChange = (field: keyof Tablet, value: string) => {
     setEditedData(prev => {
       if (!prev) return;
       return {

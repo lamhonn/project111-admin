@@ -1,14 +1,12 @@
 import { atom } from 'jotai';
 import { OrderDto } from '../types/dtos/orderDto';
 import { OrderService } from '../api/services/orderService';
-import { OrderViewModel } from '../types/viewModels/orderViewModel';
 import { OrderStatus } from '../types/enums/orderStatus';
 import { userIdAtom } from './authStore';
 import { OrderProductDto } from '../types/dtos/orderProductDto';
 import { OrderProductExcludableDto } from '../types/dtos/orderProductExcludableDto';
 import { OrderProductToppingDto } from '../types/dtos/orderProductToppingDto';
-
-// TODO: figure how do we update orders real-time using websockets
+import { Order } from '../types/models';
 
 export const errorAtom = atom<string | null>(null);
 
@@ -24,12 +22,51 @@ export const selectedOrderAtom = atom(
     }
 );
 
-export const ordersAtom = atom<OrderViewModel[]>([]);
+// TODO: make into atomFamily; investigate atomFamily for independent resources, so that we don't have to fetch every single session again
+export const ordersAtom = atom<Order[]>([]);
 
-export const newOrdersAtom = atom(
+export const getNewOrdersAtom = atom(
     (get) => {
         const orders = get(ordersAtom);
         return orders.filter(order => order.OrderStatus === OrderStatus.RECEIVED);
+    },
+    async (get, set) => {
+        set(loadingAtom, true);
+        set(errorAtom, null);
+
+        try {
+            const userId = get(userIdAtom);
+            if (!userId) return;
+    
+            const response = await OrderService.getByUserId(userId, { Status: OrderStatus.RECEIVED });
+            if (!response) return;
+
+            const existingOrders = get(ordersAtom);
+            const updatedOrders = [
+                ...existingOrders.map(existingOrder => {
+                    const newOrder = response.find(
+                        order => order.Id === existingOrder.Id
+                    );
+
+                    return newOrder ?? existingOrder;
+                }),
+                ...response.filter(
+                    newOrder =>
+                        !existingOrders.some(
+                            existingOrder => existingOrder.Id === newOrder.Id
+                        )
+                )
+            ];
+
+            set(ordersAtom, updatedOrders);
+        }
+        catch {
+            set(errorAtom, "Error fetching orders");
+            return null;
+        }
+        finally {
+            set(loadingAtom, false);
+        }
     }
 );
 
@@ -40,9 +77,13 @@ export const preparingOrdersAtom = atom(
     }
 );
 
-export const getOrdersAtom = atom(
+// Get all orders by userId
+export const getAllOrdersAtom = atom(
     (get) => get(ordersAtom),
     async (get, set) => {
+        set(loadingAtom, true);
+        set(errorAtom, null);
+
         try {
             const userId = get(userIdAtom);
             if (!userId) return;
@@ -62,6 +103,7 @@ export const getOrdersAtom = atom(
     }
 );
 
+// TODO: Add a function to get orders by tablet id possibly to reduce payload size; we don't always need all of the tablets' order statuses
 export const updateOrderStatusAtom = atom(
     null,
     async (get, set, id: string, orderStatus: OrderStatus ) => {
@@ -70,21 +112,21 @@ export const updateOrderStatusAtom = atom(
 
             if (!selectedOrder) return;
 
-            const orderProducts: OrderProductDto[] = selectedOrder.OrderProducts.map(viewModel => <OrderProductDto>{
-                Id: viewModel.Id,
-                ProductId: viewModel.ProductId,
-                Name: viewModel.Name,
-                OrderProductToppings: viewModel.ProductToppings.map(topping => <OrderProductToppingDto>{
+            const orderProducts: OrderProductDto[] = selectedOrder.OrderProducts.map(order => <OrderProductDto>{
+                Id: order.Id,
+                ProductId: order.ProductId,
+                Name: order.ProductName,
+                OrderProductToppings: order.OrderProductToppings.map(topping => <OrderProductToppingDto>{
                     Id: topping.Id,
-                    OrderProductId: viewModel.Id,
+                    OrderProductId: order.Id,
                     ProductToppingId: topping.Id
                 }),
-                OrderProductExcludables: viewModel.ProductExcludables.map(excludable => <OrderProductExcludableDto>{
+                OrderProductExcludables: order.OrderProductExcludables.map(excludable => <OrderProductExcludableDto>{
                     Id: excludable.Id,
-                    OrderProductId: viewModel.Id,
+                    OrderProductId: order.Id,
                     ProductExcludableId: excludable.Id
                 }),
-                Price: viewModel.Price,
+                Price: order.ProductPrice,
             });
 
             const orderDto: OrderDto = {

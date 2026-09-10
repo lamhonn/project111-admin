@@ -10,13 +10,8 @@ export const SessionService = {
         return data;
     },
 
-    getByUserId: async (id: string) => {
-        const { data } = await api.get<Session[]>(`${baseUrl}/user/${id}`);
-        return data;
-    },
-
-    getLatestByUserId: async (id: string) => {
-        const { data } = await api.get<Session[]>(`${baseUrl}/user/${id}/latest`);
+    getByUserId: async (id: string, opts?: { GetLatest?: boolean }) => {
+        const { data } = await api.get<Session[]>(`${baseUrl}/user/${id}`, { params: opts });
         return data;
     },
 

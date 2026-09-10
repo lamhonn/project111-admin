@@ -1,13 +1,12 @@
 import { OrderProductExcludable } from "./orderProductExcludables";
 import { OrderProductTopping } from "./orderProductTopping";
-import { Product } from "./product";
 
 export interface OrderProduct {
     Id: string,
     OrderId: string,
     ProductId: string,
     ProductName: string,
-    ProductPrice: string,
+    ProductPrice: number,
     OrderProductToppings: OrderProductTopping[],
     OrderProductExcludables: OrderProductExcludable[],
     Created: Date,
