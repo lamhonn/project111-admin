@@ -59,6 +59,27 @@ class WebSocketClient {
       },
     );
 
+    this.connection.on(
+      "SessionCreated",
+      (payload: SessionActivityPayload) => {
+        this.notifySessionCreated(payload);
+      },
+    );
+
+    this.connection.on(
+      "SessionEnded",
+      (payload: SessionActivityPayload) => {
+        this.notifySessionEnded(payload);
+      },
+    );
+
+    this.connection.on(
+      "TabletCreated",
+      (payload: TabletActivityPayload) => {
+        this.notifyTabletCreated(payload);
+      },
+    );
+
     this.connection.onreconnected(async () => {
       await this.rejoinSubscriptions();
     });

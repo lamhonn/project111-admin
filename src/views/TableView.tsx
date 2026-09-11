@@ -29,12 +29,20 @@ export default function TableView() {
 
   const userId = useAtomValue(userIdAtom);
 
+ //TODO: maybe add ordersAtom too, in case we want to also create notifications per table
+
   useEffect(() => {
     if (!userId) return;
 
+    const subOnCreated = SessionWebSocket.subscribeToSessionCreated(userId, getSessions);
+    const subOnEnded = SessionWebSocket.subscribeToSessionEnded(userId, getSessions); 
+
     getSessions();
 
-    return SessionWebSocket.subscribeToSessionCreated(userId, getSessions);
+    return () =>  {
+      subOnCreated();
+      subOnEnded();
+    };
   }, [userId, getSessions])
 
   const handleTableClick = (table: Tablet) => {
