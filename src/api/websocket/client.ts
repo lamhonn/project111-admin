@@ -21,8 +21,14 @@ export interface SessionActivityPayload {
 }
 
 export interface TabletActivityPayload {
-    tabletId: string;
-    userId: string;
+  tabletId: string;
+  userId: string;
+}
+
+export interface BillActivityPayload {
+  sessionId: string;
+  userId: string;
+  tabletId: string;
 }
 
 // i.e. restaurant related subscriptions
@@ -31,6 +37,7 @@ export interface UserSubscription {
   onSessionCreated?: (payload: SessionActivityPayload) => void;
   onSessionEnded?: (payload: SessionActivityPayload) => void;
   onTabletCreated?: (payload: TabletActivityPayload) => void;
+  onBillCreated?: (payload: BillActivityPayload) => void;
 }
 
 class WebSocketClient {
@@ -78,6 +85,13 @@ class WebSocketClient {
       (payload: TabletActivityPayload) => {
         this.notifyTabletCreated(payload);
       },
+    );
+
+    this.connection.on(
+      "BillCreated",
+      (payload: BillActivityPayload) => {
+        this.notifyBillCreated(payload);
+      }
     );
 
     this.connection.onreconnected(async () => {
@@ -236,6 +250,18 @@ class WebSocketClient {
 
     for (const subscription of subscriptions) {
       subscription.onTabletCreated?.(payload);
+    }
+  }
+
+  private notifyBillCreated(payload: BillActivityPayload): void {
+    const subscriptions = this.subscriptions.get(payload.userId);
+
+    if (!subscriptions) {
+      return;
+    }
+
+    for (const subscription of subscriptions) {
+      subscription.onBillCreated?.(payload);
     }
   }
 }

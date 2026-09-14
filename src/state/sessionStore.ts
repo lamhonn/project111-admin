@@ -102,13 +102,12 @@ export const billsAtom = atom<Bill[]>([]);
 // Not to be confused with getSessionBillsAtom
 export const getBillsBySessionIdAtom = atom(
     (get) => get(billsAtom),
-        //  TODO: wait for websockets for updating?
-    async (get, set, billId: string) => {
+    async (get, set, sessionId: string) => {
         set(loadingAtom, true);
         set(errorAtom, null);
 
         try {
-            const bills = await BillService.getNewBySessionId(billId);
+            const bills = await BillService.getNewBySessionId(sessionId);
 
             const currentBills = get(billsAtom);
 

@@ -3,9 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
 import type { Tablet } from '../../types/models';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { billsAtom, currentSessionsAtom, getBillsBySessionIdAtom, getSessionBillsAtom, getTabletSessionAtom } from '../../state/sessionStore';
-import { useEffect } from 'react';
+import { getBillsBySessionIdAtom, getSessionBillsAtom, getTabletSessionAtom } from '../../state/sessionStore';
 import { BillStatus } from '../../types/enums/billStatus';
+import { useEffect } from 'react';
+import { BillWebSocket } from '../../api/websocket/billSocket';
 
 interface TableCardProps {
   table: Tablet;
@@ -18,6 +19,14 @@ export default function TableCard({ table, onClick }: TableCardProps) {
   const session = useAtomValue(getTabletSessionAtom(table.Id));
   const bills = useAtomValue(getSessionBillsAtom(session?.Id ?? ''));
   const hasNewBills = bills.some(bill => bill.TabletId === table.Id && bill.Status === BillStatus.REQUESTED);
+  const getBills = useSetAtom(getBillsBySessionIdAtom);
+
+  useEffect(() => {
+    if (!session) return;
+    getBills(session.Id);
+    
+    return BillWebSocket.subscribeToBillsCreated(session.UserId, () => getBills(session.Id));
+  }, [session, getBills]);
 
   return (
     <Paper
