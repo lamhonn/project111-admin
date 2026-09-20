@@ -10,7 +10,7 @@ import {
 } from '@mui/icons-material';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 
 import Sidebar from '../components/common/Sidebar';
 import type { MenuSection } from '../components/common/Sidebar';
@@ -22,7 +22,7 @@ import MenuEditorView from './MenuEditorView';
 import OrderHistoryView from './OrderHistoryView';
 import DeviceManagementView from './DeviceManagementView';
 import { useAtomValue } from 'jotai';
-import { roleAtom } from '../state/authStore';
+import { isAuthorizedAtom, roleAtom } from '../state/authStore';
 import { UserRole } from '../types/enums';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import ErrorDialog from '../components/common/ErrorDialog';
@@ -30,7 +30,6 @@ import ErrorDialog from '../components/common/ErrorDialog';
 const MainView = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const currentRole = useAtomValue(roleAtom);
 
@@ -109,6 +108,7 @@ const MainView = () => {
       case UserRole.SUPERUSER:
         return null;
 
+      case UserRole.RESTAURANT_MANAGERSTAFF:
       case UserRole.RESTAURANT_MANAGER:
         return new Set([
           'products',
@@ -116,6 +116,7 @@ const MainView = () => {
           'settings',
         ]);
 
+      case UserRole.RESTAURANT_MANAGERSTAFF:
       case UserRole.RESTAURANT_STAFF:
         return new Set([
           'dashboard',
@@ -146,6 +147,10 @@ const MainView = () => {
   // Default route for the current user role
   const defaultRoute =
     menuSections[0]?.items[0]?.path ?? '/dashboard';
+
+  useEffect(() => {
+    navigate(defaultRoute);
+  }, [])
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', minWidth: '100vw' }}>

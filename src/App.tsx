@@ -55,16 +55,19 @@ const muiTheme = createTheme({
 });
 
 function App() {
-  const isAuthorized = useAtomValue(isAuthorizedAtom);
-
   return (
     <Provider store={store}>
       <ThemeProvider theme={muiTheme}>
         <CssBaseline />
-        {isAuthorized ? <MainView /> : <UnauthorizedView />}
+        <AuthGate />
       </ThemeProvider>
     </Provider>
   );
+}
+
+function AuthGate() {
+  const isAuthorized = useAtomValue(isAuthorizedAtom);
+  return isAuthorized ? <MainView /> : <UnauthorizedView />
 }
 
 export default App;

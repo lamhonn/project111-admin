@@ -6,7 +6,7 @@ export function registerInterceptors(axiosInstance: AxiosInstance) {
     // Add a request interceptor
     axiosInstance.interceptors.request.use(
         (config) => {
-            const accessToken = localStorage.getItem("accessToken");
+            const accessToken = store.get(tokenAtom);
 
             if (accessToken) {
                 config.headers["Authorization"] = `Bearer ${accessToken}`;
@@ -37,7 +37,7 @@ export function registerInterceptors(axiosInstance: AxiosInstance) {
                         originalRequest.retryRequest = true;
 
                         try {
-                            const response = await axios.post(`${originalRequest.baseURL}/tablet/refresh`);
+                            const response = await axios.post(`${originalRequest.baseURL}/auth/refresh`);
                             
                             store.set(tokenAtom, response.data.accessToken);
 

@@ -1,6 +1,6 @@
 import { jwtDecode, JwtPayload } from 'jwt-decode';
 import { atom } from 'jotai';
-import { atomWithStorage, atomWithReset } from 'jotai/utils';
+import { atomWithStorage } from 'jotai/utils';
 import { AuthService } from '../api/services/authService';
 import { parseUserRole } from '../utils/userRoleUtils';
 import { LoginDto } from '../types/dtos/loginDto';
@@ -11,17 +11,11 @@ interface TokenPayload extends JwtPayload {
     role: string, // parse into UserRole
 }
 
-export const tokenAtom = atomWithStorage<string | null>('accessToken', null);
+export const tokenAtom = atomWithStorage<string | null>('accessToken', null, undefined, { getOnInit: true });
 
 function parseJwt(token: string): TokenPayload | null {
     try {
-        const payload = token.split('.')[1];
-
-        if (!payload) {
-            return null;
-        }
-
-        return jwtDecode(payload);
+        return jwtDecode(token);
     } catch {
         return null;
     }
@@ -59,7 +53,7 @@ export const isAuthorizedAtom = atom((get) => {
 
 export const tokenPayloadAtom = atom((get) => {
     const token = get(tokenAtom);
-
+    
     return token ? parseJwt(token) : null;
 });
 

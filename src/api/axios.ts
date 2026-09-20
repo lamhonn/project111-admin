@@ -1,9 +1,9 @@
 import axios from "axios";
 import { registerInterceptors } from "./interceptors";
 
-// TODO: placeholder
+// TODO: placeholder. create proper .env
 const ENV = {
-    apiBaseUrl: "https://api.example.com",
+    apiBaseUrl: "https://localhost:7123",
 };
 
 export const api = axios.create({

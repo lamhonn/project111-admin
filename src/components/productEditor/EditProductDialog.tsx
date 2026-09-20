@@ -59,12 +59,12 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
   const [formData, setFormData] = useState<ProductDto>(
     {
       Id: crypto.randomUUID(),
-      Description: '{ fi: "", en: "", sv: "" }',
-      Name: '{ fi: "", en: "", sv: "" }',
+      Description: '{ "fi": "", "en": "", "sv": "" }',
+      Name: '{ "fi": "", "en": "", "sv": "" }',
       Dietaries: [],
       FreeToppings: 0,
       ImgUrl: "",
-      Ingredients: '{ fi: "", en: "", sv: "" }',
+      Ingredients: '{ "fi": "", "en": "", "sv": "" }',
       OrganizationId: organizationId ?? "",
       Price: 0,
       ProductExcludables: [],
@@ -78,9 +78,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
   const [isStockPhotoDialogOpen, setIsStockPhotoDialogOpen] = useState(false);
   const [isTranslationDialogOpen, setIsTranslationDialogOpen] = useState(false);
   const [editingTranslations, setEditingTranslations] = useState<TranslationViewModel>({ en: '', fi: '', sv: ''});
-  const [translationKey, setTranslationKey] = useState<keyof ProductDto | null>(null);
   
-
   useEffect(() => {
     if (selectedProduct) 
       setFormData({...selectedProduct});
@@ -154,6 +152,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
   const handleOpenTranslationDialog = (field: keyof ProductDto) => {
     if ((field !== "Name" && field !== "Description" && field !== "Ingredients")) return;
 
+    // FIXME: crashes. { fi: "", en: "", sv: "" } is not a proper JSON
     if (!formData[field]) return
 
     const translations = JSON.parse(formData[field]);

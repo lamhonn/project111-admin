@@ -2,7 +2,7 @@ import { Box, Typography, Paper, Button, Divider } from '@mui/material';
 import { Save as SaveIcon, Logout as LogoutIcon } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import OrganizationSettingsInputs from './OrganizationSettingsInputs';
 import ColorSettingsInputs from './ColorSettingsInputs';
 import CredentialsSettingsInputs from './CredentialsSettingsInputs';
