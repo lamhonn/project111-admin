@@ -110,6 +110,7 @@
       "dialog": {
         "title": "Tuoteeditori",
         "productImage": "Tuotekuva",
+        "chooseStockPhoto": "Valitse oletuskuvista",
         "browseImage": "Selaa kuvaa",
         "moreGallery": "Lisää galleriavaihtoehtoja",
         "productName": "Tuotteen nimi",
@@ -125,7 +126,7 @@
         "freeToppings": "Ilmaiset täytteet",
         "maxToppings": "Täytteitä enintään",
         "toppingNameHeader": "Nimi",
-        "toppingPriceHeader": "Hinta",
+        "price": "Hinta",
         "toppingRemoveHeader": "Poista",
         "addExcludables": "Lisää/poista poistettavat",
         "addExcludablePlaceholder": "lisää poistettava",

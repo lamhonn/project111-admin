@@ -21,7 +21,6 @@ import TranslationDialog from './TranslationDialog';
 import { languageAtom } from '../../state/uiStore';
 import { selectedProductIdAtom } from '../../state/productStore';
 import { getTranslation } from '../../utils/multilingualNameUtils';
-import { TranslationViewModel } from '../../types/viewModels/translationViewModel';
 
 interface EditExcludablesDialogProps {
   open: boolean;
@@ -39,10 +38,31 @@ const EditExcludablesDialog: React.FC<EditExcludablesDialogProps> = ({
   const { t } = useTranslation();
   const [localExcludables, setLocalExcludables] = useState<ProductExcludable[]>(excludables);
   const [isTranslationDialogOpen, setIsTranslationDialogOpen] = useState(false);
-  const [translations, setTranslations] = useState<TranslationViewModel>({ en: '', fi: '', sv: ''});
+  const [translations, setTranslations] = useState<string>('{ "fi": "", "en": "", "sv": "" }');
 
   const language = useAtomValue(languageAtom);
   const selectedProductId = useAtomValue(selectedProductIdAtom);
+
+  const [selectedExcludableId, setSelectedExcludableId] = useState<string>("");
+  
+  const handleTranslationDialogSave = (translation: string) => {
+    if (!selectedExcludableId) return;
+
+    const next = localExcludables.find(topping => topping.Id === selectedExcludableId);
+    if (!next) return;
+
+    const updatedExcludables: ProductExcludable[] = localExcludables.map(prev => 
+      prev.Id === selectedExcludableId
+      ?
+      {
+        ...next, 
+        Name: translation
+      } 
+      : prev
+    );
+
+    setLocalExcludables(updatedExcludables);  
+  }
 
   const handleExcludableChange = (id: string, value: string) => {
     const next = localExcludables.find(excludable => excludable.Id === id);
@@ -83,14 +103,15 @@ const EditExcludablesDialog: React.FC<EditExcludablesDialogProps> = ({
     setLocalExcludables([...localExcludables, newExcludable]);
   };
 
-  const handleOpenTranslationDialog = (jsonString: string) => {
-    const translations = JSON.parse(jsonString);
+  const handleOpenTranslationDialog = (translations: string, id: string) => {
+    setSelectedExcludableId(id);
     setTranslations(translations);
     setIsTranslationDialogOpen(true);
   };
 
   const handleSave = () => {
     onChange(localExcludables);
+    onClose();
   };
 
   return (
@@ -119,7 +140,7 @@ const EditExcludablesDialog: React.FC<EditExcludablesDialogProps> = ({
 
       <DialogContent sx={{ p: theme.spacing.lg }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-          {excludables.map((excludable, index) => (
+          {localExcludables.map((excludable, index) => (
             <Box
               key={`excludable-${index}`}
               sx={{
@@ -142,7 +163,7 @@ const EditExcludablesDialog: React.FC<EditExcludablesDialogProps> = ({
                         top: '50%',
                         transform: 'translateY(-50%)'
                       }}
-                      onClick={() => handleOpenTranslationDialog(excludable.Name)}
+                      onClick={() => handleOpenTranslationDialog(excludable.Name, excludable.Id)}
                     >
                       <TranslateIcon />
                     </IconButton>
@@ -227,7 +248,7 @@ const EditExcludablesDialog: React.FC<EditExcludablesDialogProps> = ({
       <TranslationDialog 
         open={isTranslationDialogOpen}
         translations={translations}
-        setTranslations={setTranslations}
+        onSave={handleTranslationDialogSave}
         onClose={() => {
           setIsTranslationDialogOpen(false)
         }}

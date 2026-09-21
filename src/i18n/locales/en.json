@@ -112,6 +112,7 @@
       "dialog": {
         "title": "Product Editor",
         "productImage": "Product Image",
+        "chooseStockPhoto": "Choose a stock photo instead",
         "browseImage": "Browse Image",
         "moreGallery": "More Gallery Options",
         "productName": "Product Name",
@@ -127,7 +128,7 @@
         "freeToppings": "Free toppings",
         "maxToppings": "Max toppings",
         "toppingNameHeader": "Name",
-        "toppingPriceHeader": "Price",
+        "price": "Price",
         "toppingRemoveHeader": "Remove",
         "addExcludables": "Add/Remove Excludables",
         "addExcludablePlaceholder": "add an excludable",

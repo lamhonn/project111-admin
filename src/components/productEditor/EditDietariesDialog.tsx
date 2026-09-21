@@ -74,7 +74,7 @@ const EditDietariesDialog: React.FC<EditAllergensDialogProps> = ({
           <CloseIcon />
         </IconButton>
       </Box>
-
+      {/* FIXME: for some reason, adds too many rows that show "undefined" */}
       <DialogContent sx={{ p: theme.spacing.lg }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
           {(Object.values(Dietary) as Array<Dietary>).map((option) => {

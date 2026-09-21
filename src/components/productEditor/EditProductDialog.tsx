@@ -31,7 +31,6 @@ import { getTranslation } from '../../utils/multilingualNameUtils';
 import TranslationDialog from './TranslationDialog';
 import { createProductAtom, deleteProductAtom, errorAtom, getProductByIdAtom, loadingAtom, selectedProductIdAtom, updateProductAtom } from '../../state/productStore';
 import { parsePriceValue } from '../../utils/productUtils';
-import { TranslationViewModel } from '../../types/viewModels/translationViewModel';
 
 interface EditProductDialogProps {
   open: boolean;
@@ -77,8 +76,9 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
   const [isExcludablesDialogOpen, setIsExcludablesDialogOpen] = useState(false);
   const [isStockPhotoDialogOpen, setIsStockPhotoDialogOpen] = useState(false);
   const [isTranslationDialogOpen, setIsTranslationDialogOpen] = useState(false);
-  const [editingTranslations, setEditingTranslations] = useState<TranslationViewModel>({ en: '', fi: '', sv: ''});
-  
+  const [editingTranslations, setEditingTranslations] = useState<string>('{ "fi": "", "en": "", "sv": "" }');
+  const [selectedField, setSelectedField] = useState<keyof ProductDto | null>(null);
+
   useEffect(() => {
     if (selectedProduct) 
       setFormData({...selectedProduct});
@@ -152,11 +152,10 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
   const handleOpenTranslationDialog = (field: keyof ProductDto) => {
     if ((field !== "Name" && field !== "Description" && field !== "Ingredients")) return;
 
-    // FIXME: crashes. { fi: "", en: "", sv: "" } is not a proper JSON
     if (!formData[field]) return
-
-    const translations = JSON.parse(formData[field]);
-    setEditingTranslations(translations);
+    
+    setSelectedField(field);
+    setEditingTranslations(formData[field]);
     setIsTranslationDialogOpen(true);
   };
 
@@ -176,16 +175,32 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
       [language]: value
     }
 
+    const translationJson = JSON.stringify(updatedTranslationObject);
+
     setFormData((prev) => {
       
       const next: ProductDto = {
         ...prev,
-        [field]: updatedTranslationObject,
+        [field]: translationJson,
       };
 
       return next;
     });
   };
+
+  const handleTranslationDialogSave = (translation: string) => {
+    if (!selectedField) return;
+
+    setFormData((prev) => {
+      
+      const next: ProductDto = {
+        ...prev,
+        [selectedField]: translation,
+      };
+
+      return next;
+    });
+  }
 
   const handleToppingsChange = (toppings: ProductTopping[]) => {
     setFormData({
@@ -365,7 +380,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
                   fontWeight: theme.typography.fontWeights.medium,
                 }}
               >
-                Choose a stock photo instead
+                {t('admin.productEditor.dialog.chooseStockPhoto')}
               </Button>
             </Box>
           </Box>
@@ -404,7 +419,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Typography variant="subtitle2" color="text.secondary">
                   {/* {t('admin.productEditor.dialog.price')} */}
-                  Price (€)
+                  {t('admin.productEditor.dialog.price')} (€)
                 </Typography>
               </Box>
               <TextField
@@ -642,7 +657,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
       <TranslationDialog 
         open={isTranslationDialogOpen}
         translations={editingTranslations}
-        setTranslations={setEditingTranslations}
+        onSave={handleTranslationDialogSave}
         onClose={handleCloseTranslationDialog}
       />
 

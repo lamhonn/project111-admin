@@ -112,6 +112,7 @@
       "dialog": {
         "title": "Produktredigerare",
         "productImage": "Produktbild",
+        "chooseStockPhoto": "Välj bild från stockbilden",
         "browseImage": "Bläddra bild",
         "moreGallery": "Fler gallerialternativ",
         "productName": "Produktnamn",
@@ -127,7 +128,7 @@
         "freeToppings": "Gratis pålägg",
         "maxToppings": "Max pålägg",
         "toppingNameHeader": "Namn",
-        "toppingPriceHeader": "Pris",
+        "price": "Pris",
         "toppingRemoveHeader": "Ta bort",
         "addExcludables": "Lägg till/ta bort exkluderbara",
         "addExcludablePlaceholder": "lägg till ett exkluderbart",

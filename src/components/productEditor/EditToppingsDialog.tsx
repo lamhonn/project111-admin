@@ -23,7 +23,6 @@ import { parsePriceValue } from '../../utils/productUtils';
 import { selectedProductIdAtom } from '../../state/productStore';
 import { getTranslation } from '../../utils/multilingualNameUtils';
 import TranslationDialog from './TranslationDialog';
-import { TranslationViewModel } from '../../types/viewModels/translationViewModel';
 
 interface EditToppingsDialogProps {
   open: boolean;
@@ -45,10 +44,31 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
   const { t } = useTranslation();
   const [localToppings, setLocalToppings] = useState<ProductTopping[]>(toppings);
   const [isTranslationDialogOpen, setIsTranslationDialogOpen] = useState(false);
-  const [translations, setTranslations] = useState<TranslationViewModel>({ en: '', fi: '', sv: ''});
+  const [translations, setTranslations] = useState<string>('{ "fi": "", "en": "", "sv": "" }');
 
   const language = useAtomValue(languageAtom);
-  const selectedProductId = useAtomValue(selectedProductIdAtom)
+  const selectedProductId = useAtomValue(selectedProductIdAtom);
+
+  const [selectedToppingId, setSelectedToppingId] = useState<string>("");
+
+  const handleTranslationDialogSave = (translation: string) => {
+    if (!selectedToppingId) return;
+
+    const next = localToppings.find(topping => topping.Id === selectedToppingId);
+    if (!next) return;
+
+    const updatedToppings: ProductTopping[] = localToppings.map(prev => 
+      prev.Id === selectedToppingId
+      ?
+      {
+        ...next, 
+        Name: translation
+      } 
+      : prev
+    );
+
+    setLocalToppings(updatedToppings);  
+  }
 
   const handleToppingChange = (id: string, value: string) => {
     const next = localToppings.find(topping => topping.Id === id);
@@ -101,7 +121,7 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
   const handleAddRow = () => {
     const newTopping: ProductTopping = {
       Id: crypto.randomUUID(),
-      Name: JSON.stringify({ en: '', fi: '', sv: '' }),
+      Name: '{ "fi": "", "en": "", "sv": "" }',
       ProductId: selectedProductId,
       Price: 0,
       Created: new Date(), // Will be updated in backend anyways
@@ -123,14 +143,15 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
   //   });
   // };
 
-  const handleOpenTranslationDialog = (jsonString: string) => {
-    const translations = JSON.parse(jsonString);
+  const handleOpenTranslationDialog = (translations: string, id: string) => {
+    setSelectedToppingId(id);
     setTranslations(translations);
     setIsTranslationDialogOpen(true);
   };
 
   const handleSave = () => {
     onChange(localToppings);
+    onClose();
   };
 
   return (
@@ -192,14 +213,14 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
               {t('admin.productEditor.dialog.toppingNameHeader')}
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ width: 120, flexShrink: 0 }}>
-              {t('admin.productEditor.dialog.toppingPriceHeader')}
+              {t('admin.productEditor.dialog.price')}
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ width: 40, flexShrink: 0, textAlign: 'center' }}>
               {t('admin.productEditor.dialog.toppingRemoveHeader')}
             </Typography>
           </Box>
 
-          {toppings.map((topping, index) => (
+          {localToppings.map((topping, index) => (
             <Box
               key={`topping-${index}`}
               sx={{
@@ -222,7 +243,7 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
                         top: '50%',
                         transform: 'translateY(-50%)'
                       }}
-                      onClick={() => handleOpenTranslationDialog(topping.Name)}
+                      onClick={() => handleOpenTranslationDialog(topping.Name, topping.Id)}
                     >
                       <TranslateIcon />
                     </IconButton>
@@ -325,7 +346,7 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
       <TranslationDialog 
         open={isTranslationDialogOpen}
         translations={translations}
-        setTranslations={setTranslations}
+        onSave={handleTranslationDialogSave}
         onClose={() => {
           setIsTranslationDialogOpen(false)
         }}

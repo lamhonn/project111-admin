@@ -1,6 +1,6 @@
 export function getTranslation(json: string, language: string): string {
   let parsed: unknown;
-
+  
   try {
     parsed = JSON.parse(json);
   } catch {

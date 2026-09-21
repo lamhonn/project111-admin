@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Box, Button, Dialog, DialogActions, DialogContent, IconButton, TextField, Typography } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 
 import { theme } from '../../theme/theme';
-import { TranslationViewModel } from "../../types/viewModels/translationViewModel";
+import { getTranslation } from "../../utils/multilingualNameUtils";
 
 const SUPPORTED_LANGUAGES: Array<{ code: string; labelKey: string }> = [
   { code: 'fi', labelKey: 'admin.productEditor.dialog.languages.finnish' },
@@ -14,32 +14,44 @@ const SUPPORTED_LANGUAGES: Array<{ code: string; labelKey: string }> = [
 
 interface TranslationDialogProps {
   open: boolean,
-  translations: TranslationViewModel,
-  setTranslations: React.Dispatch<React.SetStateAction<TranslationViewModel>>
+  translations: string, // JSON string
+  onSave: (translation: string) => void,
   onClose: () => void,
 }
 
 const TranslationDialog: React.FC<TranslationDialogProps> = ({
   open,
   onClose,
+  onSave,
   translations,
-  setTranslations,
 }) => {
   const { t } = useTranslation();
-  const [localTranslations, setLocalTranslations] = useState<TranslationViewModel>(translations);
+  const [localTranslations, setLocalTranslations] = useState<string>(translations);
 
+  useEffect(() => {
+    setLocalTranslations(translations);
+  }, [open])
+
+  // It's a bit crude to do string<->JSON object conversions constantly, but this has proven the most consistent.
+  // Might be worth optimizing at some point
   const handleTranslationValueChange = (key: string, value: string) => {
-    setLocalTranslations((prev) => ({ ...prev, [key]: value }));
+    if (!localTranslations) return;
+   
+    const translationObject = JSON.parse(localTranslations);
+
+    const updatedTranslationObject = {
+      ...translationObject,
+      [key]: value
+    }
+
+    const translationString = JSON.stringify(updatedTranslationObject);
+
+    setLocalTranslations(translationString);  
   }
 
   const handleSave = () => {
-    setTranslations(localTranslations);
+    onSave(localTranslations);
     onClose();
-  }
-
-  const getTranslation = (code: keyof TranslationViewModel): string | undefined => {
-    const translation = localTranslations[code];
-    return translation;
   }
 
   return (
@@ -83,7 +95,7 @@ const TranslationDialog: React.FC<TranslationDialogProps> = ({
               </Typography>
               <TextField
                 fullWidth
-                value={() => getTranslation(language.code as keyof TranslationViewModel)}
+                value={getTranslation(localTranslations, language.code)}
                 onChange={(e) => handleTranslationValueChange(language.code, e.target.value)}
                 // multiline={translationKey === 'Description' || translationKey === 'Ingredients'} // TODO: enable when we have verified UX
                 // rows={translationKey === 'Description' ? 4 : translationKey === 'Ingredients' ? 3 : 1}
