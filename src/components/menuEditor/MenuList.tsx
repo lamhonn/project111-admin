@@ -1,9 +1,6 @@
 import { Box } from '@mui/material';
 import { theme } from '../../theme';
 import MenuListItem from './MenuListItem';
-import { Menu } from '../../types/models';
-import { getTranslation } from '../../utils/multilingualNameUtils';
-import { useTranslation } from 'react-i18next';
 import { menusAtom } from '../../state/menuStore';
 import { useAtomValue } from 'jotai';
 
@@ -28,10 +25,10 @@ export default function MenuList({ onMenuClick }: MenuListProps) {
     >
       {menus.map((menu) => (
         <MenuListItem
-          key={menu.Id}
-          id={menu.Id}
-          name={menu.Name}
-          isActive={menu.Enabled}
+          key={menu.id}
+          id={menu.id}
+          name={menu.name}
+          isActive={menu.enabled}
           onClick={onMenuClick}
         />
       ))}

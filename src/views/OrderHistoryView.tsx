@@ -39,7 +39,7 @@ export default function OrderHistoryView() {
       end.setHours(23, 59, 59, 999); // Include the entire end date
       
       return allOrders.filter(order => {
-        const orderDate = new Date(order.Created);
+        const orderDate = new Date(order.created);
         return orderDate >= start && orderDate <= end;
       });
     }
@@ -70,7 +70,7 @@ export default function OrderHistoryView() {
     }
 
     return allOrders.filter(order => {
-      const orderDate = new Date(order.Created);
+      const orderDate = new Date(order.created);
       return orderDate >= filterStartDate;
     });
   }, [allOrders, filterPreset, startDate, endDate]);

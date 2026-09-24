@@ -3,15 +3,15 @@ import { ProductExcludableDto } from "./productExcludableDto";
 import { ProductToppingDto } from "./productToppingDto";
 
 export interface ProductDto {
-  Id: string;
-  OrganizationId: string;
-  Name: string; // JSON string containing the name in different languages
-  Description?: string; // JSON string containing the description in different languages
-  Ingredients?: string; // JSON string containing the ingredients in different languages
-  Price: number;
-  Dietaries: Dietary[];
-  FreeToppings: number;
-  ProductToppings: ProductToppingDto[];
-  ProductExcludables: ProductExcludableDto[];
-  ImgUrl?: string;
+  id: string;
+  organizationId: string;
+  name: string; // JSON string containing the name in different languages
+  description?: string; // JSON string containing the description in different languages
+  ingredients?: string; // JSON string containing the ingredients in different languages
+  price: number;
+  dietaries: Dietary[];
+  freeToppings: number;
+  productToppings: ProductToppingDto[];
+  productExcludables: ProductExcludableDto[];
+  imgUrl?: string;
 }

@@ -18,7 +18,7 @@ export const loadingAtom = atom(false);
 
 export const errorAtom = atom<string | null>(null);
 
-export const getMenus = atom(
+export const getMenusAtom = atom(
     (get) => get(menusAtom),
     async (get, set) => {
         set(loadingAtom, true);
@@ -47,7 +47,7 @@ export const getSelectedMenuAtom = atom(
         const menus = get(menusAtom);
         const selectedMenuId = get(selectedMenuIdAtom);
 
-        return menus.find(menu => menu.Id === selectedMenuId);
+        return menus.find(menu => menu.id === selectedMenuId);
     }
 );
 
@@ -61,7 +61,7 @@ export const createMenuAtom = atom(
             // NOTE: consider type safety; convert Menu to MenuViewModel upon getMenusAtom altogether?
             const menuDto: MenuDto = {
                 ...data,
-                MenuCategories: data.MenuCategories.map(category => <MenuCategoryDto>{ ...category }),
+                menuCategories: data.menuCategories.map(category => <MenuCategoryDto>{ ...category }),
             }
             await MenuService.create(menuDto);
             
@@ -70,8 +70,8 @@ export const createMenuAtom = atom(
             set(menusAtom, [...menus, 
                 { 
                     ...data,
-                    MenuCategories: data.MenuCategories.map(category => <MenuCategory>{ ...category, Created: data.Created }),
-                    Created: data.Created 
+                    menuCategories: data.menuCategories.map(category => <MenuCategory>{ ...category, created: data.created }),
+                    created: data.created 
                 }
             ]);
         }
@@ -94,18 +94,18 @@ export const updateMenuAtom = atom(
             // NOTE: consider type safety; convert Menu to MenuViewModel upon getMenusAtom altogether?
             const menuDto: MenuDto = {
                 ...updatedMenu,
-                MenuCategories: updatedMenu.MenuCategories.map(category => <MenuCategoryDto>{ ...category }),
+                menuCategories: updatedMenu.menuCategories.map(category => <MenuCategoryDto>{ ...category }),
             }
             await MenuService.update(menuDto);
             
             const menus = get(menusAtom);
 
             const updatedMenus: Menu[] = menus.map(menu =>
-                menu.Id === updatedMenu.Id
+                menu.id === updatedMenu.id
                 ? { 
                     ...updatedMenu,
-                    MenuCategories: updatedMenu.MenuCategories.map(category => <MenuCategory>{ ...category, Created: updatedMenu.Created }),
-                    Created: updatedMenu.Created 
+                    menuCategories: updatedMenu.menuCategories.map(category => <MenuCategory>{ ...category, created: updatedMenu.created }),
+                    created: updatedMenu.created 
                 }
                 : menu
             );
@@ -125,17 +125,17 @@ export const getSelectedMenuCategoriesAtom = atom(
         const menus = get(menusAtom);
         const selectedMenuId = get(selectedMenuIdAtom);
 
-        const selectedMenu = menus.find(menu => menu.Id === selectedMenuId);
+        const selectedMenu = menus.find(menu => menu.id === selectedMenuId);
 
         if (!selectedMenu) return;
 
-        const menuCategories: MenuCategoryViewModel[] = selectedMenu.MenuCategories.map(menuCategory => 
+        const menuCategories: MenuCategoryViewModel[] = selectedMenu.menuCategories.map(menuCategory => 
             (
                 {
-                    Id: menuCategory.Id,
-                    Name: menuCategory.Name,
-                    MenuId: menuCategory.MenuId,
-                    Products: selectedMenu.MenuProducts.filter(product => product.MenuCategoryId === menuCategory.Id)
+                    id: menuCategory.id,
+                    name: menuCategory.name,
+                    menuId: menuCategory.menuId,
+                    products: selectedMenu.menuProducts.filter(product => product.menuCategoryId === menuCategory.id)
                 }
             )
         );
@@ -154,7 +154,7 @@ export const deleteMenuAtom = atom(
             await MenuService.delete(id);
 
             const menus = get(menusAtom);
-            set(menusAtom, menus.filter(menu => menu.Id !== id));
+            set(menusAtom, menus.filter(menu => menu.id !== id));
         }
         catch {
             set(errorAtom, "Failed to delete menu");

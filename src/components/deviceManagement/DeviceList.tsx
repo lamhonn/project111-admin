@@ -65,9 +65,9 @@ export default function DeviceList() {
               <>
                 {tablets.map((tablet) => (
                   <TableRow
-                    key={tablet.Id}
+                    key={tablet.id}
                     hover
-                    onClick={() => handleRowClick(tablet.Id)}
+                    onClick={() => handleRowClick(tablet.id)}
                     sx={{ 
                       '&:last-child td, &:last-child th': { border: 0 },
                       transition: theme.transitions.fast,
@@ -83,7 +83,7 @@ export default function DeviceList() {
                         fontWeight={theme.typography.fontWeights.semibold}
                         sx={{ color: theme.colors.text }}
                       >
-                        {tablet.Id}
+                        {tablet.id}
                       </Typography>
                     </TableCell>
                     <TableCell>
@@ -91,7 +91,7 @@ export default function DeviceList() {
                         variant="body2" 
                         sx={{ color: theme.colors.text }}
                       >
-                        {tablet.TableNumber}
+                        {tablet.tableNumber}
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -101,9 +101,11 @@ export default function DeviceList() {
             :
             (
               <TableRow>
-                <Typography variant="body1" sx={{ color: theme.colors.text }}>
-                  {t('deviceManagement.noDevicesConfigured', { defaultValue: 'No devices configured' })}
-                </Typography>
+                <TableCell>
+                  <Typography variant="body1" sx={{ color: theme.colors.text }}>
+                    {t('deviceManagement.noDevicesConfigured', { defaultValue: 'No devices configured' })}
+                  </Typography>
+                </TableCell>
               </TableRow>
             )}
           </TableBody>

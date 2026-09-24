@@ -61,7 +61,7 @@ export default function OrderHistoryTable({ loading, orders, onRowClick }: Order
               :
               (orders.map((order) => (
                 <TableRow
-                  key={order.Id}
+                  key={order.id}
                   hover
                   onClick={() => onRowClick(order)}
                   sx={{ 
@@ -79,7 +79,7 @@ export default function OrderHistoryTable({ loading, orders, onRowClick }: Order
                       fontWeight={theme.typography.fontWeights.semibold}
                       sx={{ color: theme.colors.text }}
                     >
-                      {order.Id}
+                      {order.id}
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -87,7 +87,7 @@ export default function OrderHistoryTable({ loading, orders, onRowClick }: Order
                       variant="body2" 
                       sx={{ color: theme.colors.text }}
                     >
-                      {order.Created.toLocaleDateString()}
+                      {order.created.toLocaleDateString()}
                     </Typography>
                   </TableCell>
                   <TableCell align="right">
@@ -96,7 +96,7 @@ export default function OrderHistoryTable({ loading, orders, onRowClick }: Order
                       fontWeight={theme.typography.fontWeights.semibold}
                       sx={{ color: theme.colors.text }}
                     >
-                      {order.TotalPrice}€
+                      {order.totalPrice}€
                     </Typography>
                   </TableCell>
                 </TableRow>

@@ -48,14 +48,14 @@ export default function TableDialog({
 
   if (!table) return null;
 
-  const session = useAtomValue(getTabletSessionAtom(table.Id));
+  const session = useAtomValue(getTabletSessionAtom(table.id));
 
   if (!session) return null;
 
-  const orderItems = session.Orders.flatMap(order => order.OrderProducts);
+  const orderItems = session.orders.flatMap(order => order.orderProducts);
   const hasOrders = orderItems.length > 0;
 
-  const bills = useAtomValue(getSessionBillsAtom(session.Id));
+  const bills = useAtomValue(getSessionBillsAtom(session.id));
 
   // Calculate payment summary including toppings
   const subtotal = calculateTotalBillsPrice(bills);
@@ -94,13 +94,13 @@ export default function TableDialog({
   };
 
   const renderOrderAction = (order: Order) => {
-    if (order.OrderStatus === OrderStatus.RECEIVED) {
+    if (order.orderStatus === OrderStatus.RECEIVED) {
       return (
         <Button
           variant="contained"
           color="primary"
           size="small"
-          onClick={() => void runSessionOrderAction(order.Id, 'confirm')}
+          onClick={() => void runSessionOrderAction(order.id, 'confirm')}
           sx={{
             borderRadius: theme.borderRadius.medium,
             textTransform: 'none',
@@ -113,13 +113,13 @@ export default function TableDialog({
       );
     }
 
-    if (order.OrderStatus === OrderStatus.PREPARING) {
+    if (order.orderStatus === OrderStatus.PREPARING) {
       return (
         <Button
           variant="contained"
           color="success"
           size="small"
-          onClick={() => void runSessionOrderAction(order.Id, 'ready')}
+          onClick={() => void runSessionOrderAction(order.id, 'ready')}
           sx={{
             borderRadius: theme.borderRadius.medium,
             textTransform: 'none',
@@ -161,7 +161,7 @@ export default function TableDialog({
       >
         <Box>
           <Typography variant="h6" fontWeight={theme.typography.fontWeights.bold}>
-            {t('common.table')} {table.TableNumber}
+            {t('common.table')} {table.tableNumber}
           </Typography>
         </Box>
         <IconButton
@@ -186,11 +186,11 @@ export default function TableDialog({
               <>
                 {/* Show all split bills */}
                 {bills.map((bill, index) => {
-                  if (bill.OrderProducts.length === 0) return null;
-                  const isRequested = bill.Status === BillStatus.REQUESTED;
+                  if (bill.orderProducts.length === 0) return null;
+                  const isRequested = bill.status === BillStatus.REQUESTED;
 
                   return (
-                    <Box key={bill.Id} sx={{ mb: theme.spacing.lg, opacity: isRequested ? 0.6 : 1 }}>
+                    <Box key={bill.id} sx={{ mb: theme.spacing.lg, opacity: isRequested ? 0.6 : 1 }}>
                       <Box
                         sx={{
                           display: 'flex',
@@ -205,7 +205,7 @@ export default function TableDialog({
                             fontWeight={theme.typography.fontWeights.semibold}
                             color={isRequested ? 'text.secondary' : 'text.primary'}
                           >
-                            {t('tableDialog.bill')} {bill.Id === EMPTY_GUID ? t('tableDialog.primaryBill') : bill.Id}
+                            {t('tableDialog.bill')} {bill.id === EMPTY_GUID ? t('tableDialog.primaryBill') : bill.id}
                           </Typography>
                           {isRequested && (
                             <Chip
@@ -220,8 +220,8 @@ export default function TableDialog({
                             />
                           )}
                           <Chip
-                            label={`${bill.OrderProducts.length} ${
-                              bill.OrderProducts.length === 1
+                            label={`${bill.orderProducts.length} ${
+                              bill.orderProducts.length === 1
                                 ? t('tableDialog.item')
                                 : t('tableDialog.items')
                             }`}
@@ -243,15 +243,15 @@ export default function TableDialog({
                           fontWeight={theme.typography.fontWeights.bold}
                           color={isRequested ? 'text.secondary' : 'primary'}
                         >
-                          {bill.TotalPrice.toFixed(2)}€
+                          {bill.totalPrice.toFixed(2)}€
                         </Typography>
                       </Box>
 
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-                        {bill.OrderProducts.map((product) => {
+                        {bill.orderProducts.map((product) => {
                           return (
                             <Box
-                              key={product.Id}
+                              key={product.id}
                               sx={{
                                 display: 'flex',
                                 alignItems: 'flex-start',
@@ -268,27 +268,27 @@ export default function TableDialog({
                                   variant="body1"
                                   fontWeight={theme.typography.fontWeights.semibold}
                                 >
-                                  {getTranslation(product.ProductName, language)}
+                                  {getTranslation(product.productName, language)}
                                 </Typography>
 
-                                {product.OrderProductToppings && product.OrderProductToppings.length > 0 && (
+                                {product.orderProductToppings && product.orderProductToppings.length > 0 && (
                                   <Box sx={{ mt: 0.5 }}>
-                                    {product.OrderProductToppings.map((topping) => (
+                                    {product.orderProductToppings.map((topping) => (
                                       <Typography
-                                        key={topping.Id}
+                                        key={topping.id}
                                         variant="caption"
                                         color="text.secondary"
                                         sx={{ display: 'block', lineHeight: 1.4 }}
                                       >
-                                        {getTranslation(topping.ProductTopping.Name, language)} ({topping.ProductTopping.Price.toFixed(2)}€)
+                                        {getTranslation(topping.productTopping.name, language)} ({topping.productTopping.price.toFixed(2)}€)
                                       </Typography>
                                     ))}
                                   </Box>
                                 )}
 
-                                {product.OrderProductExcludables && product.OrderProductExcludables.length > 0 && (
+                                {product.orderProductExcludables && product.orderProductExcludables.length > 0 && (
                                   <Box sx={{ mt: 0.5 }}>
-                                    {product.OrderProductExcludables.map((excludable, index) => (
+                                    {product.orderProductExcludables.map((excludable, index) => (
                                       <Typography
                                         key={index}
                                         variant="caption"
@@ -298,7 +298,7 @@ export default function TableDialog({
                                           color: '#dc2626',
                                         }}
                                       >
-                                        − {getTranslation(excludable.ProductExcludable.Name, language)}
+                                        − {getTranslation(excludable.productExcludable.name, language)}
                                       </Typography>
                                     ))}
                                   </Box>
@@ -309,7 +309,7 @@ export default function TableDialog({
                                   color="text.secondary"
                                   sx={{ mt: 0.5 }}
                                 >
-                                  {product.ProductPrice}€
+                                  {product.productPrice}€
                                 </Typography>
                               </Box>
                             </Box>
@@ -318,7 +318,7 @@ export default function TableDialog({
                       </Box>
 
                       {index <
-                        bills.filter((bill) => bill.OrderProducts.length > 0).length - 1 && (
+                        bills.filter((bill) => bill.orderProducts.length > 0).length - 1 && (
                         <Divider sx={{ mt: theme.spacing.lg }} />
                       )}
                     </Box>
@@ -440,7 +440,7 @@ export default function TableDialog({
                 </Button>
               {hasOrders && (
                 <Chip
-                  label={`${session.Orders.length} ${session.Orders.length === 1 ? t('tableDialog.item') : t('tableDialog.items')}`}
+                  label={`${session.orders.length} ${session.orders.length === 1 ? t('tableDialog.item') : t('tableDialog.items')}`}
                   size="small"
                   sx={{
                     bgcolor: theme.colors.primaryLight,
@@ -456,12 +456,12 @@ export default function TableDialog({
             <CircularProgress size={16} />
           ) : hasOrders ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-              {session.Orders.map((order) => {
-                const statusChipStyles = getOrderStatusColor(order.OrderStatus) ?? { backgroundColor: theme.colors.primaryLight, color: theme.colors.primary,};
+              {session.orders.map((order) => {
+                const statusChipStyles = getOrderStatusColor(order.orderStatus) ?? { backgroundColor: theme.colors.primaryLight, color: theme.colors.primary,};
 
                 return (
                   <Box
-                    key={order.Id}
+                    key={order.id}
                     sx={{
                       border: `1px solid ${theme.colors.border}`,
                       borderRadius: theme.borderRadius.large,
@@ -483,14 +483,14 @@ export default function TableDialog({
                           variant="body1"
                           fontWeight={theme.typography.fontWeights.semibold}
                         >
-                          {t('orderOptionsDialog.orderNumber', { number: order.Id })}
+                          {t('orderOptionsDialog.orderNumber', { number: order.id })}
                         </Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                          {t('orderOptionsDialog.table', { number: order.TableNumber })} • {order.Created.toLocaleString()}
+                          {t('orderOptionsDialog.table', { number: order.tableNumber })} • {order.created.toLocaleString()}
                         </Typography>
                       </Box>
                       <Chip
-                        label={getOrderStatusLabel(order.OrderStatus)}
+                        label={getOrderStatusLabel(order.orderStatus)}
                         size="small"
                         sx={{
                           backgroundColor: statusChipStyles.backgroundColor,
@@ -500,16 +500,16 @@ export default function TableDialog({
                       />
                     </Box>
 
-                    {order.OrderProducts.length === 0 ? (
+                    {order.orderProducts.length === 0 ? (
                       <Typography variant="body2" color="text.secondary">
                         {t('orderOptionsDialog.noProducts')}
                       </Typography>
                     ) : (
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-                        {order.OrderProducts.map((product) => {
+                        {order.orderProducts.map((product) => {
                           return (
                             <Box
-                              key={product.Id}
+                              key={product.id}
                               sx={{
                                 display: 'flex',
                                 alignItems: 'flex-start',
@@ -535,14 +535,14 @@ export default function TableDialog({
                                     fontWeight={theme.typography.fontWeights.semibold}
                                     sx={{ color: theme.colors.text }}
                                   >
-                                    {getTranslation(product.ProductName, language)}
+                                    {getTranslation(product.productName, language)}
                                   </Typography>
                                   <Typography
                                     variant="body1"
                                     fontWeight={theme.typography.fontWeights.bold}
                                     sx={{ color: theme.colors.primary }}
                                   >
-                                    {product.ProductPrice}€
+                                    {product.productPrice}€
                                   </Typography>
                                 </Box>
                                 {/* TODO: enable when notes are added */}
@@ -591,7 +591,7 @@ export default function TableDialog({
                           fontWeight={theme.typography.fontWeights.bold}
                           sx={{ color: theme.colors.primary }}
                         >
-                          {order.TotalPrice}€
+                          {order.totalPrice}€
                         </Typography>
                       </Box>
                       {renderOrderAction(order)}

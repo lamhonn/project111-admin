@@ -61,7 +61,7 @@ const OrderHistoryDialog: React.FC<OrderHistoryDialogProps> = ({ open, order, on
             color="text.secondary"
             sx={{ mt: 0.5 }}
           >
-            {order.Id} • {order.Created.toLocaleDateString()}
+            {order.id} • {order.created.toLocaleDateString()}
           </Typography>
         </Box>
         <IconButton
@@ -79,7 +79,7 @@ const OrderHistoryDialog: React.FC<OrderHistoryDialogProps> = ({ open, order, on
 
       {/* Order Products */}
       <DialogContent sx={{ p: theme.spacing.lg }}>
-        {order.OrderProducts.length === 0 ? (
+        {order.orderProducts.length === 0 ? (
           <Box
             sx={{
               display: 'flex',
@@ -97,10 +97,10 @@ const OrderHistoryDialog: React.FC<OrderHistoryDialogProps> = ({ open, order, on
           </Box>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-            {order.OrderProducts.map((product) => {
+            {order.orderProducts.map((product) => {
               return (
                 <Box
-                  key={product.Id}
+                  key={product.id}
                   sx={{
                     display: 'flex',
                     alignItems: 'flex-start',
@@ -123,14 +123,14 @@ const OrderHistoryDialog: React.FC<OrderHistoryDialogProps> = ({ open, order, on
                         fontWeight={theme.typography.fontWeights.semibold}
                         sx={{ color: theme.colors.text }}
                       >
-                        {getTranslation(product.ProductName, i18n.language)}
+                        {getTranslation(product.productName, i18n.language)}
                       </Typography>
                       <Typography
                         variant="body1"
                         fontWeight={theme.typography.fontWeights.bold}
                         sx={{ color: theme.colors.primary }}
                       >
-                        {product.ProductPrice}€
+                        {product.productPrice}€
                       </Typography>
                     </Box>
                     {/* TODO: quantity */}
@@ -163,7 +163,7 @@ const OrderHistoryDialog: React.FC<OrderHistoryDialogProps> = ({ open, order, on
         )}
 
         {/* Total */}
-        {order.OrderProducts.length > 0 && (
+        {order.orderProducts.length > 0 && (
           <Box
             sx={{
               mt: theme.spacing.lg,
@@ -186,7 +186,7 @@ const OrderHistoryDialog: React.FC<OrderHistoryDialogProps> = ({ open, order, on
               fontWeight={theme.typography.fontWeights.bold}
               sx={{ color: theme.colors.primary }}
             >
-              {order.TotalPrice}€
+              {order.totalPrice}€
             </Typography>
           </Box>
         )}

@@ -1,5 +1,5 @@
 export interface MenuCategoryDto {
-    Id: string,
-    MenuId: string,
-    Name: string,
+    id: string,
+    menuId: string,
+    name: string,
 }

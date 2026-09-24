@@ -1,7 +1,7 @@
 export interface ProductToppingDto {
-    Id: string,
-    ProductId: string,
-    Name: string, // JSON string with multilingual object
-    Price: number,
-    Created: Date,
+    id: string,
+    productId: string,
+    name: string, // JSON string with multilingual object
+    price: number,
+    created: Date,
 }

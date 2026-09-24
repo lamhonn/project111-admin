@@ -1,6 +1,6 @@
 export interface Tablet {
-    Id: string,
-    UserId: string,
-    TableNumber: number,
-    Created: Date,
+    id: string,
+    userId: string,
+    tableNumber: number,
+    created: Date,
 }

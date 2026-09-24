@@ -1,4 +1,4 @@
 export interface SettingsViewModel {
-    OrganizationName: string;
-    Language: string; // language code, e.g.'en'
+    organizationName: string;
+    language: string; // language code, e.g.'en'
 }

@@ -69,9 +69,9 @@ export default function SettingsForm() {
       </Typography>
       <Box sx={{ mb: theme.spacing.lg }}>
         <OrganizationSettingsInputs
-          restaurantName={settings.OrganizationName}
+          restaurantName={settings.organizationName}
           onRestaurantNameChange={(value) =>
-            setSettingsInput((prev) => ({ ...prev, OrganizationName: value }))
+            setSettingsInput((prev) => ({ ...prev, organizationName: value }))
           }
         />
       </Box>
@@ -152,9 +152,9 @@ export default function SettingsForm() {
 
       <Box sx={{ mb: theme.spacing.xl }}>
         <SystemSettingsInputs
-          selectedLanguage={settings.Language}
+          selectedLanguage={settings.language}
           onLanguageChange={(value) =>
-            setSettingsInput((prev) => ({ ...prev, Language: value }))
+            setSettingsInput((prev) => ({ ...prev, language: value }))
           }
         />
       </Box>

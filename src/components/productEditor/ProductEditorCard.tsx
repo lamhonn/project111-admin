@@ -4,24 +4,22 @@ import { theme } from '../../theme';
 import { Product } from '../../types/models';
 import { languageAtom } from '../../state/uiStore';
 import { getTranslation } from '../../utils/multilingualNameUtils';
-import { editProductDialogOpenAtom, selectedProductIdAtom } from '../../state/productStore';
 
 interface ProductEditorCardProps {
   product: Product;
+  onClick: (product: Product) => void
 }
 
 export default function ProductEditorCard({
   product,
+  onClick
 }: ProductEditorCardProps) {
-  const { Id, Name, Description, ImgUrl } = product;
+  const { name, description, imgUrl } = product;
 
   const language = useAtomValue(languageAtom);
-  const setSelectedProductId = useSetAtom(selectedProductIdAtom);
-  const setDialogOpen = useSetAtom(editProductDialogOpenAtom);
 
   const handleClickProduct = () => {
-    setSelectedProductId(Id);
-    setDialogOpen(true);
+    onClick(product);
   }
 
   return (
@@ -59,8 +57,8 @@ export default function ProductEditorCard({
         >
           <Box
             component="img"
-            src={ImgUrl || ''}
-            alt={getTranslation(Name, language)}
+            src={imgUrl || ''}
+            alt={getTranslation(name, language)}
             sx={{
               width: '100%',
               height: '100%',
@@ -77,7 +75,7 @@ export default function ProductEditorCard({
             fontWeight={theme.typography.fontWeights.semibold}
             sx={{ mb: theme.spacing.sm }}
           >
-            {getTranslation(Name, language)}
+            {getTranslation(name, language)}
           </Typography>
           <Typography
             variant="body2"
@@ -91,7 +89,7 @@ export default function ProductEditorCard({
               WebkitBoxOrient: 'vertical',
             }}
           >
-            {Description ? getTranslation(Description, language) : ''}
+            {description ? getTranslation(description, language) : ''}
           </Typography>
         </Box>
       </Box>

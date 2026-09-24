@@ -3,9 +3,9 @@ import { Product } from "./product";
 import { ProductExcludable } from "./productExcludable";
 
 export interface OrderProductExcludable {
-    Id: string,
-    OrderProductId: string,
-    ProductExcludableId : string,
-    ProductExcludable: ProductExcludable,
-    Created: Date,
+    id: string,
+    orderProductId: string,
+    productExcludableId : string,
+    productExcludable: ProductExcludable,
+    created: Date,
 }

@@ -18,7 +18,7 @@ export const selectedOrderAtom = atom(
     (get) => {
         const orderId = get(selectedOrderIdAtom);
         const orders = get(ordersAtom);
-        return orders.find(order => order.Id === orderId);
+        return orders.find(order => order.id === orderId);
     }
 );
 
@@ -28,7 +28,7 @@ export const ordersAtom = atom<Order[]>([]);
 export const getNewOrdersAtom = atom(
     (get) => {
         const orders = get(ordersAtom);
-        return orders.filter(order => order.OrderStatus === OrderStatus.RECEIVED);
+        return orders.filter(order => order.orderStatus === OrderStatus.RECEIVED);
     },
     async (get, set) => {
         set(loadingAtom, true);
@@ -45,7 +45,7 @@ export const getNewOrdersAtom = atom(
             const updatedOrders = [
                 ...existingOrders.map(existingOrder => {
                     const newOrder = response.find(
-                        order => order.Id === existingOrder.Id
+                        order => order.id === existingOrder.id
                     );
 
                     return newOrder ?? existingOrder;
@@ -53,7 +53,7 @@ export const getNewOrdersAtom = atom(
                 ...response.filter(
                     newOrder =>
                         !existingOrders.some(
-                            existingOrder => existingOrder.Id === newOrder.Id
+                            existingOrder => existingOrder.id === newOrder.id
                         )
                 )
             ];
@@ -73,7 +73,7 @@ export const getNewOrdersAtom = atom(
 export const preparingOrdersAtom = atom(
     (get) => {
         const orders = get(ordersAtom);
-        return orders.filter(order => order.OrderStatus === OrderStatus.PREPARING);
+        return orders.filter(order => order.orderStatus === OrderStatus.PREPARING);
     }
 );
 
@@ -112,32 +112,32 @@ export const updateOrderStatusAtom = atom(
 
             if (!selectedOrder) return;
 
-            const orderProducts: OrderProductDto[] = selectedOrder.OrderProducts.map(order => <OrderProductDto>{
-                Id: order.Id,
-                ProductId: order.ProductId,
-                Name: order.ProductName,
-                OrderProductToppings: order.OrderProductToppings.map(topping => <OrderProductToppingDto>{
-                    Id: topping.Id,
-                    OrderProductId: order.Id,
-                    ProductToppingId: topping.Id
+            const orderProducts: OrderProductDto[] = selectedOrder.orderProducts.map(order => <OrderProductDto>{
+                id: order.id,
+                productId: order.productId,
+                name: order.productName,
+                orderProductToppings: order.orderProductToppings.map(topping => <OrderProductToppingDto>{
+                    id: topping.id,
+                    orderProductId: order.id,
+                    productToppingId: topping.id
                 }),
-                OrderProductExcludables: order.OrderProductExcludables.map(excludable => <OrderProductExcludableDto>{
-                    Id: excludable.Id,
-                    OrderProductId: order.Id,
-                    ProductExcludableId: excludable.Id
+                orderProductExcludables: order.orderProductExcludables.map(excludable => <OrderProductExcludableDto>{
+                    id: excludable.id,
+                    orderProductId: order.id,
+                    productExcludableId: excludable.id
                 }),
-                Price: order.ProductPrice,
+                price: order.productPrice,
             });
 
             const orderDto: OrderDto = {
-                Id: selectedOrder.Id,
-                UserId: selectedOrder.UserId,
-                TabletId: selectedOrder.TabletId,
-                TotalPrice: selectedOrder.TotalPrice,
-                OrganizationId: selectedOrder.OrganizationId,
-                SessionId: selectedOrder.SessionId,
-                OrderProducts: orderProducts,
-                OrderStatus: orderStatus,
+                id: selectedOrder.id,
+                userId: selectedOrder.userId,
+                tabletId: selectedOrder.tabletId,
+                totalPrice: selectedOrder.totalPrice,
+                organizationId: selectedOrder.organizationId,
+                sessionId: selectedOrder.sessionId,
+                orderProducts: orderProducts,
+                orderStatus: orderStatus,
             }
 
             const response = await OrderService.updateStatus(orderDto);

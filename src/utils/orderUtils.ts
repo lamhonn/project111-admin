@@ -4,17 +4,17 @@ import { OrderProductViewModel } from "../types/viewModels/orderProductViewModel
 import { OrderViewModel } from "../types/viewModels/orderViewModel";
 
 export function calculateTotalOrderPrice(orderProducts: OrderProductViewModel[]): number {
-    const totalPrice =  orderProducts.reduce(((total, product) => total + product.Price), 0);
+    const totalPrice =  orderProducts.reduce(((total, product) => total + product.price), 0);
     return totalPrice;
 };
 
 export function calculateTotalSessionPrice(orders: OrderViewModel[]): number {
-    const totalPrice = orders.reduce((total, order) => total + order.TotalPrice, 0);
+    const totalPrice = orders.reduce((total, order) => total + order.totalPrice, 0);
     return totalPrice;
 };
 
 export function calculateTotalOrderProductsPrice(orderProducts: OrderProductViewModel[]): number {
-    return orderProducts.reduce((sum, orderProduct) => sum + orderProduct.Price, 0);
+    return orderProducts.reduce((sum, orderProduct) => sum + orderProduct.price, 0);
 };
 
 export function getOrderStatusLabel(orderStatus: OrderStatus): string {

@@ -3,6 +3,8 @@ import { TabletService } from "../api/services/tabletService";
 import { TabletDto } from "../types/dtos/tabletDto";
 import { Tablet } from "../types/models";
 import { userIdAtom } from "./authStore";
+import { PairingService } from "../api/services/pairingService";
+import { PairingSession } from "../types/models/pairingSession";
 
 export const errorAtom = atom<string | null>(null);
 
@@ -41,11 +43,13 @@ export const selectedTabletAtom = atom(
         const selectedTabletId = get(selectedTabletIdAtom);
         const tablets = get(tabletsAtom);
         
-        return tablets.find(tablet => tablet.Id === selectedTabletId);
+        return tablets.find(tablet => tablet.id === selectedTabletId);
     }
 );
 
 export const tabletPairingPinAtom = atom<string | null>(null);
+export const tabletPairingIdAtom = atom<string | null>(null);
+export const tabletPairingPinExpiresAtom = atom<Date | null>(null);
 
 export const startTabletPairingAtom = atom(
     null,
@@ -53,14 +57,44 @@ export const startTabletPairingAtom = atom(
         set(loadingAtom, true);
         set(errorAtom, null);
 
+        set(tabletPairingPinAtom, null);
+        set(tabletPairingPinExpiresAtom, null);
+
         try {
-            // TODO: logic for starting tablet pairing. See backend how it works
+            const response: PairingSession = await PairingService.startPairing();
+
+            if (!response) throw new Error;
+
+            set(tabletPairingPinAtom, response.pin);
+            set(tabletPairingIdAtom, response.id);
+            set(tabletPairingPinExpiresAtom, response.expires);
         }
         catch {
+            set(tabletPairingPinAtom, "ERROR");
             set(errorAtom, "Failed to start pairing");
         }
         finally {
             set(loadingAtom, false);
+        }
+    }
+);
+
+export const stopTabletPairingAtom = atom(
+    null,
+    async (get, set) => {
+        const pairingSessionId = get(tabletPairingIdAtom);
+
+        if (!pairingSessionId) return;
+        
+        try {
+            await PairingService.stopPairing(pairingSessionId);
+            
+            set(tabletPairingPinAtom, null);
+            set(tabletPairingIdAtom, null);
+            set(tabletPairingPinExpiresAtom, null);
+        }
+        catch {
+            set(errorAtom, "Failed to stop pairing");
         }
     }
 );
@@ -72,16 +106,16 @@ export const editTabletAtom = atom(
 
         try {
             const tabletDto: TabletDto = {
-                Id: tablet.Id,
-                TableNumber: tablet.TableNumber,
-                UserId: tablet.UserId,
+                id: tablet.id,
+                tableNumber: tablet.tableNumber,
+                userId: tablet.userId,
             };
 
             await TabletService.update(tabletDto);
 
             const tablets = get(tabletsAtom);
             const updatedTablets = tablets.map(t =>
-                t.Id === tablet.Id ? { ...t, ...tablet } : t
+                t.id === tablet.id ? { ...t, ...tablet } : t
             );
     
             set(tabletsAtom, updatedTablets);
@@ -105,7 +139,7 @@ export const deleteTabletAtom = atom(
             await TabletService.delete(id);
 
             const tablets = get(tabletsAtom);
-            const updatedTablets = tablets.filter(tablet => tablet.Id !== id);
+            const updatedTablets = tablets.filter(tablet => tablet.id !== id);
     
             set(tabletsAtom, updatedTablets);
         }

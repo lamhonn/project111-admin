@@ -42,7 +42,7 @@ const CategoryItemsDialog: React.FC<CategoryItemsDialogProps> = ({
 
   const filteredProductOptions = menuProducts.filter((product) =>
     // Works with other languages too, but might also take brackets into account 
-    product.Name.toLowerCase().includes(itemSearchQuery.toLowerCase())
+    product.name.toLowerCase().includes(itemSearchQuery.toLowerCase())
   );
 
   return (
@@ -75,7 +75,7 @@ const CategoryItemsDialog: React.FC<CategoryItemsDialogProps> = ({
           >
             {filteredProductOptions.map((product) => (
               <ListItem
-                key={product.Id}
+                key={product.id}
                 sx={{
                   borderBottom: `1px solid ${theme.colors.border}`,
                   '&:last-child': { borderBottom: 'none' },
@@ -88,7 +88,7 @@ const CategoryItemsDialog: React.FC<CategoryItemsDialogProps> = ({
                   />
                 }
               >
-                <ListItemText primary={getTranslation(product.Name, i18n.language)} />
+                <ListItemText primary={getTranslation(product.name, i18n.language)} />
               </ListItem>
             ))}
 

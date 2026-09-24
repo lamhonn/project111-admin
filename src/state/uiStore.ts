@@ -16,8 +16,8 @@ export const lockedAtom = atom<boolean>(false);
 
 export const settingsAtom = atom<SettingsViewModel>(
     {
-        OrganizationName: 'Restaurant',
-        Language: 'en' // language code, e.g.'en'
+        organizationName: 'Restaurant',
+        language: 'en' // language code, e.g.'en'
     }  
 );
 
@@ -31,8 +31,8 @@ export const initSettingsAtom = atom(
         const organization = organizationId ? await OrganizationService.getById(organizationId) : null;
 
         const settings: SettingsViewModel = {
-            OrganizationName: organization?.Name || 'Restaurant',
-            Language: language,
+            organizationName: organization?.name || 'Restaurant',
+            language: language,
         };
 
         set(settingsAtom, settings);
@@ -46,14 +46,14 @@ export const updateSettingsAtom = atom(
         set(errorAtom, null);
         
         try {
-            set(languageAtom, data.Language);
+            set(languageAtom, data.language);
 
             const organization = get(organizationAtom);
             if (organization) {
                 const updatedOrganization: Organization = 
                 {
                     ...organization,
-                    Name: data.OrganizationName,
+                    name: data.organizationName,
                 }
         
                 set(organizationAtom, updatedOrganization);

@@ -48,15 +48,15 @@ const EditExcludablesDialog: React.FC<EditExcludablesDialogProps> = ({
   const handleTranslationDialogSave = (translation: string) => {
     if (!selectedExcludableId) return;
 
-    const next = localExcludables.find(topping => topping.Id === selectedExcludableId);
+    const next = localExcludables.find(topping => topping.id === selectedExcludableId);
     if (!next) return;
 
     const updatedExcludables: ProductExcludable[] = localExcludables.map(prev => 
-      prev.Id === selectedExcludableId
+      prev.id === selectedExcludableId
       ?
       {
         ...next, 
-        Name: translation
+        name: translation
       } 
       : prev
     );
@@ -65,18 +65,18 @@ const EditExcludablesDialog: React.FC<EditExcludablesDialogProps> = ({
   }
 
   const handleExcludableChange = (id: string, value: string) => {
-    const next = localExcludables.find(excludable => excludable.Id === id);
+    const next = localExcludables.find(excludable => excludable.id === id);
     if (!next) return;
 
-    const jsonObject = JSON.parse(next.Name);
+    const jsonObject = JSON.parse(next.name);
     jsonObject[language] = value;
 
     const updatedExcludables: ProductExcludable[] = localExcludables.map(prev => 
-      prev.Id === id
+      prev.id === id
       ?
       {
         ...next, 
-        Name: JSON.stringify(jsonObject)
+        name: JSON.stringify(jsonObject)
       } 
       : prev
     );
@@ -85,20 +85,20 @@ const EditExcludablesDialog: React.FC<EditExcludablesDialogProps> = ({
   };
 
   const handleRemoveRow = (id: string) => {
-    const next = localExcludables.find(excludable => excludable.Id === id);
+    const next = localExcludables.find(excludable => excludable.id === id);
     if (!next) return;
 
-    const updatedExcludables: ProductExcludable[] = localExcludables.filter(prev => prev.Id !== id);
+    const updatedExcludables: ProductExcludable[] = localExcludables.filter(prev => prev.id !== id);
     
     setLocalExcludables(updatedExcludables);
   };
 
   const handleAddRow = () => {
     const newExcludable: ProductExcludable = {
-      Id: crypto.randomUUID(),
-      Name: JSON.stringify({ en: '', fi: '', sv: '' }),
-      ProductId: selectedProductId,
-      Created: new Date(), // Will be updated in backend anyways
+      id: crypto.randomUUID(),
+      name: JSON.stringify({ en: '', fi: '', sv: '' }),
+      productId: selectedProductId,
+      created: new Date(), // Will be updated in backend anyways
     }
     setLocalExcludables([...localExcludables, newExcludable]);
   };
@@ -151,8 +151,8 @@ const EditExcludablesDialog: React.FC<EditExcludablesDialogProps> = ({
             >
               <TextField
                 fullWidth
-                value={getTranslation(excludable.Name, language)}
-                onChange={(e) => handleExcludableChange(excludable.Id, e.target.value)}
+                value={getTranslation(excludable.name, language)}
+                onChange={(e) => handleExcludableChange(excludable.id, e.target.value)}
                 placeholder={t('admin.productEditor.dialog.addExcludablePlaceholder')}
                 InputProps={{
                   endAdornment: (
@@ -163,7 +163,7 @@ const EditExcludablesDialog: React.FC<EditExcludablesDialogProps> = ({
                         top: '50%',
                         transform: 'translateY(-50%)'
                       }}
-                      onClick={() => handleOpenTranslationDialog(excludable.Name, excludable.Id)}
+                      onClick={() => handleOpenTranslationDialog(excludable.name, excludable.id)}
                     >
                       <TranslateIcon />
                     </IconButton>
@@ -172,7 +172,7 @@ const EditExcludablesDialog: React.FC<EditExcludablesDialogProps> = ({
               />
               <IconButton
                 aria-label={t('admin.productEditor.dialog.removeExcludable')}
-                onClick={() => handleRemoveRow(excludable.Id)}
+                onClick={() => handleRemoveRow(excludable.id)}
                 sx={{
                   width: 40,
                   height: 40,

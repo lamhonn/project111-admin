@@ -116,7 +116,7 @@ export default function DeviceDialog({
                 fullWidth
                 size="small"
                 disabled
-                value={editedData?.Id || ''}
+                value={editedData?.id || ''}
                 onChange={(e) => handleFieldChange('Id', e.target.value)}
                 sx={{
                   mt: 0.5,
@@ -136,7 +136,7 @@ export default function DeviceDialog({
                   mt: 0.5,
                 }}
               >
-                {tablet?.Id ?? t(`common.error`)}
+                {tablet?.id ?? t(`common.error`)}
               </Typography>
             )}
           </Box>
@@ -159,7 +159,7 @@ export default function DeviceDialog({
               <TextField
                 fullWidth
                 size="small"
-                value={editedData?.TableNumber || ''}
+                value={editedData?.tableNumber || ''}
                 onChange={(e) => handleFieldChange('TableNumber', e.target.value)}
                 sx={{
                   mt: 0.5,
@@ -179,7 +179,7 @@ export default function DeviceDialog({
                   mt: 0.5,
                 }}
               >
-                {tablet?.TableNumber ?? t(`common.error`)}
+                {tablet?.tableNumber ?? t(`common.error`)}
               </Typography>
             )}
           </Box>
@@ -208,7 +208,7 @@ export default function DeviceDialog({
                     mt: 0.5,
                   }}
                 >
-                  {tablet?.Created.toLocaleDateString() ?? t(`common.error`)}
+                  {tablet?.created.toLocaleDateString() ?? t(`common.error`)}
                 </Typography>
               </>
             )}

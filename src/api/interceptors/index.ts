@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import { store } from "../../state/store";
 import { tokenAtom } from "../../state/authStore";
+import { AuthService } from "../services/authService";
 
 export function registerInterceptors(axiosInstance: AxiosInstance) {
     // Add a request interceptor
@@ -37,11 +38,11 @@ export function registerInterceptors(axiosInstance: AxiosInstance) {
                         originalRequest.retryRequest = true;
 
                         try {
-                            const response = await axios.post(`${originalRequest.baseURL}/auth/refresh`);
+                            const response = await AuthService.refresh();
                             
-                            store.set(tokenAtom, response.data.accessToken);
+                            store.set(tokenAtom, response);
 
-                            originalRequest.headers['Authorization'] = `Bearer ${response.data.accessToken}`;
+                            originalRequest.headers['Authorization'] = `Bearer ${response}`;
                             
                             return axiosInstance(originalRequest);
                         } 

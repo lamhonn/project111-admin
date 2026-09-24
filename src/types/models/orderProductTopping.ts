@@ -1,9 +1,9 @@
 import { ProductTopping } from "./productTopping";
 
 export interface OrderProductTopping {
-    Id: string,
-    OrderProductId: string,
-    ProductToppingId: string,
-    ProductTopping: ProductTopping,
-    Created: Date
+    id: string,
+    orderProductId: string,
+    productToppingId: string,
+    productTopping: ProductTopping,
+    created: Date
 }

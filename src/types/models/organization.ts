@@ -2,13 +2,13 @@ import { License } from "./license";
 import { User } from "./user";
 
 export interface Organization {
-    Id: string,
-    LicenseId: string | null,
-    License: License | null,
-    Users: User[],
-    PrimaryUserId: string | null,
-    PrimaryUser: User | null,
-    Name: string,
-    MaxUsers: number,
-    Created: Date,
+    id: string,
+    licenseId: string | null,
+    license: License | null,
+    users: User[],
+    primaryUserId: string | null,
+    primaryUser: User | null,
+    name: string,
+    maxUsers: number,
+    created: Date,
 }

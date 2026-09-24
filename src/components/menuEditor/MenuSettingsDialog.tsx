@@ -54,14 +54,14 @@ const MenuSettingsDialog: React.FC<MenuSettingsDialogProps> = ({
             label={t('admin.menuEditor.dialog.menuName')}
             placeholder={t('admin.menuEditor.dialog.menuNamePlaceholder')}
             value={name}
-            onChange={onInputChange('Name')}
+            onChange={onInputChange('name')}
           />
 
           <FormControlLabel
             control={
               <Switch
                 checked={enabled}
-                onChange={onSwitchChange('Enabled')}
+                onChange={onSwitchChange('enabled')}
                 color="primary"
               />
             }

@@ -37,7 +37,7 @@ const OrderOptionsDialog: React.FC = () => {
     if (!selectedOrder) return;
 
     try {
-      updateOrderStatus(selectedOrder.Id, OrderStatus.PREPARING);
+      updateOrderStatus(selectedOrder.id, OrderStatus.PREPARING);
 
       handleClose();
     } catch {
@@ -49,7 +49,7 @@ const OrderOptionsDialog: React.FC = () => {
     if (!selectedOrder) return;
 
     try {
-      updateOrderStatus(selectedOrder.Id, OrderStatus.COMPLETED);
+      updateOrderStatus(selectedOrder.id, OrderStatus.COMPLETED);
       handleClose();
     } catch {
       setErrorMessage(error ?? 'Failed to update order status');
@@ -62,7 +62,7 @@ const OrderOptionsDialog: React.FC = () => {
 
   // Determine which action button to show based on status
   const renderActionButton = () => {
-    switch (selectedOrder.OrderStatus) {
+    switch (selectedOrder.orderStatus) {
       case OrderStatus.RECEIVED:
         return (
           <Button
@@ -136,7 +136,7 @@ const OrderOptionsDialog: React.FC = () => {
             color="text.secondary"
             sx={{ mt: 0.5 }}
           >
-            {t('orderOptionsDialog.orderNumber', { number: selectedOrder.Id })} • {t('orderOptionsDialog.table', { number: selectedOrder.TableNumber })}
+            {t('orderOptionsDialog.orderNumber', { number: selectedOrder.id })} • {t('orderOptionsDialog.table', { number: selectedOrder.tableNumber })}
           </Typography>
         </Box>
         <IconButton
@@ -154,7 +154,7 @@ const OrderOptionsDialog: React.FC = () => {
 
       {/* Order Products */}
       <DialogContent sx={{ p: theme.spacing.lg }}>
-        {selectedOrder.OrderProducts.length === 0 ? (
+        {selectedOrder.orderProducts.length === 0 ? (
           <Box
             sx={{
               display: 'flex',
@@ -172,10 +172,10 @@ const OrderOptionsDialog: React.FC = () => {
           </Box>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-            {selectedOrder.OrderProducts.map((product) => {
+            {selectedOrder.orderProducts.map((product) => {
               return (
                 <Box
-                  key={product.Id}
+                  key={product.id}
                   sx={{
                     display: 'flex',
                     alignItems: 'flex-start',
@@ -247,7 +247,7 @@ const OrderOptionsDialog: React.FC = () => {
         )}
 
         {/* Total */}
-        {selectedOrder.OrderProducts.length > 0 && (
+        {selectedOrder.orderProducts.length > 0 && (
           <Box
             sx={{
               mt: theme.spacing.lg,
@@ -270,7 +270,7 @@ const OrderOptionsDialog: React.FC = () => {
               fontWeight={theme.typography.fontWeights.bold}
               sx={{ color: theme.colors.primary }}
             >
-              {selectedOrder.TotalPrice}€
+              {selectedOrder.totalPrice}€
             </Typography>
           </Box>
         )}

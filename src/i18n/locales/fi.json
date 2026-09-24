@@ -171,6 +171,7 @@
         "activeStatus": "Aktiivinen",
         "menuSettings": "Menun asetukset",
         "addCategory": "Lisää kategoria",
+        "newCategory": "Uusi kategoria",
         "renameCategory": "Nimeä kategoria uudelleen",
         "addRemoveItemsFromMenu": "Lisää/poista tuotteita",
         "categoryName": "Kategorian nimi",

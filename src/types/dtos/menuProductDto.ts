@@ -1,10 +1,10 @@
 export interface MenuProductDto {
-    Id: string,
-    MenuId: string,
-    ProductId: string,
-    MenuCategoryId: string,
-    Name: string,
-    ImgUrl?: string,
-    Price: number,
-    Created: Date
+    id: string,
+    menuId: string,
+    productId: string,
+    menuCategoryId: string,
+    name: string,
+    imgUrl?: string,
+    price: number,
+    created: Date
 }

@@ -25,7 +25,7 @@ export default function AvailableTableCard({ table }: AvailableTableCardProps) {
     >
       {/* Table Number */}
       <Typography variant="body2" sx={{ textAlign: 'center', fontWeight: theme.typography.fontWeights.medium }}>
-        {t('common.table')} {table.TableNumber}
+        {t('common.table')} {table.tableNumber}
       </Typography>
     </Paper>
   );

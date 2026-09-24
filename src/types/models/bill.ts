@@ -2,12 +2,12 @@ import { BillStatus } from "../enums/billStatus";
 import { OrderProduct } from "./orderProduct";
 
 export interface Bill {
-    Id: string,
-    SessionId: string,
-    TabletId: string,
-    Name: string,
-    Status: BillStatus,
-    TotalPrice: number,
-    OrderProducts: OrderProduct[] // array of OrderProductViewModel IDs
-    Created: Date
+    id: string,
+    sessionId: string,
+    tabletId: string,
+    name: string,
+    status: BillStatus,
+    totalPrice: number,
+    orderProducts: OrderProduct[] // array of OrderProductViewModel IDs
+    created: Date
 }

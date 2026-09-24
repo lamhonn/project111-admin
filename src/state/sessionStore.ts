@@ -1,7 +1,6 @@
 import { atom } from "jotai";
 import { atomFamily } from 'jotai-family'
 
-import { SessionStatus } from "../types/enums/sessionStatus";
 import { SessionService } from "../api/services/sessionService";
 import { Session } from "../types/models";
 import { BillService } from "../api/services/billService";
@@ -70,7 +69,7 @@ export const getTabletSessionAtom = atomFamily((tabletId: string) =>
   atom((get) => {
     const sessions = get(currentSessionsAtom);
 
-    return sessions.find(session => session.TabletId === tabletId)
+    return sessions.find(session => session.tabletId === tabletId)
   })
 );
 
@@ -79,11 +78,11 @@ export const setEndSessionAtom = atom(
     async (get, set, id: string) => {
         try {
             const sessions = get(currentSessionsAtom);
-            const currentSession = sessions.find(session => session.Id === id);
+            const currentSession = sessions.find(session => session.id === id);
     
             if (currentSession) {
                 const updatedSessions = sessions.map(session => 
-                    session.Id === id ? 
+                    session.id === id ? 
                     { ...session, EndSessionTime: new Date() }
                     : session
                 );
@@ -112,8 +111,8 @@ export const getBillsBySessionIdAtom = atom(
             const currentBills = get(billsAtom);
 
             const updatedBills: Bill[] = bills.map(bill => {
-                if (currentBills.find(prev => bill.Id === prev.Id)) { 
-                    const currentBill = currentBills.find(prev => prev.Id === bill.Id);
+                if (currentBills.find(prev => bill.id === prev.id)) { 
+                    const currentBill = currentBills.find(prev => prev.id === bill.id);
                     return { 
                         ...currentBill,
                         ...bill
@@ -137,7 +136,7 @@ export const getBillsBySessionIdAtom = atom(
 
 export const getSessionBillsAtom = atomFamily((sessionId: string) => 
     atom((get) => {
-        return get(billsAtom).filter(bill => bill.SessionId === sessionId);
+        return get(billsAtom).filter(bill => bill.sessionId === sessionId);
     })
 );
 
@@ -149,7 +148,7 @@ export const confirmBillAtom = atom(
 
         try {
             const currentBills = get(billsAtom);
-            const selectedBill = currentBills.find(prev => prev.Id === billId);
+            const selectedBill = currentBills.find(prev => prev.id === billId);
 
             if (!selectedBill) return;
 
@@ -157,20 +156,20 @@ export const confirmBillAtom = atom(
 
             const updatedBill: BillDto = { 
                 ...selectedBill, 
-                Status: BillStatus.COMPLETED,
-                OrderProducts: selectedBill.OrderProducts.map(orderProduct => {
-                    const product = products.find(product => product.Id === orderProduct.ProductId);
+                status: BillStatus.COMPLETED,
+                orderProducts: selectedBill.orderProducts.map(orderProduct => {
+                    const product = products.find(product => product.id === orderProduct.productId);
 
                     return <OrderProductDto>{ 
                         ...orderProduct,
-                        Name: product?.Name ?? '',
-                        Price: product?.Price ?? 0
+                        name: product?.name ?? '',
+                        price: product?.price ?? 0
                     }
                 })
             };
 
             const updatedBills: Bill[] = currentBills.map(bill => 
-                bill.Id === billId ? { ...bill, Status: BillStatus.COMPLETED } : bill
+                bill.id === billId ? { ...bill, status: BillStatus.COMPLETED } : bill
             );
 
             set(billsAtom, updatedBills);

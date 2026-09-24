@@ -1,21 +1,30 @@
-import { useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Box, CircularProgress, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../theme';
 import MenuEditorHeader from '../components/menuEditor/MenuEditorHeader';
 import MenuList from '../components/menuEditor/MenuList';
 import EditMenuDialog from '../components/menuEditor/EditMenuDialog';
-import { useAtom, useAtomValue } from 'jotai';
-import { menusAtom, selectedMenuIdAtom } from '../state/menuStore';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { getMenusAtom, loadingAtom, menusAtom, selectedMenuIdAtom } from '../state/menuStore';
 
 export default function MenuEditorView() {
   const { t } = useTranslation();
 
+  const loading = useAtomValue(loadingAtom);
+
+
   const [searchQuery, setSearchQuery] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const menus = useAtomValue(menusAtom);
   const [selectedMenuId, setSelectedMenuId] = useAtom(selectedMenuIdAtom);
+
+  const menus = useAtomValue(menusAtom);
+  const getMenus = useSetAtom(getMenusAtom);
+
+  useEffect(() => {
+    getMenus();
+  }, []);
 
   const handleAddMenu = () => {
     setSelectedMenuId(null);
@@ -35,13 +44,17 @@ export default function MenuEditorView() {
         onSearchChange={setSearchQuery}
       />
 
-      {menus.length === 0 ? (
-        <Typography variant="body1" sx={{ color: theme.colors.text }}>
-          {t(`admin.menuEditor.dialog.noMenus`)}
-        </Typography>
-      ) : (
-        <MenuList onMenuClick={handleMenuClick} />
-      )}
+      {loading ?
+        <CircularProgress />
+        :
+        (menus.length === 0 ? (
+          <Typography variant="body1" sx={{ color: theme.colors.text }}>
+            {t(`admin.menuEditor.dialog.noMenus`)}
+          </Typography>
+        ) : (
+          <MenuList onMenuClick={handleMenuClick} />
+        ))
+      }
 
       {dialogOpen && (
         <EditMenuDialog

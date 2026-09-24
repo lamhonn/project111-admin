@@ -1,6 +1,6 @@
 export interface OrganizationDto {
-    Id: string,
-    Name: string,
-    MaxUsers: number,
-    Created: Date,
+    id: string,
+    name: string,
+    maxUsers: number,
+    created: Date,
 }

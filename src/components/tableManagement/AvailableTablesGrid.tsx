@@ -31,7 +31,7 @@ export default function AvailableTablesGrid({ tables }: AvailableTablesGridProps
       }}>
         {tables.map((table) => (
           <AvailableTableCard 
-            key={table.Id} 
+            key={table.id} 
             table={table}
           />
         ))}

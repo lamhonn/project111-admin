@@ -1,5 +1,5 @@
 export interface OrderProductExcludableDto {
-    Id: string,
-    OrderProductId: string,
-    ProductExcludableId: string,
+    id: string,
+    orderProductId: string,
+    productExcludableId: string,
 }

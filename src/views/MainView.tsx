@@ -109,6 +109,15 @@ const MainView = () => {
         return null;
 
       case UserRole.RESTAURANT_MANAGERSTAFF:
+       return new Set([
+          'dashboard',
+          'tables',
+          'products',
+          'menus',
+          'history',
+          'devices',
+          'settings',
+        ]);
       case UserRole.RESTAURANT_MANAGER:
         return new Set([
           'products',
@@ -116,7 +125,6 @@ const MainView = () => {
           'settings',
         ]);
 
-      case UserRole.RESTAURANT_MANAGERSTAFF:
       case UserRole.RESTAURANT_STAFF:
         return new Set([
           'dashboard',
@@ -127,7 +135,7 @@ const MainView = () => {
         ]);
 
       default:
-        return new Set(['dashboard']);
+        return null
     }
   }, [currentRole]);
 

@@ -16,16 +16,16 @@ interface TableCardProps {
 export default function TableCard({ table, onClick }: TableCardProps) {
   const { t } = useTranslation();
 
-  const session = useAtomValue(getTabletSessionAtom(table.Id));
-  const bills = useAtomValue(getSessionBillsAtom(session?.Id ?? ''));
-  const hasNewBills = bills.some(bill => bill.TabletId === table.Id && bill.Status === BillStatus.REQUESTED);
+  const session = useAtomValue(getTabletSessionAtom(table.id));
+  const bills = useAtomValue(getSessionBillsAtom(session?.id ?? ''));
+  const hasNewBills = bills.some(bill => bill.tabletId === table.id && bill.status === BillStatus.REQUESTED);
   const getBills = useSetAtom(getBillsBySessionIdAtom);
 
   useEffect(() => {
     if (!session) return;
-    getBills(session.Id);
+    getBills(session.id);
     
-    return BillWebSocket.subscribeToBillsCreated(session.UserId, () => getBills(session.Id));
+    return BillWebSocket.subscribeToBillsCreated(session.userId, () => getBills(session.id));
   }, [session, getBills]);
 
   return (
@@ -71,7 +71,7 @@ export default function TableCard({ table, onClick }: TableCardProps) {
 
       {/* Table Number */}
       <Typography variant="h6" sx={{ textAlign: 'center', fontWeight: theme.typography.fontWeights.semibold }}>
-        {t('common.table')} {table.TableNumber}
+        {t('common.table')} {table.tableNumber}
       </Typography>
     </Paper>
   );

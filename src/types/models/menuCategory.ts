@@ -1,6 +1,6 @@
 export interface MenuCategory {
-    Id: string,
-    MenuId: string,
-    Name: string,
-    Created: Date,
+    id: string,
+    menuId: string,
+    name: string,
+    created: Date,
 }

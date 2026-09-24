@@ -33,7 +33,7 @@ export default function ActiveTablesGrid({ tables, onTableClick }: ActiveTablesG
       }}>
         {tables.map((table) => (
           <TableCard 
-            key={table.Id} 
+            key={table.id} 
             table={table} 
             onClick={onTableClick}
           />

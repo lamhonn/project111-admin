@@ -66,9 +66,9 @@ const OrderList: React.FC = () => {
       </TableRow>
       {orders.map((order, idx) => (
         <TableRow
-          key={`${order.Id}-${idx}`}
+          key={`${order.id}-${idx}`}
           hover
-          onClick={() => handleRowClick(order.Id)}
+          onClick={() => handleRowClick(order.id)}
           sx={{ 
             '&:last-child td, &:last-child th': { border: 0 },
             transition: theme.transitions.fast,
@@ -84,7 +84,7 @@ const OrderList: React.FC = () => {
               fontWeight={theme.typography.fontWeights.semibold}
               sx={{ color: theme.colors.text }}
             >
-              {order.Id}
+              {order.id}
             </Typography>
           </TableCell>
           <TableCell>
@@ -93,7 +93,7 @@ const OrderList: React.FC = () => {
               fontWeight={theme.typography.fontWeights.medium}
               sx={{ color: theme.colors.text }}
             >
-              {t('dashboard.orderList.tableLabel', { number: order.TableNumber })}
+              {t('dashboard.orderList.tableLabel', { number: order.tableNumber })}
             </Typography>
           </TableCell>
           <TableCell>
@@ -101,7 +101,7 @@ const OrderList: React.FC = () => {
               variant="caption" 
               sx={{ color: theme.colors.text, opacity: 0.6 }}
             >
-              {order.Created.toLocaleDateString()}
+              {order.created.toLocaleDateString()}
             </Typography>
           </TableCell>
           <TableCell>
@@ -110,7 +110,7 @@ const OrderList: React.FC = () => {
               fontWeight={theme.typography.fontWeights.semibold}
               sx={{ color: theme.colors.text }}
             >
-              {order.OrderProducts.length}
+              {order.orderProducts.length}
             </Typography>
           </TableCell>
           <TableCell align="right">
@@ -129,7 +129,7 @@ const OrderList: React.FC = () => {
                 }
               }}
             >
-              {t(`dashboard.orderList.actions.${order.OrderStatus}`)}
+              {t(`dashboard.orderList.actions.${order.orderStatus}`)}
             </Button>
           </TableCell>
         </TableRow>

@@ -2,14 +2,14 @@ import { MenuCategory } from "./menuCategory"
 import { Product } from "./product"
 
 export type MenuProduct = {
-    Id: string,
-    MenuId: string,
-    ProductId: string,
-    Product: Product,
-    MenuCategoryId: string,
-    MenuCategory: MenuCategory,
-    Name: string,
-    ImgUrl?: string,
-    Price: number,
-    Created: Date
+    id: string,
+    menuId: string,
+    productId: string,
+    product: Product,
+    menuCategoryId: string,
+    menuCategory: MenuCategory,
+    name: string,
+    imgUrl?: string,
+    price: number,
+    created: Date
 }

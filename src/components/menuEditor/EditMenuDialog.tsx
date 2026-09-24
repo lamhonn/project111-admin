@@ -30,6 +30,7 @@ import { openConfirmDialogAtom } from '../../state/confirmDialogStore';
 import { getTranslation } from '../../utils/multilingualNameUtils';
 import { MenuProduct } from '../../types/models';
 import { organizationIdAtom } from '../../state/authStore';
+import { languageAtom } from '../../state/uiStore';
 
 interface EditMenuDialogProps {
   open: boolean;
@@ -41,9 +42,10 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
   onClose, 
 }) => {
   const { t, i18n } = useTranslation();
+  const language = useAtomValue(languageAtom);
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
-  const [categoryNameInput, setCategoryNameInput] = useState('');
+  const [categoryNameInput, setCategoryNameInput] = useState('{ "fi": "", "en": "", "sv": "" }');
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [itemsDialogOpen, setItemsDialogOpen] = useState(false);
   const [itemSearchQuery, setItemSearchQuery] = useState('');
@@ -60,17 +62,17 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
   const deleteMenu = useSetAtom(deleteMenuAtom);
 
   const [formData, setFormData] = useState<MenuViewModel>({
-    Id: crypto.randomUUID(),
-    OrganizationId: organizationId ?? '',
-    Enabled: false,
-    Name: '',
-    PatternStartTime: null,
-    PatternEndTime: null,
-    EventStartTime: null,
-    EventEndTime: null,
-    MenuCategories: [],
-    MenuProducts: [],
-    Created: new Date(),
+    id: crypto.randomUUID(),
+    organizationId: organizationId ?? '',
+    enabled: false,
+    name: '',
+    patternStartTime: null,
+    patternEndTime: null,
+    eventStartTime: null,
+    eventEndTime: null,
+    menuCategories: [],
+    menuProducts: [],
+    created: new Date(),
   });
 
   const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -83,17 +85,17 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
     if (!menu) return;
 
     const menuViewModel: MenuViewModel = {
-      Id: menu.Id,
-      OrganizationId: menu.OrganizationId,
-      Enabled: menu.Enabled,
-      Name: menu.Name,
-      PatternStartTime: menu.PatternStartTime,
-      PatternEndTime: menu.PatternEndTime,
-      EventStartTime: menu.EventStartTime,
-      EventEndTime: menu.EventEndTime,
-      MenuCategories: menuCategories ?? [],
-      MenuProducts: menu.MenuProducts,
-      Created: menu.Created,
+      id: menu.id,
+      organizationId: menu.organizationId,
+      enabled: menu.enabled,
+      name: menu.name,
+      patternStartTime: menu.patternStartTime,
+      patternEndTime: menu.patternEndTime,
+      eventStartTime: menu.eventStartTime,
+      eventEndTime: menu.eventEndTime,
+      menuCategories: menuCategories ?? [],
+      menuProducts: menu.menuProducts,
+      created: menu.created,
     };
 
     setFormData(menuViewModel);
@@ -134,10 +136,10 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
       return;
     }
 
-    const category = formData.MenuCategories.find(category => category.Id === editingCategoryId);
+    const category = formData.menuCategories.find(category => category.id === editingCategoryId);
     if (!category) return;
 
-    setSelectedProducts(category.Products);
+    setSelectedProducts(category.products);
     setItemSearchQuery('');
     setItemsDialogOpen(true);
   };
@@ -169,50 +171,49 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
 
   const handleOpenAddCategory = () => {
     setEditingCategoryId(null);
-    setCategoryNameInput('');
+    setCategoryNameInput('{ "fi": "", "en": "", "sv": "" }');
     setCategoryDialogOpen(true);
   };
 
   const handleOpenEditCategory = (category: MenuCategoryViewModel) => {
-    setEditingCategoryId(category.Id);
-    setCategoryNameInput(category.Name);
+    setEditingCategoryId(category.id);
+    setCategoryNameInput(category.name);
     setCategoryDialogOpen(true);
   };
 
-  const handleSaveCategory = () => {
-    const trimmedName = categoryNameInput.trim();
-    if (!trimmedName) {
-      return;
-    }
-
+  const handleSaveCategory = (translation?: string) => {
     if (editingCategoryId === null) {
       const newCategory: MenuCategoryViewModel = {
-        Id: crypto.randomUUID(),
-        Name: trimmedName,
-        MenuId: menu?.Id ?? '',
-        Products: [],
+        id: crypto.randomUUID(),
+        name: translation ?? '{ "fi": "", "en": "", "sv": "" }',
+        menuId: menu?.id ?? '',
+        products: [],
       }
-      setFormData(prev => {
-        return { ...prev, MenuCategories: [...prev.MenuCategories, newCategory]}
+      setFormData({
+        ...formData, 
+        menuCategories: [...formData.menuCategories, newCategory]
       });
     } else {
-      const editingCategory = formData?.MenuCategories.find(category => category.Id === editingCategoryId);
+      const editingCategory = formData?.menuCategories.find(category => category.id === editingCategoryId);
       if (!editingCategory) return;
 
       const updated: MenuCategoryViewModel = 
       { 
         ...editingCategory, 
-        Name: trimmedName,
-        Products: editingCategory.Products
+        name: translation ?? editingCategory.name,
+        products: editingCategory.products
       }
 
-      setFormData(prev => {
-        return { ...prev, MenuCategories: [...prev.MenuCategories, updated]}
+      const updatedCategories = formData?.menuCategories.map(category => category.id === editingCategoryId ? updated : category) ;
+
+      setFormData({
+        ...formData,
+        menuCategories: updatedCategories
       });
     }
 
     setCategoryDialogOpen(false);
-    setCategoryNameInput('');
+    setCategoryNameInput('{ "fi": "", "en": "", "sv": "" }');
     setEditingCategoryId(null);
   };
 
@@ -233,7 +234,7 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
         confirmText: t('common.confirm'),
         onConfirm: async () => {
           if (!menu) return;
-          deleteMenu(menu.Id);
+          deleteMenu(menu.id);
           onClose();
         },
     });
@@ -323,9 +324,9 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
         >
           <Table>
             <TableBody>
-              {menuCategories && menuCategories.length > 0 ? (
-                menuCategories.map((category) => (
-                  <React.Fragment key={category.Id}>
+              {formData.menuCategories && formData.menuCategories.length > 0 ? (
+                formData.menuCategories.map((category) => (
+                  <React.Fragment key={category.id}>
                     <TableRow>
                       <TableCell
                         colSpan={2}
@@ -341,7 +342,7 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
                             fontWeight={theme.typography.fontWeights.semibold}
                             sx={{ color: theme.colors.text }}
                           >
-                            {getTranslation(category.Name, i18n.language)} ({category.Products.length})
+                            {getTranslation(category.name, language)} ({category.products.length})
                           </Typography>
                           <IconButton
                             size="small"
@@ -354,7 +355,7 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
                       </TableCell>
                     </TableRow>
 
-                    {category.Products.length === 0 ? (
+                    {category.products.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={2} sx={{ py: 1.5 }}>
                           <Typography variant="body2" sx={{ color: theme.colors.text, opacity: 0.65 }}>
@@ -364,8 +365,8 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
                       </TableRow>
                       )
                       :
-                      (category.Products.map((product) => (
-                        <TableRow key={`${category.Id}-${product.Id}`} hover>
+                      (category.products.map((product) => (
+                        <TableRow key={`${category.id}-${product.id}`} hover>
                           <TableCell
                             sx={{
                               py: 1.5,
@@ -377,7 +378,7 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
                               fontWeight={theme.typography.fontWeights.medium}
                               sx={{ color: theme.colors.text }}
                             >
-                              {getTranslation(product.Name, i18n.language)}
+                              {getTranslation(product.name, i18n.language)}
                             </Typography>
                           </TableCell>
                           <TableCell
@@ -416,7 +417,6 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
           open={categoryDialogOpen}
           editingCategoryId={editingCategoryId}
           categoryNameInput={categoryNameInput}
-          onCategoryNameChange={setCategoryNameInput}
           onClose={() => setCategoryDialogOpen(false)}
           onSave={handleSaveCategory}
           onOpenItemsDialog={handleOpenItemsDialog}
@@ -424,8 +424,8 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
 
         <MenuSettingsDialog
           open={settingsDialogOpen}
-          name={formData?.Name ?? ''}
-          enabled={formData?.Enabled ?? false}
+          name={formData?.name ?? ''}
+          enabled={formData?.enabled ?? false}
           weekdays={weekdays}
           onClose={() => setSettingsDialogOpen(false)}
           onInputChange={handleSettingsInputChange}
@@ -435,7 +435,7 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
 
         <CategoryItemsDialog
           open={itemsDialogOpen}
-          menuProducts={menu?.MenuProducts ?? []}
+          menuProducts={menu?.menuProducts ?? []}
           itemSearchQuery={itemSearchQuery}
           selectedProducts={selectedProducts}
           onSearchChange={setItemSearchQuery}

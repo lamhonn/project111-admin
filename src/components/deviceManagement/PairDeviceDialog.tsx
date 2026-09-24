@@ -1,10 +1,9 @@
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography, IconButton, CircularProgress } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme';
-import { startTabletPairingAtom, tabletPairingPinAtom } from '../../state/tabletStore';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { tabletPairingPinAtom } from '../../state/tabletStore';
+import { useAtomValue } from 'jotai';
 
 interface PairDeviceDialogProps {
   isOpen: boolean;
@@ -17,12 +16,7 @@ export default function PairDeviceDialog({
 }: PairDeviceDialogProps) {
   const { t } = useTranslation();
 
-  const startPairing = useSetAtom(startTabletPairingAtom);
   const pairingPin = useAtomValue(tabletPairingPinAtom);
-
-  useEffect(() => {
-    startPairing();
-  }, []);
 
   const formatPin = (pin: string): string => {
     if (pin.length < 8) {
@@ -131,7 +125,7 @@ export default function PairDeviceDialog({
             },
           }}
         >
-          {t('common.cancel')}
+          {t('common.close')}
         </Button>
       </DialogActions>
     </Dialog>

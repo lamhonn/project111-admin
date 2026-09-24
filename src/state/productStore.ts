@@ -10,8 +10,6 @@ export const loadingAtom = atom(false);
 
 export const selectedProductIdAtom = atom<string>('');
 
-export const selectedProductAtom = atom<Product | null>(null);
-
 export const errorAtom = atom<string | null>(null);
 
 export const getProductByIdAtom = atom(
@@ -19,9 +17,9 @@ export const getProductByIdAtom = atom(
         const productId = get(selectedProductIdAtom);
         if (!productId) return null;
 
-        return get(productsAtom).find(product => product.Id === productId) || null;
+        return get(productsAtom).find(product => product.id === productId) || null;
     },
-    async (get, set) => {
+    async (get, set, id?: string) => {
         const productId = get(selectedProductIdAtom);
         if (!productId) return null;
 
@@ -29,18 +27,17 @@ export const getProductByIdAtom = atom(
         set(errorAtom, null);
 
         try {
-            const response = await ProductService.getById(get(selectedProductIdAtom));
+            const response = id ? await ProductService.getById(id) : await ProductService.getById(get(selectedProductIdAtom));
 
             const existingProducts = get(productsAtom);
-            const productExists = existingProducts.some(product => product.Id === response.Id);
+            const productExists = existingProducts.some(product => product.id === response.id);
             if (!productExists) {
                 set(productsAtom, [...existingProducts, response]);
             }
-            else if (existingProducts.some(product => product.Id === response.Id && !Object.is(product, response))) {
+            else if (existingProducts.some(product => product.id === response.id && !Object.is(product, response))) {
                 // update the array if some product has been modified
-                set(productsAtom, existingProducts.map(product => product.Id === response.Id && Object.is(product, response) ? response : product))
+                set(productsAtom, existingProducts.map(product => product.id === response.id && Object.is(product, response) ? response : product))
             }
-            set(selectedProductAtom, response);   
         } 
         catch (error) {
             set(errorAtom, "Error fetching product");
@@ -86,7 +83,7 @@ export const createProductAtom = atom(
 
             const products = get(productsAtom);
 
-            set(productsAtom, [...products, { ...data, Created: new Date() }])
+            set(productsAtom, [...products, { ...data, created: new Date() }])
         }
         catch {
             set(errorAtom, "Error creating product");
@@ -109,7 +106,7 @@ export const updateProductAtom = atom(
             const products = get(productsAtom);
 
             const updatedProducts: Product[] = products.map(product =>
-                product.Id === data.Id ? { ...product, ...data } : product
+                product.id === data.id ? { ...product, ...data } : product
             );
             set(productsAtom, updatedProducts)
         }
@@ -132,7 +129,7 @@ export const deleteProductAtom = atom(
             await ProductService.delete(id);
             
             const products = get(productsAtom);
-            set(productsAtom, products.filter(product => product.Id !== id));
+            set(productsAtom, products.filter(product => product.id !== id));
         }
         catch {
             set(errorAtom, "Error deleting product")

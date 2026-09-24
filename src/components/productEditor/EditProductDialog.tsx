@@ -25,50 +25,36 @@ import type { StockPhoto } from './StockPhotoDialog';
 import { ProductDto } from '../../types/dtos/productDto';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { languageAtom } from '../../state/uiStore';
-import { organizationIdAtom } from '../../state/authStore';
-import { Dietary, ProductExcludable, ProductTopping } from '../../types/models';
+import { Dietary, Product, ProductExcludable, ProductTopping } from '../../types/models';
 import { getTranslation } from '../../utils/multilingualNameUtils';
 import TranslationDialog from './TranslationDialog';
-import { createProductAtom, deleteProductAtom, errorAtom, getProductByIdAtom, loadingAtom, selectedProductIdAtom, updateProductAtom } from '../../state/productStore';
+import { createProductAtom, deleteProductAtom, errorAtom, loadingAtom, updateProductAtom } from '../../state/productStore';
 import { parsePriceValue } from '../../utils/productUtils';
 
 interface EditProductDialogProps {
   open: boolean;
   onClose: () => void;
+  product: Product;
 }
 
 const EditProductDialog: React.FC<EditProductDialogProps> = ({ 
   open, 
   onClose, 
+  product
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const language = useAtomValue(languageAtom);
 
   const loading = useAtomValue(loadingAtom);
   const error = useAtomValue(errorAtom);
 
-  const organizationId = useAtomValue(organizationIdAtom);
   const createProduct = useSetAtom(createProductAtom);
   const updateProduct = useSetAtom(updateProductAtom);
   const deleteProduct = useSetAtom(deleteProductAtom);
-
-  const selectedProductId = useAtomValue(selectedProductIdAtom);
-  const selectedProduct = useAtomValue(getProductByIdAtom);
   
-  const [formData, setFormData] = useState<ProductDto>(
-    {
-      Id: crypto.randomUUID(),
-      Description: '{ "fi": "", "en": "", "sv": "" }',
-      Name: '{ "fi": "", "en": "", "sv": "" }',
-      Dietaries: [],
-      FreeToppings: 0,
-      ImgUrl: "",
-      Ingredients: '{ "fi": "", "en": "", "sv": "" }',
-      OrganizationId: organizationId ?? "",
-      Price: 0,
-      ProductExcludables: [],
-      ProductToppings: []
-    });
+  const [formData, setFormData] = useState<ProductDto>(product);
+
+  // TODO: product ALWAYS exists, how can we distinguish whether it exists in the backend per se? Atom?
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isDietariesDialogOpen, setIsDietariesDialogOpen] = useState(false);
@@ -79,16 +65,11 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
   const [editingTranslations, setEditingTranslations] = useState<string>('{ "fi": "", "en": "", "sv": "" }');
   const [selectedField, setSelectedField] = useState<keyof ProductDto | null>(null);
 
-  useEffect(() => {
-    if (selectedProduct) 
-      setFormData({...selectedProduct});
-  }, [selectedProduct]);
-
   const handleImageUpload = (imgUrl: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
     if (imgUrl) {
       setFormData({
         ...formData,
-        ImgUrl: imgUrl
+        imgUrl: imgUrl
       });
       
       // TODO: proper image upload logic
@@ -105,7 +86,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
 
     setFormData((prev) => ({
       ...prev,
-      Price: value,
+      price: value,
     }));
   };
 
@@ -132,7 +113,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
   const handleSaveStockPhoto = (photo: StockPhoto) => {
     setFormData((previous) => ({
       ...previous,
-      ImgUrl: photo.link,
+      imgUrl: photo.link,
     }));
     setImagePreview(photo.link);
   };
@@ -150,7 +131,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
   };
 
   const handleOpenTranslationDialog = (field: keyof ProductDto) => {
-    if ((field !== "Name" && field !== "Description" && field !== "Ingredients")) return;
+    if ((field !== "name" && field !== "description" && field !== "ingredients")) return;
 
     if (!formData[field]) return
     
@@ -164,8 +145,8 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
   };
 
   const handleTranslationValueChange = (field: keyof ProductDto, language: string, value: string) => {
-    if (field !== "Name" && field !== "Description" && field !== "Ingredients") return;
-      
+    if (field !== "name" && field !== "description" && field !== "ingredients") return;
+
     if (!formData[field]) return;
    
     const translationObject = JSON.parse(formData[field]);
@@ -205,34 +186,33 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
   const handleToppingsChange = (toppings: ProductTopping[]) => {
     setFormData({
       ...formData,
-      ProductToppings: toppings,
+      productToppings: toppings,
     });
   };
 
   const handleToppingsSettingsChange = (freeToppings: number) => {
     setFormData({
       ...formData,
-      FreeToppings: freeToppings,
+      freeToppings: freeToppings,
     });
   };
 
   const handleExcludablesChange = (excludables: ProductExcludable[]) => {
     setFormData({
       ...formData,
-      ProductExcludables: excludables,
+      productExcludables: excludables,
     });
   };
 
   const handleSaveDietaries = (dietaries: Dietary[]) => {
     setFormData({
       ...formData,
-      Dietaries: dietaries
+      dietaries: dietaries
     });
   };
 
   const handleSave = () => {
-    // if selectedProductId === '' => new product
-    if (selectedProductId && selectedProduct) {
+    if (product.id) {
       updateProduct(formData);
     }
     else {
@@ -242,10 +222,8 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
   };
 
   const handleDelete = () => {
-    if (selectedProductId) {
-      deleteProduct(selectedProductId);
-      onClose();
-    }
+    deleteProduct(product.id);
+    onClose();
   };
 
   const handleClose = () => {
@@ -395,7 +373,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
                 </Typography>
                 <Button
                   variant="outlined"
-                  onClick={() => handleOpenTranslationDialog('Name')}
+                  onClick={() => handleOpenTranslationDialog('name')}
                   sx={{
                     textTransform: 'none',
                     borderRadius: 999,
@@ -410,8 +388,8 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
               <TextField
                 fullWidth
                 placeholder={t('admin.productEditor.dialog.productNamePlaceholder')}
-                value={getTranslation(formData.Name, language)}
-                onChange={(e) => {handleTranslationValueChange('Name', language, e.target.value)}}
+                value={getTranslation(formData.name, language)}
+                onChange={(e) => {handleTranslationValueChange('name', language, e.target.value)}}
                 variant="outlined"
               />
 
@@ -427,7 +405,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
                 type="number"
                 inputProps={{ min: 0, step: '0.01' }}
                 placeholder="0.00"
-                value={formData.Price ?? 0}
+                value={formData.price ?? 0}
                 onChange={handlePriceChange}
                 variant="outlined"
               />
@@ -439,7 +417,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
                 </Typography>
                 <Button
                   variant="outlined"
-                  onClick={() => handleOpenTranslationDialog('Description')}
+                  onClick={() => handleOpenTranslationDialog('description')}
                   sx={{
                     textTransform: 'none',
                     borderRadius: 999,
@@ -456,8 +434,8 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
                 multiline
                 rows={6}
                 placeholder={t('admin.productEditor.dialog.descriptionPlaceholder')}
-                value={getTranslation(formData.Description ?? '', language)}
-                onChange={(e) => handleTranslationValueChange('Description', language, e.target.value)}
+                value={getTranslation(formData.description ?? '{ "fi": "", "en": "", "sv": "" }', language)}
+                onChange={(e) => handleTranslationValueChange('description', language, e.target.value)}
                 variant="outlined"
               />
 
@@ -510,7 +488,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
                 </Typography>
                 <Button
                   variant="outlined"
-                  onClick={() => handleOpenTranslationDialog('Ingredients')}
+                  onClick={() => handleOpenTranslationDialog('ingredients')}
                   sx={{
                     textTransform: 'none',
                     borderRadius: 999,
@@ -527,8 +505,8 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
                 multiline
                 rows={3}
                 placeholder={t('admin.productEditor.dialog.ingredientsPlaceholder')}
-                value={getTranslation(formData.Ingredients ?? '', language)}
-                onChange={(e) => handleTranslationValueChange('Ingredients', language, e.target.value)}
+                value={getTranslation(formData.ingredients ?? '{ "fi": "", "en": "", "sv": "" }', language)}
+                onChange={(e) => handleTranslationValueChange('ingredients', language, e.target.value)}
                 variant="outlined"
               />
 
@@ -553,9 +531,9 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
                     {t('admin.productEditor.dialog.editDietaries')}
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                    {formData.Dietaries && formData.Dietaries.length > 0 ? (
+                    {formData.dietaries && formData.dietaries.length > 0 ? (
                       <Chip
-                        label={formData.Dietaries.join(', ')}
+                        label={formData.dietaries.join(', ')}
                         size="small"
                         variant="outlined"
                       />
@@ -581,7 +559,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
         }}
       >
         <Box>
-          {selectedProductId && (
+          {product && (
             <Button 
               onClick={handleDelete}
               variant="outlined"
@@ -634,23 +612,23 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
       <EditDietariesDialog
         open={isDietariesDialogOpen}
         onClose={handleCloseDietariesDialog}
-        selectedDietaries={formData.Dietaries || []}
+        selectedDietaries={formData.dietaries || []}
         onSave={handleSaveDietaries}
       />
 
       <EditToppingsDialog
         open={isToppingsDialogOpen}
         onClose={handleCloseToppingsDialog}
-        toppings={formData.ProductToppings}
+        toppings={formData.productToppings}
         onChange={handleToppingsChange}
-        freeToppings={formData.FreeToppings ?? 0}
+        freeToppings={formData.freeToppings ?? 0}
         onSettingsChange={handleToppingsSettingsChange}
       />
 
       <EditExcludablesDialog
         open={isExcludablesDialogOpen}
         onClose={handleCloseExcludablesDialog}
-        excludables={formData.ProductExcludables}
+        excludables={formData.productExcludables}
         onChange={handleExcludablesChange}
       />
 
@@ -664,7 +642,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({
       <StockPhotoDialog
         open={isStockPhotoDialogOpen}
         onClose={handleCloseStockPhotoDialog}
-        selectedPhotoLink={formData.ImgUrl ?? ''}
+        selectedPhotoLink={formData.imgUrl ?? ''}
         onSave={handleSaveStockPhoto}
       />
     </Dialog>

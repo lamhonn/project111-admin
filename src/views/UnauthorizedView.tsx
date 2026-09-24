@@ -31,7 +31,7 @@ const UnauthorizedView: React.FC = () => {
     }
 
     try {
-      tryLogin({ Login: login, Password: password });
+      tryLogin({ login: login, password: password });
     }
     catch {
       setError(loginError ?? 'Unknown error');

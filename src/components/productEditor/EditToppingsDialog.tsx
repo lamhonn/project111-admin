@@ -54,15 +54,15 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
   const handleTranslationDialogSave = (translation: string) => {
     if (!selectedToppingId) return;
 
-    const next = localToppings.find(topping => topping.Id === selectedToppingId);
+    const next = localToppings.find(topping => topping.id === selectedToppingId);
     if (!next) return;
 
     const updatedToppings: ProductTopping[] = localToppings.map(prev => 
-      prev.Id === selectedToppingId
+      prev.id === selectedToppingId
       ?
       {
         ...next, 
-        Name: translation
+        name: translation
       } 
       : prev
     );
@@ -71,18 +71,18 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
   }
 
   const handleToppingChange = (id: string, value: string) => {
-    const next = localToppings.find(topping => topping.Id === id);
+    const next = localToppings.find(topping => topping.id === id);
     if (!next) return;
 
-    const jsonObject = JSON.parse(next.Name);
+    const jsonObject = JSON.parse(next.name);
     jsonObject[language] = value;
 
     const updatedToppings: ProductTopping[] = localToppings.map(prev => 
-      prev.Id === id
+      prev.id === id
       ?
       {
         ...next, 
-        Name: JSON.stringify(jsonObject)
+        name: JSON.stringify(jsonObject)
       } 
       : prev
     );
@@ -91,17 +91,17 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
   };
 
   const handlePriceIncrementChange = (id: string, value: string) => {
-    const next = localToppings.find(topping => topping.Id === id);
+    const next = localToppings.find(topping => topping.id === id);
     if (!next) return;
 
     const parsedValue = parsePriceValue(value);
 
     const updatedToppings: ProductTopping[] = localToppings.map(prev => 
-      prev.Id === id
+      prev.id === id
       ?
       {
         ...next, 
-        Price: parsedValue
+        price: parsedValue
       } 
       : prev
     );
@@ -110,21 +110,21 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
   };
 
   const handleRemoveRow = (id: string) => {
-    const next = localToppings.find(topping => topping.Id === id);
+    const next = localToppings.find(topping => topping.id === id);
     if (!next) return;
 
-    const updatedToppings: ProductTopping[] = localToppings.filter(prev => prev.Id !== id);
+    const updatedToppings: ProductTopping[] = localToppings.filter(prev => prev.id !== id);
     
     setLocalToppings(updatedToppings);
   };
 
   const handleAddRow = () => {
     const newTopping: ProductTopping = {
-      Id: crypto.randomUUID(),
-      Name: '{ "fi": "", "en": "", "sv": "" }',
-      ProductId: selectedProductId,
-      Price: 0,
-      Created: new Date(), // Will be updated in backend anyways
+      id: crypto.randomUUID(),
+      name: '{ "fi": "", "en": "", "sv": "" }',
+      productId: selectedProductId,
+      price: 0,
+      created: new Date(), // Will be updated in backend anyways
     }
     setLocalToppings([...localToppings, newTopping]);
   };
@@ -231,8 +231,8 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
             >
               <TextField
                 fullWidth
-                value={getTranslation(topping.Name, language)}
-                onChange={(e) => handleToppingChange(topping.Id, e.target.value)}
+                value={getTranslation(topping.name, language)}
+                onChange={(e) => handleToppingChange(topping.id, e.target.value)}
                 placeholder={t('admin.productEditor.dialog.addToppingPlaceholder')}
                 InputProps={{
                   endAdornment: (
@@ -243,7 +243,7 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
                         top: '50%',
                         transform: 'translateY(-50%)'
                       }}
-                      onClick={() => handleOpenTranslationDialog(topping.Name, topping.Id)}
+                      onClick={() => handleOpenTranslationDialog(topping.name, topping.id)}
                     >
                       <TranslateIcon />
                     </IconButton>
@@ -252,8 +252,8 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
               />
               <TextField
                 type="number"
-                value={topping.Price}
-                onChange={(e) => handlePriceIncrementChange(topping.Id, e.target.value)}
+                value={topping.price}
+                onChange={(e) => handlePriceIncrementChange(topping.id, e.target.value)}
                 placeholder={t('admin.productEditor.dialog.priceIncrement')}
                 inputProps={{ min: 0, step: 0.01 }}
                 sx={{
@@ -270,7 +270,7 @@ const EditToppingsDialog: React.FC<EditToppingsDialogProps> = ({
               />
               <IconButton
                 aria-label={t('admin.productEditor.dialog.removeTopping')}
-                onClick={() => handleRemoveRow(topping.Id)}
+                onClick={() => handleRemoveRow(topping.id)}
                 sx={{
                   width: 40,
                   height: 40,

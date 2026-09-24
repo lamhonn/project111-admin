@@ -173,6 +173,7 @@
         "activeStatus": "Active",
         "menuSettings": "Menu settings",
         "addCategory": "Add a category",
+        "newCategory": "New category",
         "renameCategory": "Rename category",
         "addRemoveItemsFromMenu": "Add/remove items from menu",
         "categoryName": "Category name",

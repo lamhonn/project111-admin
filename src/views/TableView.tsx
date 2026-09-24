@@ -24,13 +24,12 @@ export default function TableView() {
   const sessions = useAtomValue(currentSessionsAtom);
   const getSessions = useSetAtom(getLatestSessionsAtom);
 
-  const activeTables = tables.filter(table => sessions.some(session => session.TabletId === table.Id));
-  const inactiveTables = tables.filter(table => !sessions.some(session => session.TabletId === table.Id));
+  const activeTables = tables.filter(table => sessions.some(session => session.tabletId === table.id));
+  const inactiveTables = tables.filter(table => !sessions.some(session => session.tabletId === table.id));
 
   const userId = useAtomValue(userIdAtom);
 
  //TODO: maybe add ordersAtom too, in case we want to also create notifications per table
-
   useEffect(() => {
     if (!userId) return;
 

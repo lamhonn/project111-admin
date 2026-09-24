@@ -31,7 +31,7 @@ export default function TableActionsDialog({
 
     const handleFinalize = () => {
         if (!session) return;
-        endSession(session.Id);
+        endSession(session.id);
 
         onClose();
     };

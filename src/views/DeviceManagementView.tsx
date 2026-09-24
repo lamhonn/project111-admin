@@ -5,7 +5,7 @@ import { theme } from '../theme';
 import { useTranslation } from 'react-i18next';
 import DeviceList from '../components/deviceManagement/DeviceList';
 import PairDeviceDialog from '../components/deviceManagement/PairDeviceDialog';
-import { errorAtom, getTabletsAtom, loadingAtom } from '../state/tabletStore';
+import { errorAtom, getTabletsAtom, loadingAtom, startTabletPairingAtom, stopTabletPairingAtom } from '../state/tabletStore';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { userIdAtom } from '../state/authStore';
 import { TabletWebSocket } from '../api/websocket/tabletSocket';
@@ -19,6 +19,9 @@ export default function DeviceManagementView() {
   const getTablets = useSetAtom(getTabletsAtom);
   const userId = useAtomValue(userIdAtom);
 
+  const startPairing = useSetAtom(startTabletPairingAtom);
+  const stopPairing = useSetAtom(stopTabletPairingAtom);
+  
   useEffect(() => {
     if (!userId) return;
 
@@ -29,6 +32,12 @@ export default function DeviceManagementView() {
 
   const handlePairDevice = () => {
     setPairDialogOpen(true);
+    startPairing();
+  };
+
+  const handleStopPairing = () => {
+    setPairDialogOpen(false);
+    stopPairing();
   };
 
   return (
@@ -68,11 +77,11 @@ export default function DeviceManagementView() {
         </Button>
       </Box>
 
-      {error && (
+      {/* {error && (
         <Alert severity="error" sx={{ mb: theme.spacing.md }}>
           {error}
         </Alert>
-      )}
+      )} */}
 
       {/* Device List */}
       {loading ? (
@@ -86,9 +95,7 @@ export default function DeviceManagementView() {
       {/* Pair Device Dialog */}
       <PairDeviceDialog
         isOpen={pairDialogOpen}
-        onClose={() => {
-          setPairDialogOpen(false);
-        }}
+        onClose={handleStopPairing}
       />
 
     </Box>

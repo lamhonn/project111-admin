@@ -1,6 +1,6 @@
 export interface SessionDto {
-    Id: string,
-    OrganizationId: string,
-    UserId: string,
-    TabletId: string,
+    id: string,
+    organizationId: string,
+    userId: string,
+    tabletId: string,
 }

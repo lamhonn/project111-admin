@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -7,17 +7,22 @@ import {
   Box,
   Typography,
   TextField,
+  IconButton,
 } from '@mui/material';
+import TranslateIcon from '@mui/icons-material/Translate';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
+import TranslationDialog from '../productEditor/TranslationDialog';
+import { languageAtom } from '../../state/uiStore';
+import { useAtomValue } from 'jotai';
+import { getTranslation } from '../../utils/multilingualNameUtils';
 
 interface CategoryNameDialogProps {
   open: boolean;
   editingCategoryId: string | null;
   categoryNameInput: string;
-  onCategoryNameChange: (value: string) => void;
   onClose: () => void;
-  onSave: () => void;
+  onSave: (translation?: string) => void;
   onOpenItemsDialog: () => void;
 }
 
@@ -25,12 +30,34 @@ const CategoryNameDialog: React.FC<CategoryNameDialogProps> = ({
   open,
   editingCategoryId,
   categoryNameInput,
-  onCategoryNameChange,
   onClose,
   onSave,
   onOpenItemsDialog,
 }) => {
   const { t } = useTranslation();
+  const language = useAtomValue(languageAtom);
+
+  const [isTranslationDialogOpen, setIsTranslationDialogOpen] = useState(false);
+  const [translations, setTranslations] = useState<string>(categoryNameInput);
+
+  const handleTranslationDialogSave = (translation: string) => {
+    setTranslations(translation);
+  }
+
+  const handleTranslationChange = (value: string) => {
+    const jsonObject = JSON.parse(translations);
+    jsonObject[language] = value;
+
+    setTranslations(JSON.stringify(jsonObject));
+  };
+
+  const handleOpenTranslationDialog = () => {
+    setIsTranslationDialogOpen(true);
+  };
+
+  const handleSave = () => {
+    onSave(translations);
+  }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
@@ -49,8 +76,23 @@ const CategoryNameDialog: React.FC<CategoryNameDialogProps> = ({
             autoFocus
             fullWidth
             label={t('admin.menuEditor.dialog.categoryName')}
-            value={categoryNameInput}
-            onChange={(event) => onCategoryNameChange(event.target.value)}
+            value={getTranslation(translations, language)}
+            onChange={(e) => handleTranslationChange(e.target.value)}
+            InputProps={{
+              endAdornment: (
+                <IconButton
+                  sx={{
+                    position: 'absolute',
+                    right: 0,
+                    top: '50%',
+                    transform: 'translateY(-50%)'
+                  }}
+                  onClick={handleOpenTranslationDialog}
+                >
+                  <TranslateIcon />
+                </IconButton>
+              ),
+            }}
           />
         </Box>
       </DialogContent>
@@ -66,10 +108,19 @@ const CategoryNameDialog: React.FC<CategoryNameDialogProps> = ({
         <Button onClick={onClose} sx={{ textTransform: 'none' }}>
           {t('common.cancel')}
         </Button>
-        <Button variant="contained" onClick={onSave} sx={{ textTransform: 'none' }}>
+        <Button variant="contained" onClick={handleSave} sx={{ textTransform: 'none' }}>
           {t('common.save')}
         </Button>
       </DialogActions>
+
+      <TranslationDialog 
+        open={isTranslationDialogOpen}
+        translations={translations}
+        onSave={handleTranslationDialogSave}
+        onClose={() => {
+          setIsTranslationDialogOpen(false)
+        }}
+      />
     </Dialog>
   );
 };
