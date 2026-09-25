@@ -1,5 +1,21 @@
 # Project 111 - Restaurant Admin Panel
 
+## Offline Demo
+
+This branch runs entirely against an in-memory diner dataset: 14 products, a
+categorized menu, eight tables, sample orders, sessions, and bills. Authentication
+is bypassed with a fixed manager/staff identity; HTTP requests and SignalR
+connections do not reach a backend. Do not deploy this authentication bypass to
+production.
+
+Edits and order/status changes last until the page is refreshed. Refresh to reset
+the demo. Device pairing returns a sample PIN only and does not pair a real device.
+The dashboard receives two simulated orders: the first after six seconds and the
+second ten seconds later. Leaving the dashboard cancels the pending timer;
+returning restarts that delay without replaying orders already delivered. Refresh
+the page to replay the demonstration.
+Run `node scripts/demo-smoke.mjs` to check the offline service and store workflows.
+
 ## Quick Start
 
 ### First Time Setup

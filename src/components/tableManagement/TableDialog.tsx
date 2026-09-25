@@ -17,8 +17,8 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
 import { Order, Tablet } from '../../types/models';
-import { getSessionBillsAtom, getTabletSessionAtom, loadingAtom } from '../../state/sessionStore';
-import { useAtomValue } from 'jotai';
+import { getSessionBillsAtom, getTabletSessionAtom, loadingAtom, updateSessionOrderStatusAtom } from '../../state/sessionStore';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { OrderStatus } from '../../types/enums/orderStatus';
 import { calculateTotalBillsPrice } from '../../utils/billUtils';
 import { BillStatus } from '../../types/enums/billStatus';
@@ -45,17 +45,15 @@ export default function TableDialog({
   const language = useAtomValue(languageAtom);
 
   const loading = useAtomValue(loadingAtom);
+  const updateSessionOrderStatus = useSetAtom(updateSessionOrderStatusAtom);
 
-  if (!table) return null;
+  const session = useAtomValue(getTabletSessionAtom(table?.id ?? ''));
+  const bills = useAtomValue(getSessionBillsAtom(session?.id ?? ''));
 
-  const session = useAtomValue(getTabletSessionAtom(table.id));
-
-  if (!session) return null;
+  if (!table || !session) return null;
 
   const orderItems = session.orders.flatMap(order => order.orderProducts);
   const hasOrders = orderItems.length > 0;
-
-  const bills = useAtomValue(getSessionBillsAtom(session.id));
 
   // Calculate payment summary including toppings
   const subtotal = calculateTotalBillsPrice(bills);
@@ -90,7 +88,15 @@ export default function TableDialog({
     orderNo: string,
     action: 'confirm' | 'ready'
   ) => {
-    // TODO: create two separate functions: set order status "preparing" and "completed"
+    const orderStatus = action === 'confirm'
+      ? OrderStatus.PREPARING
+      : OrderStatus.COMPLETED;
+
+    await updateSessionOrderStatus({
+      sessionId: session.id,
+      orderId: orderNo,
+      orderStatus,
+    });
   };
 
   const renderOrderAction = (order: Order) => {
@@ -101,6 +107,7 @@ export default function TableDialog({
           color="primary"
           size="small"
           onClick={() => void runSessionOrderAction(order.id, 'confirm')}
+          disabled={loading}
           sx={{
             borderRadius: theme.borderRadius.medium,
             textTransform: 'none',
@@ -120,6 +127,7 @@ export default function TableDialog({
           color="success"
           size="small"
           onClick={() => void runSessionOrderAction(order.id, 'ready')}
+          disabled={loading}
           sx={{
             borderRadius: theme.borderRadius.medium,
             textTransform: 'none',
@@ -490,7 +498,7 @@ export default function TableDialog({
                         </Typography>
                       </Box>
                       <Chip
-                        label={getOrderStatusLabel(order.orderStatus)}
+                        label={getOrderStatusLabel(order.orderStatus, t)}
                         size="small"
                         sx={{
                           backgroundColor: statusChipStyles.backgroundColor,

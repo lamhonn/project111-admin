@@ -1,10 +1,11 @@
-import { OrderActivityPayload, ws } from "./client";
+import type { OrderActivityPayload } from "./client";
+import { subscribeToDemoOrders } from "../mock/orderActivity";
 
 export const OrderWebSocket = {
   subscribeToOrdersCreated: (
     userId: string, 
     onOrderCreated: (payload: OrderActivityPayload) => void
   ) => {
-    return ws.subscribeUser(userId, { onOrderCreated });
+    return subscribeToDemoOrders(userId, onOrderCreated);
   }
 };

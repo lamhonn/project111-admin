@@ -38,7 +38,7 @@ export const getNewOrdersAtom = atom(
             const userId = get(userIdAtom);
             if (!userId) return;
     
-            const response = await OrderService.getByUserId(userId, { Status: OrderStatus.RECEIVED });
+            const response = await OrderService.getByUserId(userId);
             if (!response) return;
 
             const existingOrders = get(ordersAtom);
@@ -58,7 +58,9 @@ export const getNewOrdersAtom = atom(
                 )
             ];
 
-            set(ordersAtom, updatedOrders);
+            set(ordersAtom, updatedOrders.sort((first, second) =>
+                new Date(second.created).getTime() - new Date(first.created).getTime()
+            ));
         }
         catch {
             set(errorAtom, "Error fetching orders");
@@ -141,6 +143,9 @@ export const updateOrderStatusAtom = atom(
             }
 
             const response = await OrderService.updateStatus(orderDto);
+            set(ordersAtom, get(ordersAtom).map(order =>
+                order.id === selectedOrder.id ? { ...order, orderStatus } : order
+            ));
             return response;
         }
         catch {

@@ -100,23 +100,11 @@ class WebSocketClient {
   }
 
   async connect(): Promise<void> {
-    if (this.connection.state === HubConnectionState.Connected) {
-      return;
-    }
-
-    if (this.connection.state === HubConnectionState.Connecting) {
-      return;
-    }
-
-    await this.connection.start();
-
-    // Important: manually rejoin groups after
-    // the initial connection as well.
-    await this.rejoinSubscriptions();
+    return;
   }
 
   async disconnect(): Promise<void> {
-    await this.connection.stop();
+    return;
   }
 
   subscribeUser(userId: string, subscription: UserSubscription): () => void {

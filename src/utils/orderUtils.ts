@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { OrderStatus } from "../types/enums/orderStatus";
 import { OrderProductViewModel } from "../types/viewModels/orderProductViewModel";
 import { OrderViewModel } from "../types/viewModels/orderViewModel";
@@ -17,9 +17,7 @@ export function calculateTotalOrderProductsPrice(orderProducts: OrderProductView
     return orderProducts.reduce((sum, orderProduct) => sum + orderProduct.price, 0);
 };
 
-export function getOrderStatusLabel(orderStatus: OrderStatus): string {
-    const { t } = useTranslation();
-
+export function getOrderStatusLabel(orderStatus: OrderStatus, t: TFunction): string {
     switch (orderStatus) {
       case OrderStatus.PENDING:
         return t('status.orderStatus.pending');

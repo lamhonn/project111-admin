@@ -5,7 +5,7 @@ import { theme } from '../theme/theme';
 import ActiveTablesGrid from '../components/tableManagement/ActiveTablesGrid';
 import TableDialog from '../components/tableManagement/TableDialog';
 import AvailableTablesGrid from '../components/tableManagement/AvailableTablesGrid';
-import { errorAtom, loadingAtom, tabletsAtom } from '../state/tabletStore';
+import { errorAtom, getTabletsAtom, loadingAtom, tabletsAtom } from '../state/tabletStore';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { currentSessionsAtom, getLatestSessionsAtom } from '../state/sessionStore';
 import { Tablet } from '../types/models';
@@ -21,6 +21,7 @@ export default function TableView() {
   const error = useAtomValue(errorAtom);
 
   const tables = useAtomValue(tabletsAtom);
+  const getTablets = useSetAtom(getTabletsAtom);
   const sessions = useAtomValue(currentSessionsAtom);
   const getSessions = useSetAtom(getLatestSessionsAtom);
 
@@ -36,13 +37,14 @@ export default function TableView() {
     const subOnCreated = SessionWebSocket.subscribeToSessionCreated(userId, getSessions);
     const subOnEnded = SessionWebSocket.subscribeToSessionEnded(userId, getSessions); 
 
+    getTablets();
     getSessions();
 
     return () =>  {
       subOnCreated();
       subOnEnded();
     };
-  }, [userId, getSessions])
+  }, [userId, getSessions, getTablets])
 
   const handleTableClick = (table: Tablet) => {
     setSelectedTable(table);

@@ -10,6 +10,15 @@
     "campaigns": "Campaigns",
     "error": "Error"
   },
+  "status": {
+    "unknown": "Unknown",
+    "orderStatus": {
+      "pending": "Pending",
+      "received": "Received",
+      "preparing": "Preparing",
+      "completed": "Completed"
+    }
+  },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Hello {{name}}, Welcome to Spoon!",

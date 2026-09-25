@@ -1,61 +1,39 @@
-import { jwtDecode, JwtPayload } from 'jwt-decode';
 import { atom } from 'jotai';
-import { atomWithStorage } from 'jotai/utils';
-import { AuthService } from '../api/services/authService';
 import { parseUserRole } from '../utils/userRoleUtils';
 import { LoginDto } from '../types/dtos/loginDto';
 
-interface TokenPayload extends JwtPayload {
-    organizationId: string,
-    userId: string,
-    role: string, // parse into UserRole
-}
-
-export const tokenAtom = atomWithStorage<string | null>('accessToken', null, undefined, { getOnInit: true });
-
-function parseJwt(token: string): TokenPayload | null {
-    try {
-        return jwtDecode(token);
-    } catch {
-        return null;
-    }
-}
+export const tokenAtom = atom<string | null>('demo-token');
 
 export const expirationAtom = atom(
-    (get) => get(tokenPayloadAtom)?.exp ?? null
+    () => 4102444800
 );
 
 export const tabletIdAtom = atom(
-    (get) => get(tokenPayloadAtom)?.sub ?? null
+    () => 'demo-tablet-1'
 );
 
 export const organizationIdAtom = atom(
-    (get) => get(tokenPayloadAtom)?.organizationId ?? null
+    () => 'demo-organization'
 );
 
 export const userIdAtom = atom(
-    (get) => get(tokenPayloadAtom)?.userId ?? null
+    () => 'demo-user'
 );
 
 export const roleAtom = atom(
-    (get) => parseUserRole(get(tokenPayloadAtom)?.role) ?? null
+    () => parseUserRole('RESTAURANT_MANAGERSTAFF')
 );
 
-export const isAuthorizedAtom = atom((get) => {
-    const payload = get(tokenPayloadAtom);
+export const isAuthorizedAtom = atom(() => true);
+export const isAuthenticatedAtom = isAuthorizedAtom;
 
-    if (!payload || !payload.exp) {
-        return false;
-    }
-
-    return payload.exp * 1000 > Date.now();
-});
-
-export const tokenPayloadAtom = atom((get) => {
-    const token = get(tokenAtom);
-    
-    return token ? parseJwt(token) : null;
-});
+export const tokenPayloadAtom = atom(() => ({
+    exp: 4102444800,
+    sub: 'demo-tablet-1',
+    organizationId: 'demo-organization',
+    userId: 'demo-user',
+    role: 'RESTAURANT_MANAGERSTAFF',
+}));
 
 export const currentPinAtom = atom<string>('');
 
@@ -65,32 +43,17 @@ export const loadingAtom = atom<boolean>(false);
 
 export const loginAtom = atom(
     null,
-    async (get, set, login: LoginDto) => {
-        try {
-            set(loadingAtom, true);
-            set(errorAtom, null);
-
-            const response = await AuthService.login(login);
-
-            set(tokenAtom, response);
-        }
-        catch {
-            set(errorAtom, "Authentication error");
-        }
-        finally {
-            set(loadingAtom, false);
-        }
+    async (_get, set, _login: LoginDto) => {
+        set(tokenAtom, 'demo-token');
+        set(errorAtom, null);
+        set(loadingAtom, false);
     }
 );
 
 export const logoutAtom = atom(
     null,
-    async (get, set) => {
-        try {
-            await AuthService.logout();
-        }
-        finally {
-            set(tokenAtom, null);
-        }
+    async (_get, set) => {
+        set(tokenAtom, 'demo-token');
+        set(currentPinAtom, '');
     }
 );

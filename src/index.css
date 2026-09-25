@@ -9,6 +9,19 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100dvh;
+}
+
+html,
+body {
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+}
+
 a {
   font-weight: 500;
   color: #646cff;
@@ -22,11 +35,26 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  min-height: 100dvh;
+  padding:
+    env(safe-area-inset-top)
+    env(safe-area-inset-right)
+    env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
+}
+
+@media (display-mode: standalone) {
+  body {
+    min-height: 100dvh;
+  }
 }
 
 h1 {

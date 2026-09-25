@@ -7,7 +7,6 @@ import {
   Typography,
   IconButton,
   Button,
-  Avatar,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
@@ -179,7 +178,6 @@ const OrderOptionsDialog: React.FC = () => {
                   sx={{
                     display: 'flex',
                     alignItems: 'flex-start',
-                    gap: theme.spacing.sm,
                     pb: theme.spacing.md,
                     borderBottom: `1px solid ${theme.colors.border}`,
                     '&:last-child': {
@@ -187,16 +185,6 @@ const OrderOptionsDialog: React.FC = () => {
                     },
                   }}
                 >
-                  <Avatar
-                    src={product.ImgUrl}
-                    alt={getTranslation(product.Name, i18n.language)}
-                    variant="rounded"
-                    sx={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: theme.borderRadius.medium,
-                    }}
-                  />
                   <Box sx={{ flex: 1 }}>
                     <Box sx={{ 
                       display: 'flex', 
@@ -208,14 +196,14 @@ const OrderOptionsDialog: React.FC = () => {
                         fontWeight={theme.typography.fontWeights.semibold}
                         sx={{ color: theme.colors.text }}
                       >
-                        {getTranslation(product.Name, i18n.language)}
+                        {getTranslation(product.productName, i18n.language)}
                       </Typography>
                       <Typography
                         variant="body1"
                         fontWeight={theme.typography.fontWeights.bold}
                         sx={{ color: theme.colors.primary }}
                       >
-                        {product.Price}€
+                        {product.productPrice}€
                       </Typography>
                     </Box>
                     {/* TODO: quantity and comments */}

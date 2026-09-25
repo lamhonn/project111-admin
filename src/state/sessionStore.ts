@@ -8,6 +8,11 @@ import { Bill } from "../types/models/bill";
 import { BillStatus } from "../types/enums/billStatus";
 import { BillDto } from "../types/dtos/billDto";
 import { OrderProductDto } from "../types/dtos/orderProductDto";
+import { OrderDto } from "../types/dtos/orderDto";
+import { OrderProductExcludableDto } from "../types/dtos/orderProductExcludableDto";
+import { OrderProductToppingDto } from "../types/dtos/orderProductToppingDto";
+import { OrderStatus } from "../types/enums/orderStatus";
+import { OrderService } from "../api/services/orderService";
 import { productsAtom } from "./productStore";
 import { userIdAtom } from "./authStore";
 
@@ -81,13 +86,8 @@ export const setEndSessionAtom = atom(
             const currentSession = sessions.find(session => session.id === id);
     
             if (currentSession) {
-                const updatedSessions = sessions.map(session => 
-                    session.id === id ? 
-                    { ...session, EndSessionTime: new Date() }
-                    : session
-                );
-                set(currentSessionsAtom, updatedSessions);
                 await SessionService.endSession(currentSession);
+                set(currentSessionsAtom, get(currentSessionsAtom).filter(session => session.id !== id));
             }
         }
         catch (error) {
@@ -138,6 +138,71 @@ export const getSessionBillsAtom = atomFamily((sessionId: string) =>
     atom((get) => {
         return get(billsAtom).filter(bill => bill.sessionId === sessionId);
     })
+);
+
+export const updateSessionOrderStatusAtom = atom(
+    null,
+    async (get, set, payload: { sessionId: string; orderId: string; orderStatus: OrderStatus }) => {
+        set(loadingAtom, true);
+        set(errorAtom, null);
+
+        try {
+            const sessions = get(currentSessionsAtom);
+            const session = sessions.find(current => current.id === payload.sessionId);
+            const order = session?.orders.find(current => current.id === payload.orderId);
+
+            if (!session || !order) {
+                return;
+            }
+
+            const orderDto: OrderDto = {
+                id: order.id,
+                organizationId: order.organizationId,
+                sessionId: order.sessionId,
+                userId: order.userId,
+                tabletId: order.tabletId,
+                totalPrice: order.totalPrice,
+                orderStatus: payload.orderStatus,
+                orderProducts: order.orderProducts.map(orderProduct => <OrderProductDto>{
+                    id: orderProduct.id,
+                    productId: orderProduct.productId,
+                    name: orderProduct.productName,
+                    price: orderProduct.productPrice,
+                    orderProductToppings: orderProduct.orderProductToppings.map(topping => <OrderProductToppingDto>{
+                        id: topping.id,
+                        orderProductId: orderProduct.id,
+                        productToppingId: topping.productToppingId,
+                    }),
+                    orderProductExcludables: orderProduct.orderProductExcludables.map(excludable => <OrderProductExcludableDto>{
+                        id: excludable.id,
+                        orderProductId: orderProduct.id,
+                        productExcludableId: excludable.productExcludableId,
+                    }),
+                }),
+            };
+
+            await OrderService.updateStatus(orderDto);
+
+            set(currentSessionsAtom, sessions.map(currentSession =>
+                currentSession.id === payload.sessionId
+                    ? {
+                        ...currentSession,
+                        orders: currentSession.orders.map(currentOrder =>
+                            currentOrder.id === payload.orderId
+                                ? { ...currentOrder, orderStatus: payload.orderStatus }
+                                : currentOrder
+                        )
+                    }
+                    : currentSession
+            ));
+        }
+        catch {
+            set(errorAtom, "Error updating order status");
+        }
+        finally {
+            set(loadingAtom, false);
+        }
+    }
 );
 
 export const confirmBillAtom = atom(

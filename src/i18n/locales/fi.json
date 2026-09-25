@@ -10,6 +10,15 @@
     "campaigns": "Kampanjat",
     "error": "Virhe" 
   },
+  "status": {
+    "unknown": "Tuntematon",
+    "orderStatus": {
+      "pending": "Odottaa",
+      "received": "Vastaanotettu",
+      "preparing": "Valmistuksessa",
+      "completed": "Valmis"
+    }
+  },
   "dashboard": {
     "title": "Hallintapaneeli",
     "welcome": "Hei {{name}}, Tervetuloa Spooniin!",

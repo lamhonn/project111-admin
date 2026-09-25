@@ -10,6 +10,15 @@
     "campaigns": "Kampanjer",
     "error": "Fel"   
   },
+  "status": {
+    "unknown": "Okänd",
+    "orderStatus": {
+      "pending": "Väntande",
+      "received": "Mottagen",
+      "preparing": "Tillagas",
+      "completed": "Klar"
+    }
+  },
   "dashboard": {
     "title": "Instrumentpanel",
     "welcome": "Hej {{name}}, Välkommen till Spoon!",
