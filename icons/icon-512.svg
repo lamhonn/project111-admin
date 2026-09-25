@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Soljuu Admin">
+  <rect width="512" height="512" rx="96" fill="#4D80E6"/>
+  <rect x="64" y="96" width="384" height="320" rx="48" fill="#FFFFFF"/>
+  <circle cx="170" cy="208" r="24" fill="#4D80E6"/>
+  <rect x="220" y="186" width="196" height="44" rx="22" fill="#4D80E6"/>
+  <circle cx="170" cy="304" r="24" fill="#22C55E"/>
+  <rect x="220" y="282" width="156" height="44" rx="22" fill="#94A3B8"/>
+</svg>
