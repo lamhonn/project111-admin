@@ -14,25 +14,25 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
-import { MenuProduct } from '../../types/models';
+import { Product } from '../../types/models';
 import { getTranslation } from '../../utils/multilingualNameUtils';
 
 interface CategoryItemsDialogProps {
   open: boolean;
-  menuProducts: MenuProduct[];
+  products: Product[];
+  selectedProducts: Product[];
   itemSearchQuery: string;
-  selectedProducts: MenuProduct[];
   onSearchChange: (value: string) => void;
-  onToggleProductSelection: (product: MenuProduct) => void;
+  onToggleProductSelection: (product: Product) => void;
   onClose: () => void;
   onSave: () => void;
 }
 
 const CategoryItemsDialog: React.FC<CategoryItemsDialogProps> = ({
   open,
-  menuProducts,
-  itemSearchQuery,
+  products,
   selectedProducts,
+  itemSearchQuery,
   onSearchChange,
   onToggleProductSelection,
   onClose,
@@ -40,7 +40,7 @@ const CategoryItemsDialog: React.FC<CategoryItemsDialogProps> = ({
 }) => {
   const { t, i18n } = useTranslation();
 
-  const filteredProductOptions = menuProducts.filter((product) =>
+  const filteredProductOptions = products.filter((product) =>
     // Works with other languages too, but might also take brackets into account 
     product.name.toLowerCase().includes(itemSearchQuery.toLowerCase())
   );

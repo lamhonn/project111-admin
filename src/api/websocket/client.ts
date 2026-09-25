@@ -267,6 +267,6 @@ class WebSocketClient {
 }
 
 export const ws = new WebSocketClient(
-  import.meta.env.VITE_WS_URL ?? "https://api.example.com/hubs/orders",
+  "https://localhost:7123/hubs/orders",
 );
 

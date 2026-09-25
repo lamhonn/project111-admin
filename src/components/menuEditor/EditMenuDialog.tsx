@@ -28,9 +28,10 @@ import { createMenuAtom, deleteMenuAtom, getSelectedMenuAtom, getSelectedMenuCat
 import { MenuCategoryViewModel } from '../../types/viewModels/menuCategoryViewModel';
 import { openConfirmDialogAtom } from '../../state/confirmDialogStore';
 import { getTranslation } from '../../utils/multilingualNameUtils';
-import { MenuProduct } from '../../types/models';
+import { MenuProduct, Product } from '../../types/models';
 import { organizationIdAtom } from '../../state/authStore';
 import { languageAtom } from '../../state/uiStore';
+import { productsAtom } from '../../state/productStore';
 
 interface EditMenuDialogProps {
   open: boolean;
@@ -49,7 +50,9 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [itemsDialogOpen, setItemsDialogOpen] = useState(false);
   const [itemSearchQuery, setItemSearchQuery] = useState('');
-  const [selectedProducts, setSelectedProducts] = useState<MenuProduct[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
+
+  const products = useAtomValue(productsAtom);
 
   const menu = useAtomValue(getSelectedMenuAtom);
   const menuCategories = useAtomValue(getSelectedMenuCategoriesAtom); // TODO: add an ability to sort categories
@@ -139,12 +142,14 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
     const category = formData.menuCategories.find(category => category.id === editingCategoryId);
     if (!category) return;
 
-    setSelectedProducts(category.products);
+    const selectedProducts = products.filter(product => category.products.some(menuProduct => menuProduct.productId === product.id));
+
+    setSelectedProducts(selectedProducts);
     setItemSearchQuery('');
     setItemsDialogOpen(true);
   };
 
-  const handleToggleProductSelection = (product: MenuProduct) => {
+  const handleToggleProductSelection = (product: Product) => {
     setSelectedProducts(prev =>
       prev.includes(product)
         ? prev.filter((selectedProduct) => selectedProduct !== product)
@@ -153,19 +158,26 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
   };
 
   const handleSaveCategoryItems = () => {
-    // const selectedItems = productOptions
-    //   .filter((product) => selectedProductIds.includes(product.id))
-    //   .map((product) => ({ id: product.id, name: product.name }));
+    const updatedCategories: MenuCategoryViewModel[] = (formData.menuCategories || []).map((category) =>
+      category.id === editingCategoryId ? 
+        { ...category, 
+          products: selectedProducts.map((product): MenuProduct => ({
+            ...product,
+            id: crypto.randomUUID(),
+            menuId: formData.id,
+            menuCategoryId: category.id,
+            productId: product.id,
+            name: product.name,
+          }))
+        } 
+        : category
+    );
 
-    // const updatedCategories = (formData.categories || []).map((category) =>
-    //   category.id === editingCategoryId ? { ...category, items: selectedItems } : category
-    // );
-
-    // setFormData({
-    //   ...formData,
-    //   categories: updatedCategories,
-    // });
-    // TODO: implement save category items logic
+    setFormData({
+      ...formData,
+      menuCategories: updatedCategories,
+    });
+    
     setItemsDialogOpen(false);
   };
 
@@ -435,7 +447,7 @@ const EditMenuDialog: React.FC<EditMenuDialogProps> = ({
 
         <CategoryItemsDialog
           open={itemsDialogOpen}
-          menuProducts={menu?.menuProducts ?? []}
+          products={products}
           itemSearchQuery={itemSearchQuery}
           selectedProducts={selectedProducts}
           onSearchChange={setItemSearchQuery}
